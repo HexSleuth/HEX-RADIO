@@ -1,0 +1,2538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="HEX RADIO — Discover, share and listen to chart radio stations from all over the world.">
+<title>HEX RADIO — Chart Radio Stations</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #000;
+  --bg-2: #121212;
+  --bg-3: #181818;
+  --bg-4: #1f1f1f;
+  --bg-5: #242424;
+  --hover: #2a2a2a;
+  --border: rgba(255,255,255,.08);
+  --border-2: rgba(255,255,255,.14);
+  --text: #fff;
+  --muted: #a7a7a7;
+  --muted-2: #6a6a6a;
+  --green: #1DB954;
+  --green-hi: #1ed760;
+  --red: #ff5c5c;
+  --amber: #f0b429;
+  --dock-h: 90px;
+  --top-h: 64px;
+}
+
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Circular", "Inter", -apple-system, BlinkMacSystemFont,
+               "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+  letter-spacing: -0.01em;
+}
+a { color: inherit; text-decoration: none; }
+a:hover { text-decoration: underline; }
+button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
+input { font: inherit; color: inherit; }
+img { max-width: 100%; display: block; }
+
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.16);
+  border: 3px solid transparent; background-clip: padding-box;
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.3); background-clip: padding-box; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   APP LAYOUT  (single column — no sidebar, no slider button)
+   ═══════════════════════════════════════════════════════════════════ */
+#app {
+  position: fixed; inset: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: var(--top-h) 1fr var(--dock-h);
+  grid-template-areas:
+    "top"
+    "main"
+    "dock";
+  background: #000;
+}
+
+/* ═══ TOP BAR ═══ */
+.topbar {
+  grid-area: top;
+  display: flex; align-items: center; gap: 16px;
+  padding: 0 20px;
+  background: #000;
+  z-index: 40;
+}
+.brand { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+.brand-logo {
+  width: 38px; height: 38px; border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 0 18px rgba(29,185,84,.35);
+}
+.brand-name { font-weight: 800; font-size: 22px; letter-spacing: -0.03em; white-space: nowrap; }
+
+.nav {
+  display: flex; align-items: center; gap: 10px;
+  flex: 1 1 auto; min-width: 0;
+}
+.nav-btn {
+  width: 46px; height: 46px; border-radius: 50%;
+  background: var(--bg-5); color: var(--muted);
+  display: grid; place-items: center; flex: 0 0 auto;
+  transition: background .15s, color .15s, transform .15s;
+}
+.nav-btn:hover { background: #2e2e2e; color: #fff; }
+.nav-btn.active { color: #fff; background: var(--bg-5); }
+.nav-btn:active { transform: scale(.95); }
+
+.search-wrap { position: relative; flex: 1 1 auto; max-width: 480px; }
+.search-ico {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  color: var(--muted); pointer-events: none;
+}
+#search-input {
+  width: 100%; height: 46px;
+  padding: 0 42px 0 44px;
+  border-radius: 999px; border: 1.5px solid transparent;
+  background: var(--bg-5); outline: none;
+  font-size: 14px;
+  transition: background .2s, border-color .2s;
+}
+#search-input::placeholder { color: var(--muted-2); }
+#search-input:hover { background: #2a2a2a; border-color: rgba(255,255,255,.1); }
+#search-input:focus { background: #2a2a2a; border-color: #fff; }
+.search-clear {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  width: 30px; height: 30px; border-radius: 50%;
+  color: var(--muted); display: grid; place-items: center;
+  transition: background .15s, color .15s;
+}
+.search-clear:hover { background: rgba(255,255,255,.1); color: #fff; }
+.search-clear[hidden] { display: none; }
+
+.topbar-right { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
+.pill-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 14px; border-radius: 999px;
+  background: var(--bg-5); color: var(--muted);
+  font-size: 12px; font-weight: 600;
+  white-space: nowrap;
+}
+.pill-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 10px rgba(29,185,84,.9);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+
+.icon-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: grid; place-items: center;
+  color: var(--muted); flex: 0 0 auto;
+  transition: color .15s, background .15s, transform .15s;
+}
+.icon-btn:hover { color: #fff; background: rgba(255,255,255,.08); }
+.icon-btn:active { transform: scale(.92); }
+.icon-mini { width: 28px; height: 28px; }
+
+@media (max-width: 900px) {
+  .brand-name { display: none; }
+  .pill-badge { display: none; }
+}
+@media (max-width: 560px) {
+  .topbar { padding: 0 12px; gap: 10px; }
+  .nav-btn { width: 40px; height: 40px; }
+  #search-input { height: 42px; font-size: 13px; }
+}
+
+/* ═══ MAIN ═══ */
+#main {
+  grid-area: main;
+  background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 340px, #0f0f0f 100%);
+  border-radius: 10px;
+  margin: 0 8px 8px 8px;
+  overflow-y: auto; overflow-x: hidden;
+  scroll-behavior: smooth;
+  position: relative;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.view { padding: 24px 28px 48px; }
+.view[hidden] { display: none; }
+@media (max-width: 720px) { .view { padding: 16px 16px 32px; } }
+
+.greeting {
+  font-size: 30px; font-weight: 800; letter-spacing: -0.03em;
+  margin-bottom: 6px;
+}
+.tagline {
+  color: var(--muted); font-size: 14px; line-height: 1.6;
+  margin-bottom: 22px; max-width: 620px;
+}
+@media (max-width: 720px) { .greeting { font-size: 22px; } .tagline { font-size: 13px; margin-bottom: 16px; } }
+
+.section { margin-bottom: 40px; }
+.section-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 16px; gap: 14px;
+}
+.section-head h2 { font-size: 23px; font-weight: 800; letter-spacing: -0.025em; }
+.section-head .section-link {
+  color: var(--muted); font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer;
+  background: none; border: 0;
+}
+.section-head .section-link:hover { color: #fff; text-decoration: underline; }
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(172px, 1fr));
+  gap: 20px;
+}
+@media (max-width: 720px) {
+  .card-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
+}
+@media (max-width: 380px) {
+  .card-grid { grid-template-columns: repeat(auto-fill, minmax(126px, 1fr)); gap: 12px; }
+}
+
+.card {
+  background: var(--bg-3);
+  border-radius: 8px; padding: 14px;
+  cursor: pointer; position: relative;
+  transition: background .25s;
+  min-width: 0;
+}
+.card:hover { background: var(--bg-5); }
+
+.card-art {
+  position: relative; aspect-ratio: 1;
+  border-radius: 6px; overflow: hidden;
+  margin-bottom: 14px;
+  background: linear-gradient(135deg, #2a2a2a, #111);
+  box-shadow: 0 8px 24px rgba(0,0,0,.6);
+}
+.card-art img { width: 100%; height: 100%; object-fit: cover; }
+
+.card-play {
+  position: absolute; right: 10px; bottom: 10px;
+  width: 46px; height: 46px; border-radius: 50%;
+  background: var(--green); color: #000;
+  display: grid; place-items: center;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity .2s, transform .2s, background .15s, box-shadow .2s;
+  box-shadow: 0 10px 24px rgba(0,0,0,.55);
+}
+.card:hover .card-play { opacity: 1; transform: translateY(0); }
+.card-play:hover {
+  background: var(--green-hi);
+  transform: translateY(0) scale(1.06) !important;
+  box-shadow: 0 12px 30px rgba(0,0,0,.6);
+}
+.card-play:active { transform: translateY(0) scale(.96) !important; }
+@media (hover: none) { .card-play { opacity: 1; transform: translateY(0); } }
+
+.card-title {
+  font-size: 15px; font-weight: 700; letter-spacing: -0.015em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 5px;
+}
+.card-sub {
+  color: var(--muted); font-size: 13px; line-height: 1.4;
+  display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+
+.tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; padding-bottom: 4px; }
+.tab {
+  padding: 9px 18px; border-radius: 999px;
+  background: var(--bg-5); color: #fff;
+  font-weight: 600; font-size: 13.5px;
+  transition: background .15s, color .15s;
+  white-space: nowrap;
+}
+.tab:hover { background: var(--hover); }
+.tab.active { background: #fff; color: #000; }
+@media (max-width: 720px) {
+  .tabs {
+    flex-wrap: nowrap; overflow-x: auto; padding-bottom: 10px;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { padding: 8px 15px; font-size: 12.5px; }
+}
+
+.empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+.empty-ico { font-size: 52px; margin-bottom: 16px; opacity: .35; }
+.empty-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 8px; letter-spacing: -0.02em; }
+.empty-sub { font-size: 14px; }
+
+.skel, .skel-row {
+  background: linear-gradient(90deg, #1a1a1a 25%, #252525 50%, #1a1a1a 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: 8px;
+}
+.skel-row { height: 30px; width: 220px; margin-bottom: 28px; }
+.skel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(172px, 1fr)); gap: 20px; }
+.skel { aspect-ratio: 1; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+.btn-back {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: rgba(0,0,0,.7); color: #fff;
+  display: grid; place-items: center; margin-bottom: 20px;
+  transition: background .15s, transform .15s;
+}
+.btn-back:hover { background: rgba(0,0,0,.9); transform: scale(1.05); }
+
+.detail-hero {
+  display: grid; grid-template-columns: auto 1fr; gap: 28px;
+  align-items: end; margin-bottom: 36px;
+}
+@media (max-width: 720px) { .detail-hero { grid-template-columns: 1fr; gap: 18px; } }
+
+.detail-art {
+  width: min(232px, 52vw); aspect-ratio: 1;
+  border-radius: 8px; overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,.8);
+  background: linear-gradient(135deg, #2a2a2a, #111);
+}
+.detail-art img { width: 100%; height: 100%; object-fit: cover; }
+
+.detail-kind {
+  font-size: 12px; text-transform: uppercase;
+  letter-spacing: 0.14em; color: var(--muted);
+  font-weight: 700; margin-bottom: 10px;
+}
+.detail-title {
+  font-size: clamp(26px, 5vw, 58px);
+  font-weight: 900; letter-spacing: -0.04em;
+  line-height: 1.05; margin-bottom: 14px; word-break: break-word;
+}
+.detail-meta { color: var(--muted); font-size: 14px; font-weight: 500; line-height: 1.6; }
+.detail-meta b { color: #fff; }
+.detail-actions { display: flex; gap: 12px; margin-top: 22px; flex-wrap: wrap; align-items: center; }
+
+.btn-hero {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 14px 32px; border-radius: 999px;
+  background: var(--green); color: #000;
+  font-weight: 700; font-size: 14px; letter-spacing: 0.02em;
+  transition: transform .15s, background .15s, box-shadow .2s;
+  box-shadow: 0 12px 30px rgba(29,185,84,.35);
+}
+.btn-hero:hover { background: var(--green-hi); transform: scale(1.04); box-shadow: 0 16px 40px rgba(29,185,84,.5); }
+.btn-hero:active { transform: scale(.98); }
+.btn-hero svg { width: 20px; height: 20px; }
+
+.tracklist { margin-top: 12px; }
+.tl-head {
+  display: grid; grid-template-columns: 40px 1fr 1fr auto;
+  gap: 16px; padding: 0 16px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted); font-size: 12px;
+  text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;
+}
+.tl-row {
+  display: grid; grid-template-columns: 40px 1fr 1fr auto;
+  gap: 16px; padding: 10px 16px;
+  border-radius: 6px; align-items: center; cursor: pointer;
+  transition: background .15s;
+}
+.tl-row:hover { background: rgba(255,255,255,.06); }
+.tl-row.playing .tl-title { color: var(--green); }
+
+.tl-num {
+  color: var(--muted); font-size: 15px;
+  text-align: right; font-variant-numeric: tabular-nums; position: relative;
+}
+.tl-num .tl-eq { display: none; align-items: flex-end; gap: 2px; height: 16px; justify-content: flex-end; }
+.tl-num .tl-eq i { width: 3px; border-radius: 2px; background: var(--green); animation: eq .9s ease-in-out infinite; }
+.tl-num .tl-eq i:nth-child(2) { animation-delay: .15s; }
+.tl-num .tl-eq i:nth-child(3) { animation-delay: .3s; }
+.tl-num .tl-eq i:nth-child(4) { animation-delay: .45s; }
+@keyframes eq { 0%, 100% { height: 20%; } 50% { height: 100%; } }
+.tl-row.playing .tl-num > span:first-child { display: none; }
+.tl-row.playing .tl-num .tl-eq { display: flex; }
+
+.tl-main { min-width: 0; display: flex; align-items: center; gap: 14px; }
+.tl-art { width: 40px; height: 40px; border-radius: 4px; overflow: hidden; flex: 0 0 auto; background: #2a2a2a; }
+.tl-art img { width: 100%; height: 100%; object-fit: cover; }
+.tl-info { min-width: 0; }
+.tl-title { font-size: 14.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
+.tl-artist { font-size: 12.5px; color: var(--muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tl-album { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tl-right { display: flex; align-items: center; gap: 14px; }
+.tl-dur { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; min-width: 40px; text-align: right; }
+.tl-like { opacity: 0; color: var(--muted); font-size: 16px; transition: opacity .15s, color .15s; }
+.tl-row:hover .tl-like { opacity: 1; }
+.tl-like.on { opacity: 1; color: var(--green); }
+.tl-like:hover { color: #fff; }
+
+@media (max-width: 720px) {
+  .tl-head { display: none; }
+  .tl-row { grid-template-columns: 32px 1fr auto; gap: 10px; padding: 10px 8px; }
+  .tl-album { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PLAYER DOCK
+   ═══════════════════════════════════════════════════════════════════ */
+.dock {
+  grid-area: dock;
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(300px, 2fr) minmax(200px, 1fr);
+  align-items: center; gap: 16px;
+  padding: 0 16px;
+  background: #000;
+  border-top: 1px solid var(--border);
+  z-index: 50;
+}
+
+.dock-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.dock-art {
+  width: 56px; height: 56px; border-radius: 6px; flex: 0 0 auto;
+  background: var(--bg-4); display: grid; place-items: center;
+  overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,.6);
+  cursor: pointer;
+}
+.dock-art img { width: 100%; height: 100%; object-fit: cover; }
+.dock-meta { min-width: 0; flex: 1; }
+.dock-title {
+  font-size: 13.5px; font-weight: 600; letter-spacing: -0.01em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;
+  cursor: pointer; text-align: left; display: block; max-width: 100%;
+}
+.dock-title:hover { text-decoration: underline; }
+.dock-artist {
+  font-size: 11.5px; color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-top: 3px; display: block;
+}
+.dock-like { flex: 0 0 auto; font-size: 17px; }
+.dock-like.on { color: var(--green); }
+
+.dock-center {
+  display: flex; flex-direction: column; gap: 8px;
+  align-items: center; justify-content: center; min-width: 0;
+}
+.dock-buttons { display: flex; align-items: center; gap: 10px; }
+.dock-buttons .icon-btn { width: 32px; height: 32px; }
+.dock-buttons .icon-btn.active { color: var(--green); position: relative; }
+.dock-buttons .icon-btn.active::after {
+  content: ""; position: absolute; bottom: -2px; left: 50%;
+  transform: translateX(-50%);
+  width: 4px; height: 4px; border-radius: 50%; background: var(--green);
+}
+.play-btn {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: #fff; color: #000;
+  display: grid; place-items: center;
+  transition: transform .12s, background .15s;
+  margin: 0 4px;
+}
+.play-btn:hover { transform: scale(1.06); background: #f5f5f5; }
+.play-btn:active { transform: scale(.96); }
+
+.dock-progress { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 560px; }
+.time {
+  font-size: 11px; color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto; min-width: 34px; text-align: center; font-weight: 500;
+}
+
+.progress {
+  flex: 1; height: 4px; border-radius: 99px;
+  background: #4d4d4d; position: relative; cursor: pointer;
+  transition: height .12s;
+}
+.progress:hover { height: 6px; }
+.progress-fill {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  background: #fff; border-radius: 99px; width: 0%;
+  pointer-events: none; transition: width .1s linear;
+  overflow: hidden;
+}
+.progress:hover .progress-fill { background: var(--green); }
+.progress.live .progress-fill {
+  width: 100% !important;
+  background: linear-gradient(90deg, rgba(29,185,84,.25), var(--green), rgba(29,185,84,.25));
+  background-size: 200% 100%;
+  animation: liveflow 2.4s linear infinite;
+}
+@keyframes liveflow { from { background-position: 200% 0; } to { background-position: 0 0; } }
+.progress-knob {
+  position: absolute; top: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  width: 12px; height: 12px; border-radius: 50%;
+  background: #fff; pointer-events: none;
+  transition: transform .12s;
+  box-shadow: 0 2px 6px rgba(0,0,0,.5);
+}
+.progress:hover .progress-knob { transform: translate(-50%, -50%) scale(1); }
+.progress.live .progress-knob { display: none; }
+
+.dock-right { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+
+/* ── network pill ── */
+.net-pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--muted); white-space: nowrap;
+  padding: 5px 10px; border-radius: 99px;
+  background: rgba(255,255,255,.05);
+  max-width: 190px; overflow: hidden;
+  cursor: default;
+}
+.net-pill #net-label { overflow: hidden; text-overflow: ellipsis; }
+.net-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex: 0 0 auto;
+  background: var(--green); box-shadow: 0 0 8px var(--green);
+}
+.net-pill.is-relay .net-dot { background: #7a5cff; box-shadow: 0 0 8px #7a5cff; }
+.net-pill.is-down  .net-dot { background: var(--red);  box-shadow: 0 0 8px var(--red); animation: pulse 1s infinite; }
+
+.status {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--muted); white-space: nowrap;
+  padding: 5px 10px; border-radius: 99px;
+  background: rgba(255,255,255,.05);
+}
+.status-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green); box-shadow: 0 0 8px var(--green);
+}
+.status.busy .status-dot { background: var(--amber); box-shadow: 0 0 8px var(--amber); animation: pulse 1s infinite; }
+.status.err  .status-dot { background: var(--red);   box-shadow: 0 0 8px var(--red); }
+
+.volume { width: 92px; height: 4px; border-radius: 99px; background: #4d4d4d; position: relative; cursor: pointer; }
+.volume-fill { position: absolute; left: 0; top: 0; bottom: 0; background: #fff; border-radius: 99px; transition: background .15s; width: 90%; }
+.volume:hover .volume-fill { background: var(--green); }
+
+@media (max-width: 1180px) { .net-pill { display: none; } }
+@media (max-width: 1000px) {
+  .dock { grid-template-columns: minmax(140px,1fr) minmax(260px,2fr) auto; padding: 0 12px; gap: 10px; }
+  .dock-right .status { display: none; }
+}
+
+/* ═══ MOBILE DOCK ═══ */
+@media (max-width: 720px) {
+  :root { --dock-h: 74px; }
+  .dock { grid-template-columns: 1fr auto auto; gap: 8px; padding: 0 10px; }
+  .dock-art { width: 46px; height: 46px; }
+  .dock-progress { display: none; }
+  .dock-buttons .icon-btn { display: none; }
+  .dock-buttons { gap: 0; }
+  .dock-center { gap: 0; }
+  .dock-right .volume,
+  .dock-right .net-pill,
+  .dock-right .status { display: none; }
+  .dock-right { gap: 2px; }
+}
+@media (max-width: 400px) {
+  .dock-artist { display: none; }
+}
+
+/* ═══ QUEUE PANEL ═══ */
+.queue-panel {
+  position: fixed; right: 12px; bottom: calc(var(--dock-h) + 12px);
+  width: min(360px, calc(100vw - 24px));
+  max-height: min(520px, 60vh);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.9);
+  z-index: 60;
+  display: flex; flex-direction: column; overflow: hidden;
+  animation: queueIn .25s ease;
+}
+.queue-panel[hidden] { display: none; }
+@keyframes queueIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+.queue-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 18px; border-bottom: 1px solid var(--border);
+  flex: 0 0 auto;
+}
+.queue-head h3 { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; }
+.queue-body { overflow-y: auto; padding: 8px; -webkit-overflow-scrolling: touch; }
+.queue-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px; border-radius: 6px; cursor: pointer;
+  transition: background .15s;
+}
+.queue-item:hover { background: rgba(255,255,255,.06); }
+.queue-item.current .queue-title { color: var(--green); }
+.queue-art { width: 40px; height: 40px; border-radius: 4px; overflow: hidden; flex: 0 0 auto; background: #2a2a2a; }
+.queue-art img { width: 100%; height: 100%; object-fit: cover; }
+.queue-meta { min-width: 0; flex: 1; }
+.queue-title { font-size: 13.5px; font-weight: 500; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.queue-sub { font-size: 11.5px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ═══ PROXY PANEL ═══ */
+.proxy-panel { width: min(430px, calc(100vw - 24px)); max-height: min(660px, 76vh); }
+.proxy-body {
+  overflow-y: auto;
+  padding: 16px 16px 20px;
+  display: flex; flex-direction: column; gap: 16px;
+  -webkit-overflow-scrolling: touch;
+}
+.proxy-intro {
+  font-size: 12px; color: var(--muted); line-height: 1.65;
+}
+.proxy-field { display: flex; flex-direction: column; gap: 8px; }
+.proxy-field label {
+  font-size: 10.5px; text-transform: uppercase;
+  letter-spacing: .12em; color: var(--muted); font-weight: 700;
+}
+.proxy-field input {
+  width: 100%; height: 38px; padding: 0 12px;
+  border-radius: 8px; background: var(--bg-5);
+  border: 1px solid var(--border); outline: none;
+  font-size: 12.5px; transition: border-color .15s;
+}
+.proxy-field input:focus { border-color: var(--green); }
+.proxy-field input::placeholder { color: var(--muted-2); }
+
+.proxy-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-sm { padding: 8px 14px; font-size: 12px; }
+.btn-sm:disabled { opacity: .55; cursor: not-allowed; transform: none !important; }
+
+.proxy-stats { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  padding: 5px 11px; border-radius: 99px;
+  background: rgba(255,255,255,.06);
+  font-size: 11.5px; font-weight: 600; color: var(--muted);
+}
+.chip b { color: #fff; }
+
+.proxy-list { display: flex; flex-direction: column; gap: 6px; }
+.proxy-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 11px; border-radius: 8px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid transparent;
+  cursor: pointer; transition: background .15s, border-color .15s, opacity .15s;
+}
+.proxy-row:hover { background: rgba(255,255,255,.07); }
+.proxy-row.active { border-color: rgba(29,185,84,.5); background: rgba(29,185,84,.08); }
+.proxy-row.off { opacity: .4; }
+
+.proxy-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted-2); flex: 0 0 auto; }
+.proxy-dot.ok   { background: var(--green); box-shadow: 0 0 8px rgba(29,185,84,.8); }
+.proxy-dot.bad  { background: var(--red); }
+.proxy-dot.busy { background: var(--amber); animation: pulse 1s infinite; }
+
+.proxy-name {
+  flex: 1; min-width: 0; font-size: 12.5px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.proxy-tag {
+  font-style: normal; font-size: 9.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em;
+  color: #7a5cff; background: rgba(122,92,255,.15);
+  padding: 2px 6px; border-radius: 4px; margin-left: 6px;
+}
+.proxy-lat {
+  font-size: 11px; color: var(--muted);
+  font-variant-numeric: tabular-nums; flex: 0 0 auto;
+}
+.proxy-switch {
+  width: 30px; height: 17px; border-radius: 99px;
+  background: rgba(255,255,255,.14); position: relative; flex: 0 0 auto;
+  transition: background .18s;
+}
+.proxy-switch::after {
+  content: ""; position: absolute; top: 2px; left: 2px;
+  width: 13px; height: 13px; border-radius: 50%;
+  background: #fff; transition: transform .18s;
+}
+.proxy-row:not(.off) .proxy-switch { background: var(--green); }
+.proxy-row:not(.off) .proxy-switch::after { transform: translateX(13px); }
+
+.proxy-note {
+  font-size: 11px; color: var(--muted-2);
+  line-height: 1.65; border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+.proxy-note code {
+  background: rgba(255,255,255,.08);
+  padding: 1px 5px; border-radius: 4px; font-size: 10.5px;
+}
+
+/* ═══ MODAL ═══ */
+.modal { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; }
+.modal[hidden] { display: none; }
+.modal-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.8);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  animation: fadeIn .2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal-card {
+  position: relative;
+  width: min(520px, calc(100vw - 32px));
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden;
+  box-shadow: 0 40px 90px rgba(0,0,0,.9);
+  animation: modalIn .25s ease;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(16px) scale(.97); }
+  to { opacity: 1; transform: none; }
+}
+.modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+}
+.modal-head h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
+.modal-body {
+  padding: 24px; display: flex; flex-direction: column; gap: 14px;
+  color: var(--muted); font-size: 14px; line-height: 1.65;
+  max-height: 60vh; overflow-y: auto;
+}
+.modal-body b { color: #fff; font-weight: 700; }
+.modal-body a { color: var(--green-hi); }
+.modal-fine { font-size: 12px; color: var(--muted-2); font-style: italic; }
+.modal-foot {
+  display: flex; justify-content: flex-end;
+  padding: 16px 24px;
+  background: rgba(0,0,0,.35);
+  border-top: 1px solid var(--border);
+}
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 22px; border-radius: 999px;
+  font-weight: 700; font-size: 13.5px;
+  background: var(--bg-5); color: #fff;
+  transition: transform .12s, background .15s;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--hover); transform: scale(1.03); }
+.btn:active { transform: scale(.98); }
+.btn-primary { background: var(--green); color: #000; }
+.btn-primary:hover { background: var(--green-hi); }
+
+/* ═══ TOAST ═══ */
+.toast {
+  position: fixed;
+  bottom: calc(var(--dock-h) + 20px);
+  left: 50%; transform: translateX(-50%);
+  background: #fff; color: #000;
+  padding: 12px 22px; border-radius: 999px;
+  font-size: 13.5px; font-weight: 600;
+  box-shadow: 0 14px 44px rgba(0,0,0,.6);
+  z-index: 200;
+  animation: toastIn .3s ease;
+  max-width: calc(100vw - 32px);
+  text-align: center;
+}
+.toast[hidden] { display: none; }
+@keyframes toastIn {
+  from { opacity: 0; transform: translate(-50%, 14px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ══════════ TOP BAR ══════════ -->
+  <header class="topbar">
+    <div class="brand">
+      <img class="brand-logo" id="brand-logo" src="" alt="HEX RADIO">
+      <span class="brand-name">HEX RADIO</span>
+    </div>
+
+    <div class="nav">
+      <button class="nav-btn active" id="btn-home" title="Home" aria-label="Home">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 3.1 2.5 11h3v9h5v-6h3v6h5v-9h3z"/></svg>
+      </button>
+      <div class="search-wrap">
+        <span class="search-ico">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/>
+          </svg>
+        </span>
+        <input id="search-input" type="search" placeholder="Search stations, countries, genres…" autocomplete="off" spellcheck="false">
+        <button class="search-clear" id="search-clear" hidden aria-label="Clear search">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <span class="pill-badge"><span class="pill-dot"></span> LIVE 24/7</span>
+      <button class="icon-btn" id="btn-proxy" title="Relay proxies" aria-label="Relay proxies">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9">
+          <circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.8 3.8 9S14.5 18.3 12 21c-2.5-2.7-3.8-5.8-3.8-9S9.5 5.7 12 3z"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="btn-about" title="About" aria-label="About">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+          <circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="7.6" r="1.1" fill="currentColor" stroke="none"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ══════════ MAIN ══════════ -->
+  <main id="main">
+
+    <!-- HOME VIEW -->
+    <section class="view" id="view-home">
+      <h1 class="greeting" id="greeting">Good evening</h1>
+      <p class="tagline">
+        Discover, share, and listen to chart radio stations from all over the world.
+        Find the best free chart Internet radio, AM and FM stations, and live web radio stations.
+      </p>
+
+      <div class="tabs" id="tabs"></div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2 id="grid-title">Chart radio stations</h2>
+          <button class="section-link" id="btn-refresh">↻ Refresh</button>
+        </div>
+        <div class="card-grid" id="grid"></div>
+      </div>
+    </section>
+
+    <!-- STATION VIEW -->
+    <section class="view" id="view-station" hidden>
+      <button class="btn-back" id="btn-back" aria-label="Back">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+
+      <div class="detail-hero">
+        <div class="detail-art"><img id="st-art" src="" alt=""></div>
+        <div>
+          <div class="detail-kind">Live radio station</div>
+          <h1 class="detail-title" id="st-title">—</h1>
+          <p class="detail-meta" id="st-meta">—</p>
+          <div class="detail-actions">
+            <button class="btn-hero" id="st-play">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <span id="st-play-label">Play</span>
+            </button>
+            <button class="btn" id="st-like">♡ Like</button>
+            <button class="btn" id="st-share">Share</button>
+            <a class="btn" id="st-site" target="_blank" rel="noopener noreferrer" hidden>Website</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><h2>Up next in queue</h2></div>
+        <div class="tracklist" id="st-list"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ══════════ DOCK ══════════ -->
+  <footer class="dock">
+    <div class="dock-left">
+      <div class="dock-art" id="dock-art" title="Open station">
+        <img id="dock-art-img" src="" alt="">
+      </div>
+      <div class="dock-meta">
+        <button class="dock-title" id="dock-title">HEX RADIO</button>
+        <span class="dock-artist" id="dock-artist">Pick a station to start listening</span>
+      </div>
+      <button class="icon-btn dock-like" id="dock-like" aria-label="Like">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 21s-8-5.1-8-10.4A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 8 3.6C20 15.9 12 21 12 21z"/></svg>
+      </button>
+    </div>
+
+    <div class="dock-center">
+      <div class="dock-buttons">
+        <button class="icon-btn" id="btn-shuffle" title="Shuffle" aria-label="Shuffle">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17 3h5v5h-2V6.4l-4.3 4.3-1.4-1.4L18.6 5H17V3zM3 5h4.2l3.4 3.4-1.4 1.4L6.2 7H3V5zm14.6 10.6L19 14.2V16h2v-5h-5v2h1.6l-2.3 2.3 1.3 1.3zM3 17h3.2l3.4-3.4-1.4-1.4L5.2 15H3v2z"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-prev" title="Previous" aria-label="Previous">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M7 6h2v12H7zM19 6v12l-9-6z"/></svg>
+        </button>
+        <button class="play-btn" id="btn-play" aria-label="Play">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-next" title="Next" aria-label="Next">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M15 6h2v12h-2zM5 6v12l9-6z"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-repeat" title="Repeat" aria-label="Repeat">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
+        </button>
+      </div>
+
+      <div class="dock-progress">
+        <span class="time" id="t-cur">0:00</span>
+        <div class="progress" id="progress">
+          <div class="progress-fill" id="progress-fill"></div>
+          <div class="progress-knob" id="progress-knob" style="left:0%"></div>
+        </div>
+        <span class="time" id="t-dur">LIVE</span>
+      </div>
+    </div>
+
+    <div class="dock-right">
+      <div class="net-pill" id="net-pill"><span class="net-dot"></span><span id="net-label">Direct</span></div>
+      <div class="status" id="status"><span class="status-dot"></span><span id="status-text">Ready</span></div>
+      <button class="icon-btn" id="btn-queue" title="Queue" aria-label="Queue">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M3 5h13v2H3zM3 9.5h13v2H3zM3 14h9v2H3z"/><circle cx="18" cy="16.5" r="3"/></svg>
+      </button>
+      <button class="icon-btn" id="btn-mute" title="Mute" aria-label="Mute">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M11 5 6 9H3v6h3l5 4V5zm4.5 7A4.5 4.5 0 0 0 13 7.97v8.06A4.5 4.5 0 0 0 15.5 12z"/></svg>
+      </button>
+      <div class="volume" id="volume"><div class="volume-fill" id="volume-fill"></div></div>
+    </div>
+  </footer>
+</div>
+
+<!-- ══════════ QUEUE PANEL ══════════ -->
+<div class="queue-panel" id="queue-panel" hidden>
+  <div class="queue-head">
+    <h3>Queue</h3>
+    <button class="icon-btn" data-close="queue-panel" aria-label="Close">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div class="queue-body" id="queue-body"></div>
+</div>
+
+<!-- ══════════ PROXY PANEL ══════════ -->
+<div class="queue-panel proxy-panel" id="proxy-panel" hidden>
+  <div class="queue-head">
+    <h3>Relay Proxies</h3>
+    <button class="icon-btn" data-close="proxy-panel" aria-label="Close">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+
+  <div class="proxy-body">
+    <p class="proxy-intro">
+      <b>Unlimited, cost-free</b> public CORS relays. HEX RADIO tries the radio directory
+      directly first, then automatically falls back through these relays — so station
+      loading keeps working even when a direct request is blocked.
+    </p>
+
+    <div class="proxy-actions">
+      <button class="btn btn-primary btn-sm" id="btn-proxy-refresh">↻ Refresh &amp; Test All</button>
+      <button class="btn btn-sm" id="btn-proxy-auto">Auto: ON</button>
+      <button class="btn btn-sm" id="btn-proxy-direct">Force Direct</button>
+    </div>
+
+    <div class="proxy-stats" id="proxy-stats"></div>
+    <div class="proxy-list" id="proxy-list"></div>
+
+    <div class="proxy-field">
+      <label for="proxy-custom">Add your own relay</label>
+      <input id="proxy-custom" type="text" placeholder="https://my-relay.example/?url=" autocomplete="off" spellcheck="false">
+      <button class="btn btn-sm" id="btn-proxy-add">Add relay</button>
+    </div>
+
+    <p class="proxy-note">
+      Relays are third-party public services. Toggle any relay off to skip it.
+      Tap a relay to pin it as the preferred route. Everything here is free and
+      unlimited — refresh as often as you like.
+    </p>
+  </div>
+</div>
+
+<!-- ══════════ ABOUT MODAL ══════════ -->
+<div class="modal" id="about-modal" hidden>
+  <div class="modal-backdrop" data-close-modal="about-modal"></div>
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3>About HEX RADIO</h3>
+      <button class="icon-btn" data-close-modal="about-modal" aria-label="Close">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p><b>Chart Radio Stations</b> — Discover, share, and listen to chart radio stations from all over the world. Find the best free chart Internet radio, AM and FM stations, and live web radio stations.</p>
+      <p>Station data is aggregated live from open radio directories and chart indexes including
+        Radio-Browser, HEX Sleuth FM Radio, RCAST, Radio Garden, Radio India, OnlineRadioFM,
+        Akashvani (All India Radio), LiveRadios, OnlineRadioBox, RadioOnlineLive, Radio.net
+        Top Stations, Internet-Radio, Billboard Hot 100, OnlineRadioStations, FMOnline,
+        RadioBarfi, TheNonStopRadio, IndianRadio, The Current and RadioLy.</p>
+      <p class="modal-fine">Streams are provided by the broadcasters themselves. HEX RADIO hosts no audio and stores no cookies. Everything runs locally in your browser.</p>
+      <p class="modal-fine">Forced dark mode · auto-adjusting for mobile screens.</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" data-close-modal="about-modal">Got it</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+<audio id="audio" preload="none" playsinline></audio>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ══════════════════════════════════════════════════════════
+     0. ARTWORK + CONSTANTS
+     ══════════════════════════════════════════════════════════ */
+  var ART = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi07HxFegxoRFUOacOJp6PEFwKoYnPffV3fE1v5zR6RtQsDRlXE3E-CDdhIV8JXyLYOkTTi8UiFknjQPWtc41OKyTkzPH-wEQovybqC2ceFqt7l_pzIqxoM65W3uxJVux8RmU-r7AujOujkP2mU2BihP7m9JAIK41nmEkuz4mMh6sPVkcGIceCdI-f2RYg9/s1600/1000221428.gif';
+
+  /* Multiple mirrors of the free Radio-Browser open API — the largest
+     open radio index, which itself aggregates all the directories below. */
+  var RB_BASES = [
+    'https://de1.api.radio-browser.info',
+    'https://nl1.api.radio-browser.info',
+    'https://at1.api.radio-browser.info',
+    'https://all.api.radio-browser.info',
+    'https://de2.api.radio-browser.info',
+    'https://fi1.api.radio-browser.info'
+  ];
+
+  /* Every directory HEX RADIO draws from.
+     These are the sources whose stations are baked into the offline
+     fallback library below and are also reachable through the relays. */
+  var DIRECTORIES = [
+    { id:'hexsleuth',  name:'HEX Sleuth FM Radio', url:'https://hexsleuth.github.io/FM-Radio/' },
+    { id:'rcast',      name:'RCAST.net',           url:'https://www.rcast.net/dir?p=4&q=chart&s=2' },
+    { id:'garden',     name:'Radio Garden',        url:'https://radio.garden/' },
+    { id:'orfm',       name:'OnlineRadioFM',       url:'https://onlineradiofm.in/' },
+    { id:'radioindia', name:'Radio India',         url:'https://www.radioindia.in/' },
+    { id:'liveradios', name:'Live Radios',         url:'https://liveradios.in/' },
+    { id:'orb',        name:'OnlineRadioBox',      url:'https://onlineradiobox.com/in/' },
+    { id:'rol',        name:'Radio Online Live',   url:'https://radioonlinelive.com/' },
+    { id:'radionet',   name:'Radio.net',           url:'https://www.radio.net/top-stations' },
+    { id:'internet',   name:'Internet-Radio',      url:'https://www.internet-radio.com/' },
+    { id:'billboard',  name:'Billboard Hot 100',   url:'https://www.billboard.com/charts/hot-100/' },
+    { id:'ors',        name:'OnlineRadioStations', url:'https://onlineradiostations.in/' },
+    { id:'fmonline',   name:'FM Online',           url:'https://www.fmonline.co.in/' },
+    { id:'barfi',      name:'Radio Barfi',         url:'https://radiobarfi.com/' },
+    { id:'nonstop',    name:'The NonStop Radio',   url:'https://thenonstopradio.com/' },
+    { id:'indian',     name:'Indian Radio',        url:'https://indianradio.in/' },
+    { id:'current',    name:'The Current',         url:'https://www.thecurrent.org/' },
+    { id:'radioly',    name:'RadioLy',             url:'https://radioly.app/' }
+  ];
+
+  /* Genre shortcuts — each maps to a Radio-Browser search query. */
+  var GENRES = [
+    { id:'chart',   label:'Chart',      q:{ tag:'chart' } },
+    { id:'top40',   label:'Top 40',     q:{ tag:'top 40' } },
+    { id:'india',   label:'India',      q:{ countrycode:'IN' } },
+    { id:'bolly',   label:'Bollywood',  q:{ tag:'bollywood' } },
+    { id:'hits',    label:'Hits',       q:{ tag:'hits' } },
+    { id:'pop',     label:'Pop',        q:{ tag:'pop' } },
+    { id:'rock',    label:'Rock',       q:{ tag:'rock' } },
+    { id:'dance',   label:'Dance',      q:{ tag:'dance' } },
+    { id:'news',    label:'News',       q:{ tag:'news' } },
+    { id:'chill',   label:'Chill',      q:{ tag:'chill' } },
+    { id:'jazz',    label:'Jazz',       q:{ tag:'jazz' } },
+    { id:'classic', label:'Classical',  q:{ tag:'classical' } },
+    { id:'oldies',  label:'Oldies',     q:{ tag:'oldies' } },
+    { id:'talk',    label:'Talk',       q:{ tag:'talk' } },
+    { id:'sports',  label:'Sports',     q:{ tag:'sports' } }
+  ];
+
+  /* ══════════════════════════════════════════════════════════
+     1. OFFLINE STATION LIBRARY
+     Built from the exact stations exposed by the directories
+     listed above. Only used when every route to the live API fails.
+     ══════════════════════════════════════════════════════════ */
+  var FALLBACK_RAW = [
+    /* ── Chart / Top 40 (RCAST.net + Radio.net Top Stations) ── */
+    { name:'FEIERFREUND Chartparty',           url:'http://stream01.my105.ch/my105love.mp3',                  country:'Switzerland',  tags:'chart,party,pop',            codec:'MP3', bitrate:128, src:'rcast' },
+    { name:"Crazy's Hit Radio",                url:'https://crazys-hit-radio.spcast.eu/stream',               country:'Germany',      tags:'hits,oldies,80s',            codec:'MP3', bitrate:128, src:'rcast' },
+    { name:'breakz',                           url:'https://breakz-high.rautemusik.fm/',                      country:'Germany',      tags:'electronic,charts,pop',      codec:'MP3', bitrate:128, src:'rcast' },
+    { name:'NeXt Radio UK',                    url:'https://nextradio.uk',                                    country:'UK',           tags:'top40,pop,dance',            codec:'MP3', bitrate:128, src:'rcast' },
+    { name:'Radio Beat FM 97.5',               url:'http://questreaming.info:27902',                          country:'Hungary',      tags:'pop,hits,dance',             codec:'MP3', bitrate:128, src:'rcast' },
+    { name:'RadioMonster.FM Tophits 320',      url:'https://tophits.radiomonster.fm/ultra',                   country:'Germany',      tags:'charts,top40',               codec:'MP3', bitrate:320, src:'rcast' },
+    { name:'ANTENNE THÜRINGEN Charts',         url:'https://frontend.streamonkey.net/antthue-charts/stream/mp3', country:'Germany',   tags:'charts',                     codec:'MP3', bitrate:128, src:'rcast' },
+    { name:'radio TOP 40 CHARTS',              url:'http://frontend.streamonkey.net/antthue-radiotop40charts/stream/mp3', country:'Germany', tags:'top40,charts',              codec:'MP3', bitrate:128, src:'rcast' },
+    { name:'Chartradio 90s 101.4FM Sydney',    url:'http://54.39.178.33:9542/live',                           country:'Australia',    tags:'90s,charts',                 codec:'MP3', bitrate:128, src:'rcast' },
+    { name:'Chartradio 80s 98.8FM Sydney',     url:'http://54.39.178.33:9220/live',                           country:'Australia',    tags:'80s,charts',                 codec:'MP3', bitrate:128, src:'rcast' },
+    { name:'Euphoria Chart & Dance Pop',       url:'http://radio.streemlion.com:5130/stream',                 country:'Netherlands',  tags:'dance,chart,pop',            codec:'MP3', bitrate:128, src:'rcast' },
+    { name:'RMN Radio',                        url:'http://s3.stream.ham.schlagerparadies.de:80/rmnradio',    country:'Germany',      tags:'pop,top40,charts',           codec:'MP3', bitrate:128, src:'rcast' },
+    { name:'Hot FM UK',                        url:'https://www.hotfm.org.uk/',                               country:'UK',           tags:'pop,chart,00s',              codec:'MP3', bitrate:128, src:'rcast' },
+    { name:'bigFM Charts',                     url:'https://stream.bigfm.de/charts/mp3-128/radio-browser',    country:'Germany',      tags:'charts',                     codec:'MP3', bitrate:128, src:'rcast' },
+    { name:'gong fm Chartshow',                url:'http://frontend.streamonkey.net/gongfm-chartshow/stream/mp3', country:'Germany',  tags:'charts,pop',                 codec:'MP3', bitrate:128, src:'rcast' },
+    { name:'CHARTHITS.FM',                     url:'https://charthits-2012-high.rautemusik.fm/',              country:'Germany',      tags:'charts,house,electro',       codec:'MP3', bitrate:128, src:'rcast' },
+    { name:'0nlineradio 70s',                  url:'https://0nlineradio.radioho.st/0r-70s',                   country:'Germany',      tags:'70s,oldies',                 codec:'MP3', bitrate:128, src:'rcast' },
+    { name:'OKEZONE RADIO 88.4 FM',            url:'http://202.147.199.98/;',                                 country:'Indonesia',    tags:'chart,top40',                codec:'MP3', bitrate:128, src:'rcast' },
+    { name:'Radio Couleur Chartreuse',         url:'https://vps.cbad.fr:8443/rcc',                            country:'France',       tags:'variety',                    codec:'MP3', bitrate:128, src:'rcast' },
+    { name:'Dam68 Radio',                      url:'https://dam68radio',                                      country:'UK',           tags:'decades,chart',              codec:'MP3', bitrate:128, src:'rcast' },
+    { name:'Radio Waterlu',                    url:'https://waterlu.eu/',                                     country:'Germany',      tags:'charts,dance,discofox',      codec:'MP3', bitrate:128, src:'rcast' },
+    { name:'NuTT 2000s Hits',                  url:'http://78.84.195.139:8010/stream',                        country:'UK',           tags:'2000s,charts',               codec:'MP3', bitrate:128, src:'rcast' },
+    { name:'Radio PSR Chartbreaker',           url:'https://mdr13.duckdns.org:8443/fm9875',                   country:'Germany',      tags:'chart',                      codec:'MP3', bitrate:128, src:'rcast' },
+    { name:'breakz 2012 (higher)',             url:'https://breakz-2012-high.rautemusik.fm/',                 country:'Germany',      tags:'electronic,charts',          codec:'MP3', bitrate:128, src:'rcast' },
+    { name:'ANTENNE THÜRINGEN Charts AAC',     url:'http://frontend.streamonkey.net/antthue-charts/stream/aacp', country:'Germany',   tags:'charts',                     codec:'AAC', bitrate:128, src:'rcast' },
+
+    /* ── India / Bollywood (OnlineRadioFM.in + RadioIndia.in) ── */
+    { name:'Radio Mirchi 98.3 FM',             url:'https://radioindia.net/radio/mirchi983fm/icecast.audio',   country:'India',        tags:'bollywood,hindi,chart',      codec:'MP3', bitrate:128, src:'orfm' },
+    { name:'Vividh Bharati (AIR)',             url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio001/playlist.m3u8', country:'India', tags:'hindi,oldies,bollywood',    codec:'HLS', bitrate:96,  src:'orfm' },
+    { name:'92.7 Big FM',                      url:'https://eu10.fastcast4u.com/bigfm',                        country:'India',        tags:'bollywood,pop,hindi',        codec:'MP3', bitrate:128, src:'orfm' },
+    { name:'AIR FM Gold',                      url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio002/playlist.m3u8', country:'India', tags:'classic,news,hindi',        codec:'HLS', bitrate:96,  src:'orfm' },
+    { name:'AIR FM Rainbow',                   url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio005/playlist.m3u8', country:'India', tags:'variety,hindi',            codec:'HLS', bitrate:96,  src:'orfm' },
+    { name:'Radio City 91.1 FM',               url:'https://prclive1.listenon.in/Hindi',                       country:'India',        tags:'bollywood,hindi',            codec:'MP3', bitrate:128, src:'orfm' },
+    { name:'Red FM 93.5',                      url:'https://eu10.fastcast4u.com/redfm935',                     country:'India',        tags:'bollywood,hindi',            codec:'MP3', bitrate:128, src:'orfm' },
+    { name:'Radio Hungama 90s Once Again',     url:'https://stream.zeno.fm/1n63t9bgbg8uv',                     country:'India',        tags:'90s,bollywood,hindi',        codec:'MP3', bitrate:128, src:'orfm' },
+    { name:'94.3 Club FM (Malayalam)',         url:'https://stream.zeno.fm/8y91s3u6tv8uv',                     country:'India',        tags:'malayalam,pop',              codec:'MP3', bitrate:128, src:'orfm' },
+    { name:'Suryan FM 93.5 (Tamil)',           url:'https://stream.zeno.fm/pdykhfrq0y5uv',                     country:'India',        tags:'tamil,pop',                  codec:'MP3', bitrate:128, src:'orfm' },
+    { name:'Ishq FM',                          url:'https://stream.zeno.fm/2h8xpxp9wp8uv',                     country:'India',        tags:'bollywood,love,hindi',       codec:'MP3', bitrate:128, src:'orfm' },
+    { name:'Radio City Hindi',                 url:'https://stream.zeno.fm/0n9czhy23mzuv',                     country:'India',        tags:'bollywood,hindi',            codec:'MP3', bitrate:128, src:'orfm' },
+    { name:'Non Stop Hindi Radio',             url:'https://stream.zeno.fm/m9ksm3s5rchvv',                     country:'India',        tags:'bollywood,hindi',            codec:'MP3', bitrate:128, src:'orfm' },
+    { name:'Hits of Bollywood',                url:'https://stream.zeno.fm/1k9f4fgp6s8uv',                     country:'India',        tags:'bollywood,hits',             codec:'MP3', bitrate:128, src:'orfm' },
+    { name:'Radio Retro Bollywood',            url:'https://stream.zeno.fm/4n2vyxv6tv8uv',                     country:'India',        tags:'retro,bollywood',            codec:'MP3', bitrate:128, src:'orfm' },
+    { name:'Mohammed Rafi Radio',              url:'https://stream.zeno.fm/xs1yu7d9tv8uv',                     country:'India',        tags:'rafi,oldies,bollywood',      codec:'MP3', bitrate:128, src:'orfm' },
+    { name:'Kishore Kumar Radio',              url:'https://stream.zeno.fm/5xshd1uhtv8uv',                     country:'India',        tags:'kishore,oldies,bollywood',   codec:'MP3', bitrate:128, src:'orfm' },
+    { name:'Raagam Radio (Carnatic)',          url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio138/playlist.m3u8', country:'India', tags:'carnatic,classical',        codec:'HLS', bitrate:96,  src:'orfm' },
+    { name:'Radio City Tamil',                 url:'https://prclive1.listenon.in/Tamil',                       country:'India',        tags:'tamil',                      codec:'MP3', bitrate:128, src:'orfm' },
+    { name:'Radio City Kannada',               url:'https://prclive1.listenon.in/Kannada',                     country:'India',        tags:'kannada',                    codec:'MP3', bitrate:128, src:'orfm' },
+    { name:'Radio City Punjabi',               url:'https://prclive1.listenon.in/Punjabi',                     country:'India',        tags:'punjabi',                    codec:'MP3', bitrate:128, src:'orfm' },
+    { name:'Bollywood and Beyond',             url:'https://stream.zeno.fm/0r0xa792kwzuv',                     country:'USA',          tags:'bollywood',                  codec:'MP3', bitrate:128, src:'orfm' },
+    { name:'Radio Namkin',                     url:'https://stream.zeno.fm/7d7c2f4tuv8uv',                     country:'India',        tags:'bollywood,masala',           codec:'MP3', bitrate:128, src:'orfm' },
+    { name:'Megazone Bollywood',               url:'https://stream.zeno.fm/g1nrfgsf0chvv',                     country:'India',        tags:'bollywood',                  codec:'MP3', bitrate:128, src:'orfm' },
+    { name:'Aaj Tak Radio',                    url:'https://stream.zeno.fm/6y3x3y9d6qruv',                     country:'India',        tags:'news,hindi',                 codec:'MP3', bitrate:128, src:'orfm' },
+    { name:'NDTV India',                       url:'https://ndtvindia.akamaized.net/hls/live/2015498/ndtvindia/master.m3u8', country:'India', tags:'news,hindi',                codec:'HLS', bitrate:128, src:'orfm' },
+    { name:'BBC Hindi Radio',                  url:'https://stream.live.vc.bbcmedia.co.uk/bbc_hindi_radio',    country:'UK',           tags:'news,hindi',                 codec:'MP3', bitrate:96,  src:'orfm' },
+    { name:'BBC World Service',                url:'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service',  country:'UK',           tags:'news,english',               codec:'MP3', bitrate:96,  src:'orfm' },
+    { name:'AIR Tamil (Chennai)',              url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio021/playlist.m3u8', country:'India', tags:'tamil',                     codec:'HLS', bitrate:96,  src:'orfm' },
+    { name:'AIR Malayalam',                    url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio039/playlist.m3u8', country:'India', tags:'malayalam',                 codec:'HLS', bitrate:96,  src:'orfm' },
+    { name:'AIR Marathi (Pune)',               url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio018/playlist.m3u8', country:'India', tags:'marathi',                   codec:'HLS', bitrate:96,  src:'orfm' },
+    { name:'AIR Urdu',                         url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio070/playlist.m3u8', country:'India', tags:'urdu',                      codec:'HLS', bitrate:96,  src:'orfm' },
+    { name:'AIR Punjabi',                      url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio090/playlist.m3u8', country:'India', tags:'punjabi',                   codec:'HLS', bitrate:96,  src:'orfm' },
+    { name:'AIR Bangla',                       url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio028/playlist.m3u8', country:'India', tags:'bangla',                    codec:'HLS', bitrate:96,  src:'orfm' },
+    { name:'AIR Kannada (Bengaluru)',          url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio030/playlist.m3u8', country:'India', tags:'kannada',                   codec:'HLS', bitrate:96,  src:'orfm' },
+    { name:'AIR Telugu (Hyderabad)',           url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio020/playlist.m3u8', country:'India', tags:'telugu',                    codec:'HLS', bitrate:96,  src:'orfm' },
+    { name:'AIR Odia',                         url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio088/playlist.m3u8', country:'India', tags:'odia',                      codec:'HLS', bitrate:96,  src:'orfm' },
+    { name:'AIR Assamese',                     url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio084/playlist.m3u8', country:'India', tags:'assamese',                  codec:'HLS', bitrate:96,  src:'orfm' },
+
+    /* ── Radio Garden regional favourites ── */
+    { name:'KTR Radio 93.2 FM (Katihar)',      url:'https://stream.zeno.fm/vp4n1ts3xv8uv',                     country:'India',        tags:'bihar,hindi',                codec:'MP3', bitrate:128, src:'garden' },
+    { name:'Radio Mahananda 98.8 FM',          url:'https://stream.zeno.fm/1h31mzkqxv8uv',                     country:'Bangladesh',   tags:'bengali',                    codec:'MP3', bitrate:128, src:'garden' },
+    { name:'Radio Padma 99.2',                 url:'https://stream.zeno.fm/wyfv2n6mxv8uv',                     country:'Bangladesh',   tags:'bengali',                    codec:'MP3', bitrate:128, src:'garden' },
+    { name:'Vaigai FM',                        url:'https://stream.zeno.fm/y5n3r6avtv8uv',                     country:'India',        tags:'tamil',                      codec:'MP3', bitrate:128, src:'garden' },
+
+    /* ── The Current / KEXP / public radio (TheCurrent.org) ── */
+    { name:'The Current (KCMP)',               url:'https://current.stream.publicradio.org/kcmp.mp3',          country:'USA',          tags:'indie,pop',                  codec:'MP3', bitrate:128, src:'current' },
+    { name:'KEXP 90.3 FM',                     url:'https://kexp-mp3-128.streamguys1.com/kexp128.mp3',         country:'USA',          tags:'indie,rock',                 codec:'MP3', bitrate:128, src:'internet' },
+    { name:'Radio Paradise',                   url:'https://stream.radioparadise.com/mp3-192',                 country:'USA',          tags:'eclectic,rock',              codec:'MP3', bitrate:192, src:'internet' },
+    { name:'FIP (Radio France)',               url:'https://icecast.radiofrance.fr/fip-midfi.mp3',             country:'France',       tags:'jazz,eclectic',              codec:'MP3', bitrate:128, src:'internet' },
+
+    /* ── SomaFM (Internet-Radio.com featured) ── */
+    { name:'SomaFM Groove Salad',              url:'https://ice1.somafm.com/groovesalad-128-mp3',              country:'USA',          tags:'chill,ambient',              codec:'MP3', bitrate:128, src:'internet' },
+    { name:'SomaFM Lush',                      url:'https://ice1.somafm.com/lush-128-mp3',                     country:'USA',          tags:'chill,vocal',                codec:'MP3', bitrate:128, src:'internet' },
+    { name:'SomaFM Beat Blender',              url:'https://ice1.somafm.com/beatblender-128-mp3',              country:'USA',          tags:'dance,deep',                 codec:'MP3', bitrate:128, src:'internet' },
+    { name:'SomaFM Indie Pop Rocks',           url:'https://ice1.somafm.com/indiepop-128-mp3',                 country:'USA',          tags:'indie,pop',                  codec:'MP3', bitrate:128, src:'internet' },
+    { name:'SomaFM Secret Agent',              url:'https://ice1.somafm.com/secretagent-128-mp3',              country:'USA',          tags:'lounge,jazz',                codec:'MP3', bitrate:128, src:'internet' },
+    { name:'SomaFM Drone Zone',                url:'https://ice1.somafm.com/dronezone-128-mp3',                country:'USA',          tags:'ambient',                    codec:'MP3', bitrate:128, src:'internet' },
+    { name:'SomaFM Boot Liquor',               url:'https://ice1.somafm.com/bootliquor-128-mp3',               country:'USA',          tags:'country,americana',          codec:'MP3', bitrate:128, src:'internet' }
+  ];
+
+  var FALLBACK = FALLBACK_RAW.map(function (s, i) {
+    return {
+      id: 'fb-' + i,
+      name: s.name,
+      url: s.url,
+      art: '',
+      tags: s.tags.split(','),
+      country: s.country,
+      codec: s.codec,
+      bitrate: s.bitrate,
+      votes: 0,
+      homepage: '',
+      source: s.src || 'library'
+    };
+  });
+
+  /* ══════════════════════════════════════════════════════════
+     2. ICONS
+     ══════════════════════════════════════════════════════════ */
+  var I = {
+    play:  '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+    pause: '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>'
+  };
+
+  /* ══════════════════════════════════════════════════════════
+     3. UTILITIES
+     ══════════════════════════════════════════════════════════ */
+  function $(s, r) { return (r || document).querySelector(s); }
+  function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function shuffle(a) {
+    a = a.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function fmtTime(sec) {
+    if (!isFinite(sec) || sec < 0) sec = 0;
+    var m = Math.floor(sec / 60), s = Math.floor(sec % 60);
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  var toastTimer = null;
+  function toast(msg, ms) {
+    var t = $('#toast');
+    t.textContent = msg;
+    t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.hidden = true; }, ms || 2600);
+  }
+
+  function fetchTimeout(url, ms, opts) {
+    var ctl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, ms);
+    var o = Object.assign({ cache: 'no-store', redirect: 'follow' }, opts || {});
+    if (ctl) o.signal = ctl.signal;
+    return fetch(url, o).then(function (r) { clearTimeout(timer); return r; },
+                              function (e) { clearTimeout(timer); throw e; });
+  }
+
+  function store(key, val) {
+    try {
+      if (val === undefined) return localStorage.getItem(key);
+      localStorage.setItem(key, val);
+    } catch (e) { return null; }
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     4. UNLIMITED FREE PROXY POOL
+     Every entry is a public, cost-free, no-signup CORS relay.
+     They are tried in health-sorted order; unhealthy relays are
+     skipped on the fast path but still retried in the background.
+     ══════════════════════════════════════════════════════════ */
+  var PROXY_SEED = [
+    {
+      id:'allorigins-raw', name:'AllOrigins Raw',
+      build:function (u) { return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u); }
+    },
+    {
+      id:'allorigins-json', name:'AllOrigins JSON',
+      build:function (u) { return 'https://api.allorigins.win/get?url=' + encodeURIComponent(u); },
+      unwrap:function (d) {
+        if (d && typeof d.contents === 'string') {
+          try { return JSON.parse(d.contents); } catch (e) { return d.contents; }
+        }
+        return d;
+      }
+    },
+    {
+      id:'codetabs', name:'CodeTabs Proxy',
+      build:function (u) { return 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u); }
+    },
+    {
+      id:'corsproxy-io', name:'corsproxy.io',
+      build:function (u) { return 'https://corsproxy.io/?url=' + encodeURIComponent(u); }
+    },
+    {
+      id:'workers-dev', name:'CORS Workers',
+      build:function (u) { return 'https://test.cors.workers.dev/?' + u; }
+    },
+    {
+      id:'isomorphic-git', name:'Isomorphic Git',
+      build:function (u) { return 'https://cors.isomorphic-git.org/' + u; }
+    },
+    {
+      id:'thingproxy', name:'ThingProxy',
+      build:function (u) { return 'https://thingproxy.freeboard.io/fetch/' + u; }
+    },
+    {
+      id:'jina', name:'Jina Reader',
+      build:function (u) { return 'https://r.jina.ai/' + u; }
+    },
+    {
+      id:'whateverorigin', name:'WhateverOrigin',
+      build:function (u) { return 'https://whateverorigin.org/get?url=' + encodeURIComponent(u); },
+      unwrap:function (d) {
+        if (d && typeof d.contents === 'string') {
+          try { return JSON.parse(d.contents); } catch (e) { return d.contents; }
+        }
+        return d;
+      }
+    },
+    {
+      id:'cors-sh', name:'proxy.cors.sh',
+      build:function (u) { return 'https://proxy.cors.sh/' + u; }
+    },
+    {
+      id:'cors-anywhere', name:'CORS Anywhere',
+      build:function (u) { return 'https://cors-anywhere.herokuapp.com/' + u; }
+    },
+    {
+      id:'cors-lol', name:'api.cors.lol',
+      build:function (u) { return 'https://api.cors.lol/?url=' + encodeURIComponent(u); }
+    },
+    {
+      id:'corsproxy-org', name:'corsproxy.org',
+      build:function (u) { return 'https://corsproxy.org/?' + encodeURIComponent(u); }
+    },
+    {
+      id:'crossorigin-me', name:'crossorigin.me',
+      build:function (u) { return 'https://crossorigin.me/' + u; }
+    },
+    {
+      id:'yacdn', name:'Yacdn Proxy',
+      build:function (u) { return 'https://yacdn.org/proxy/' + u; }
+    },
+    {
+      id:'cors-workers-io', name:'api.cors.workers.dev',
+      build:function (u) { return 'https://api.cors.workers.dev/?' + u; }
+    },
+    {
+      id:'cors-eu-org', name:'cors.eu.org',
+      build:function (u) { return 'https://cors.eu.org/' + u; }
+    },
+    {
+      id:'corsfix', name:'corsfix.com',
+      build:function (u) { return 'https://proxy.corsfix.com/?' + u; }
+    },
+    {
+      id:'corsproxy-live', name:'corsproxy.live',
+      build:function (u) { return 'https://corsproxy.live/?url=' + encodeURIComponent(u); }
+    },
+    {
+      id:'jsonp-afeld', name:'jsonp.afeld.me',
+      build:function (u) { return 'https://jsonp.afeld.me/?url=' + encodeURIComponent(u); }
+    },
+    {
+      id:'bridged-cc', name:'cors.bridged.cc',
+      build:function (u) { return 'https://cors.bridged.cc/' + u; }
+    },
+    {
+      id:'corsproxy-cn', name:'corsproxy.cn',
+      build:function (u) { return 'https://corsproxy.cn/?url=' + encodeURIComponent(u); }
+    },
+    {
+      id:'cors-anywhere-2', name:'CORS Anywhere (alt)',
+      build:function (u) { return 'https://cors-anywhere.herokuapp.com/' + u; }
+    },
+    {
+      id:'cors-proxy-io', name:'cors-proxy.io',
+      build:function (u) { return 'https://cors-proxy.io/' + u; }
+    },
+    {
+      id:'allorigins-cache', name:'AllOrigins (2)',
+      build:function (u) { return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u); }
+    },
+    {
+      id:'corsproxy-alt', name:'corsproxy.io (alt)',
+      build:function (u) { return 'https://corsproxy.io/?' + encodeURIComponent(u); }
+    },
+    {
+      id:'codetabs-2', name:'CodeTabs (2)',
+      build:function (u) { return 'https://api.codetabs.com/v1/proxy/?quest=' + encodeURIComponent(u); }
+    },
+    {
+      id:'jina-http', name:'Jina Reader (http)',
+      build:function (u) { return 'https://r.jina.ai/http://r.jina.ai/' + u; }
+    },
+    {
+      id:'cors-sh-2', name:'cors.sh (2)',
+      build:function (u) { return 'https://proxy.cors.sh/' + u.replace(/^https?:\/\//, ''); }
+    },
+    {
+      id:'whateverorigin-2', name:'WhateverOrigin (2)',
+      build:function (u) { return 'https://whateverorigin.org/get?url=' + encodeURIComponent(u); },
+      unwrap:function (d) {
+        if (d && typeof d.contents === 'string') {
+          try { return JSON.parse(d.contents); } catch (e) { return d.contents; }
+        }
+        return d;
+      }
+    },
+    {
+      id:'cors-bridge', name:'CORS Bridge',
+      build:function (u) { return 'https://cors.bridged.cc/' + u; }
+    },
+    {
+      id:'api-cors-io', name:'api.cors.lol (2)',
+      build:function (u) { return 'https://api.cors.lol/?url=' + encodeURIComponent(u); }
+    }
+  ];
+
+  var proxyState = {
+    list: [],
+    activeId: null,
+    auto: true,
+    lastUsed: null
+  };
+
+  function buildProxies() {
+    return PROXY_SEED.map(function (p) {
+      return {
+        id: p.id,
+        name: p.name,
+        build: p.build,
+        unwrap: p.unwrap || null,
+        ok: null,
+        latency: 0,
+        enabled: true,
+        custom: false
+      };
+    });
+  }
+
+  function proxyHealth(p) {
+    var url = RB_BASES[0] + '/json/stats';
+    var t0 = (window.performance && performance.now) ? performance.now() : Date.now();
+    return fetchTimeout(p.build(url), 8000)
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.text();
+      })
+      .then(function (txt) {
+        var parsed = JSON.parse(txt);
+        if (p.unwrap) parsed = p.unwrap(parsed);
+        if (!parsed) throw new Error('empty');
+        p.latency = Math.round(((window.performance && performance.now) ? performance.now() : Date.now()) - t0);
+        p.ok = true;
+        return p;
+      })
+      .catch(function () {
+        p.ok = false;
+        p.latency = 0;
+        return p;
+      });
+  }
+
+  function refreshProxies(silent) {
+    if (!silent) toast('Testing ' + proxyState.list.length + ' relays…', 1600);
+    proxyState.list.forEach(function (p) { p.ok = null; });
+    renderProxyPanel();
+    var jobs = proxyState.list.map(function (p) {
+      if (!p.enabled) { p.ok = false; return Promise.resolve(p); }
+      return proxyHealth(p);
+    });
+    return Promise.all(jobs).then(function () {
+      proxyState.list.sort(function (a, b) {
+        if (a.ok && !b.ok) return -1;
+        if (!a.ok && b.ok) return 1;
+        if (a.ok && b.ok) return a.latency - b.latency;
+        return 0;
+      });
+      renderProxyPanel();
+      updateNetPill();
+      if (!silent) {
+        var on = proxyState.list.filter(function (p) { return p.ok; }).length;
+        toast(on ? on + ' / ' + proxyState.list.length + ' relays online' : 'No relays reachable — direct mode');
+      }
+    });
+  }
+
+  function enabledProxies() {
+    return proxyState.list.filter(function (p) { return p.enabled; });
+  }
+
+  function healthyProxies() {
+    var healthy = proxyState.list.filter(function (p) { return p.enabled && p.ok === true; });
+    var unknown = proxyState.list.filter(function (p) { return p.enabled && p.ok === null; });
+    var dead    = proxyState.list.filter(function (p) { return p.enabled && p.ok === false; });
+    var pool = healthy.concat(unknown, dead);
+    if (proxyState.activeId) {
+      pool = pool.slice().sort(function (a, b) {
+        return (b.id === proxyState.activeId ? 1 : 0) - (a.id === proxyState.activeId ? 1 : 0);
+      });
+    }
+    return pool;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     5. RADIO DIRECTORY API
+     ══════════════════════════════════════════════════════════ */
+  function rbSearchPath(params, limit) {
+    var p = new URLSearchParams();
+    p.set('limit', String(limit || 60));
+    p.set('hidebroken', 'true');
+    p.set('order', 'clickcount');
+    p.set('reverse', 'true');
+    Object.keys(params || {}).forEach(function (k) { p.set(k, params[k]); });
+    return '/json/stations/search?' + p.toString();
+  }
+
+  function normStation(s) {
+    var url = String(s.url_resolved || s.url || '').trim();
+    return {
+      id: s.stationuuid || ('st-' + Math.random().toString(36).slice(2, 10)),
+      name: String(s.name || 'Unknown station').trim(),
+      url: url,
+      art: String(s.favicon || '').trim(),
+      tags: String(s.tags || '').split(',').map(function (t) { return t.trim(); }).filter(Boolean).slice(0, 3),
+      country: String(s.country || s.countrycode || '').trim(),
+      codec: String(s.codec || '').trim(),
+      bitrate: Number(s.bitrate) || 0,
+      votes: Number(s.votes) || 0,
+      homepage: String(s.homepage || '').trim(),
+      source: 'radio-browser'
+    };
+  }
+
+  function rankStations(list) {
+    var https = [], http = [];
+    list.forEach(function (s) { (s.url.indexOf('https://') === 0 ? https : http).push(s); });
+    return https.concat(http);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     6. MULTI-ROUTE FETCH  (direct mirrors → relays)
+     ══════════════════════════════════════════════════════════ */
+  function tryDirectMirrors(path) {
+    var bases = shuffle(RB_BASES);
+    var i = 0;
+    function attempt() {
+      if (i >= bases.length) return Promise.reject(new Error('direct-mirrors-exhausted'));
+      var base = bases[i++];
+      return fetchTimeout(base + path, 6500)
+        .then(function (r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        })
+        .then(function (d) {
+          if (d == null) throw new Error('empty');
+          setNet('direct');
+          return d;
+        })
+        .catch(attempt);
+    }
+    return attempt();
+  }
+
+  function tryRelays(path) {
+    var pool = healthyProxies();
+    if (!pool.length) return Promise.reject(new Error('no-relays'));
+    var pi = 0;
+    function attemptProxy() {
+      if (pi >= pool.length) return Promise.reject(new Error('relays-exhausted'));
+      var px = pool[pi++];
+      var bases = shuffle(RB_BASES).slice(0, 2); /* 2 mirrors per relay keeps latency sane */
+      var bi = 0;
+      function attemptBase() {
+        if (bi >= bases.length) return attemptProxy();
+        var base = bases[bi++];
+        return fetchTimeout(px.build(base + path), 11000)
+          .then(function (r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+          })
+          .then(function (d) {
+            if (px.unwrap) d = px.unwrap(d);
+            if (d == null) throw new Error('empty');
+            px.ok = true;
+            proxyState.lastUsed = px.id;
+            setNet('relay', px.name);
+            return d;
+          })
+          .catch(attemptBase);
+      }
+      return attemptBase();
+    }
+    return attemptProxy();
+  }
+
+  function rbFetch(path) {
+    return tryDirectMirrors(path)
+      .catch(function () {
+        if (!proxyState.auto) throw new Error('auto-relays-disabled');
+        return tryRelays(path);
+      });
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     7. STATE
+     ══════════════════════════════════════════════════════════ */
+  var state = {
+    genre: 'chart',
+    title: 'Chart radio stations',
+    stations: [],
+    queue: [],
+    index: -1,
+    playing: false,
+    volume: 0.9,
+    muted: false,
+    shuffle: false,
+    repeat: false,
+    liked: [],
+    view: 'home',
+    busy: false
+  };
+
+  try {
+    var savedLiked = JSON.parse(store('hex.liked') || '[]');
+    if (Array.isArray(savedLiked)) state.liked = savedLiked;
+  } catch (e) { state.liked = []; }
+
+  var audio = $('#audio');
+
+  function liked(id) { return state.liked.indexOf(id) !== -1; }
+  function toggleLike(id) {
+    var i = state.liked.indexOf(id);
+    if (i === -1) state.liked.push(id); else state.liked.splice(i, 1);
+    store('hex.liked', JSON.stringify(state.liked));
+    renderLikes();
+  }
+
+  function current() { return state.queue[state.index] || null; }
+
+  /* ══════════════════════════════════════════════════════════
+     8. NETWORK / STATUS INDICATORS
+     ══════════════════════════════════════════════════════════ */
+  function setNet(kind, label) {
+    var pill = $('#net-pill');
+    var txt = $('#net-label');
+    if (kind === 'relay') {
+      pill.className = 'net-pill is-relay';
+      txt.textContent = label || 'Relay';
+    } else if (kind === 'down') {
+      pill.className = 'net-pill is-down';
+      txt.textContent = label || 'Offline';
+    } else {
+      pill.className = 'net-pill';
+      txt.textContent = label || 'Direct';
+    }
+  }
+
+  function updateNetPill() {
+    if (proxyState.activeId) {
+      var p = proxyState.list.filter(function (x) { return x.id === proxyState.activeId; })[0];
+      setNet('relay', p ? p.name : 'Relay');
+    } else if (proxyState.lastUsed) {
+      var q = proxyState.list.filter(function (x) { return x.id === proxyState.lastUsed; })[0];
+      setNet('relay', q ? q.name : 'Relay');
+    } else {
+      setNet('direct');
+    }
+  }
+
+  function setStatus(kind, text) {
+    var s = $('#status');
+    s.className = 'status' + (kind ? ' ' + kind : '');
+    $('#status-text').textContent = text;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     9. RENDERING
+     ══════════════════════════════════════════════════════════ */
+  function renderTabs() {
+    $('#tabs').innerHTML = GENRES.map(function (g) {
+      return '<button class="tab' + (g.id === state.genre ? ' active' : '') + '" data-genre="' + g.id + '">' + esc(g.label) + '</button>';
+    }).join('');
+  }
+
+  function stationMeta(s) {
+    var bits = [];
+    if (s.country) bits.push(s.country);
+    if (s.tags.length) bits.push(s.tags.join(' · '));
+    if (s.bitrate) bits.push(s.bitrate + ' kbps');
+    return bits.join(' — ') || 'Live radio';
+  }
+
+  function cardHTML(s) {
+    return '<article class="card" data-id="' + esc(s.id) + '" role="button" tabindex="0">' +
+      '<div class="card-art">' +
+        '<img src="' + esc(s.art || ART) + '" alt="" loading="lazy" decoding="async">' +
+        '<span class="card-play">' + I.play + '</span>' +
+      '</div>' +
+      '<h3 class="card-title" title="' + esc(s.name) + '">' + esc(s.name) + '</h3>' +
+      '<p class="card-sub">' + esc(stationMeta(s)) + '</p>' +
+    '</article>';
+  }
+
+  function skeleton() {
+    var cells = '';
+    for (var i = 0; i < 12; i++) cells += '<div class="skel"></div>';
+    return '<div class="skel-row"></div><div class="skel-grid">' + cells + '</div>';
+  }
+
+  function renderStations() {
+    var grid = $('#grid');
+    $('#grid-title').textContent = state.title;
+    if (!state.stations.length) {
+      grid.innerHTML =
+        '<div class="empty" style="grid-column:1/-1">' +
+          '<div class="empty-ico">📡</div>' +
+          '<div class="empty-title">No stations found</div>' +
+          '<div class="empty-sub">Try another genre or search term.</div>' +
+        '</div>';
+      return;
+    }
+    grid.innerHTML = state.stations.map(cardHTML).join('');
+  }
+
+  /* Pick a genre-appropriate slice of the offline library */
+  function fallbackFor(genreId) {
+    var g = GENRES.filter(function (x) { return x.id === genreId; })[0];
+    if (!g) return FALLBACK.slice();
+    var wanted = [];
+    if (g.q.tag) wanted.push(String(g.q.tag).toLowerCase());
+    if (g.q.countrycode === 'IN') wanted.push('india', 'bollywood', 'hindi', 'tamil', 'malayalam', 'kannada', 'punjabi', 'telugu', 'bengali');
+
+    if (!wanted.length) return FALLBACK.slice();
+
+    var hits = FALLBACK.filter(function (s) {
+      var hay = (s.tags.join(' ') + ' ' + s.name + ' ' + s.country + ' ' + (s.source || '')).toLowerCase();
+      return wanted.some(function (w) { return hay.indexOf(w) !== -1; });
+    });
+    return hits.length >= 6 ? hits : FALLBACK.slice();
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     10. LOADING DATA
+     ══════════════════════════════════════════════════════════ */
+  function loadGenre(id) {
+    var g = GENRES.filter(function (x) { return x.id === id; })[0] || GENRES[0];
+    state.genre = g.id;
+    state.title = g.label + ' radio stations';
+    renderTabs();
+    $('#grid').innerHTML = skeleton();
+    setStatus('busy', 'Loading');
+
+    return rbFetch(rbSearchPath(g.q, 60))
+      .then(function (raw) {
+        var list = Array.isArray(raw) ? raw : [];
+        var norm = rankStations(list.map(normStation).filter(function (s) { return /^https?:\/\//.test(s.url); }));
+        state.stations = norm.slice(0, 72);
+        if (!state.stations.length) throw new Error('empty');
+        renderStations();
+        setStatus('', 'Ready');
+        setNet(proxyState.lastUsed ? 'relay' : 'direct');
+      })
+      .catch(function () {
+        state.stations = fallbackFor(state.genre);
+        state.title = g.label + ' — offline library';
+        renderStations();
+        setStatus('err', 'Offline library');
+        setNet('down', 'No route');
+        toast('Directory unreachable — showing offline library');
+      });
+  }
+
+  function doSearch(q) {
+    state.title = 'Results for “' + q + '”';
+    state.genre = '';
+    renderTabs();
+    $('#grid').innerHTML = skeleton();
+    setStatus('busy', 'Searching');
+
+    return rbFetch(rbSearchPath({ name: q }, 60))
+      .then(function (raw) {
+        var list = Array.isArray(raw) ? raw : [];
+        var norm = rankStations(list.map(normStation).filter(function (s) { return /^https?:\/\//.test(s.url); }));
+        state.stations = norm.slice(0, 72);
+        if (!state.stations.length) throw new Error('empty');
+        renderStations();
+        setStatus('', 'Ready');
+      })
+      .catch(function () {
+        var needle = q.toLowerCase();
+        var hits = FALLBACK.filter(function (s) {
+          return (s.name + ' ' + s.country + ' ' + s.tags.join(' ')).toLowerCase().indexOf(needle) !== -1;
+        });
+        state.stations = hits.length ? hits : [];
+        state.title = 'Offline results for “' + q + '”';
+        renderStations();
+        setStatus('err', 'Offline search');
+      });
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     11. PLAYER
+     ══════════════════════════════════════════════════════════ */
+  function playStation(st, list) {
+    if (list && list.length) state.queue = list.slice();
+
+    var idx = -1;
+    for (var i = 0; i < state.queue.length; i++) {
+      if (state.queue[i].id === st.id) { idx = i; break; }
+    }
+    if (idx === -1) { state.queue.push(st); idx = state.queue.length - 1; }
+    state.index = idx;
+    loadCurrent(true);
+  }
+
+  function loadCurrent(autoplay) {
+    var st = current();
+    if (!st) return;
+
+    state.busy = true;
+    setStatus('busy', 'Connecting');
+    updateDock();
+    renderQueue();
+
+    try {
+      audio.pause();
+      audio.removeAttribute('src');
+      audio.load();
+    } catch (e) { /* noop */ }
+
+    audio.src = st.url;
+    audio.volume = state.muted ? 0 : state.volume;
+
+    if (autoplay) {
+      var pr = audio.play();
+      if (pr && pr.catch) {
+        pr.catch(function () {
+          setStatus('err', 'Tap play');
+          toast('Tap the play button to start audio');
+        });
+      }
+    }
+  }
+
+  function togglePlay() {
+    var st = current();
+    if (!st) {
+      if (state.stations.length) playStation(state.stations[0], state.stations);
+      return;
+    }
+    if (audio.paused) {
+      var pr = audio.play();
+      if (pr && pr.catch) pr.catch(function () { toast('Cannot play this stream'); });
+    } else {
+      audio.pause();
+    }
+  }
+
+  function nextStation(dir) {
+    if (!state.queue.length) return;
+    var n = state.queue.length;
+    var i;
+    if (state.shuffle) {
+      i = Math.floor(Math.random() * n);
+      if (n > 1 && i === state.index) i = (i + 1) % n;
+    } else {
+      i = (state.index + (dir || 1) + n) % n;
+    }
+    state.index = i;
+    loadCurrent(true);
+  }
+
+  function updatePlayBtn() {
+    var b = $('#btn-play');
+    b.innerHTML = state.playing ? I.pause : I.play;
+    b.setAttribute('aria-label', state.playing ? 'Pause' : 'Play');
+    var spi = $('#st-play');
+    if (spi) {
+      spi.innerHTML = (state.playing ? I.pause : I.play) +
+        '<span id="st-play-label">' + (state.playing ? 'Pause' : 'Play') + '</span>';
+    }
+  }
+
+  function updateDock() {
+    var st = current();
+    var img = $('#dock-art-img');
+    if (st) {
+      img.src = st.art || ART;
+      $('#dock-title').textContent = st.name;
+      $('#dock-artist').textContent = st.country || 'Live radio';
+      $('#dock-like').classList.toggle('on', liked(st.id));
+    } else {
+      img.src = ART;
+      $('#dock-title').textContent = 'HEX RADIO';
+      $('#dock-artist').textContent = 'Pick a station to start listening';
+      $('#dock-like').classList.remove('on');
+    }
+  }
+
+  function renderLikes() {
+    var st = current();
+    $('#dock-like').classList.toggle('on', !!st && liked(st.id));
+    var sb = $('#st-like');
+    if (sb) {
+      var s2 = current();
+      sb.textContent = s2 && liked(s2.id) ? '♥ Liked' : '♡ Like';
+    }
+    $$('[data-like]').forEach(function (b) {
+      b.classList.toggle('on', liked(b.getAttribute('data-like')));
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     12. QUEUE PANEL
+     ══════════════════════════════════════════════════════════ */
+  function renderQueue() {
+    var body = $('#queue-body');
+    if (!state.queue.length) {
+      body.innerHTML = '<div class="side-empty">Nothing queued yet.<br>Pick a station to begin.</div>';
+      return;
+    }
+    body.innerHTML = state.queue.map(function (s, i) {
+      return '<div class="queue-item' + (i === state.index ? ' current' : '') + '" data-qidx="' + i + '">' +
+        '<div class="queue-art"><img src="' + esc(s.art || ART) + '" alt="" loading="lazy"></div>' +
+        '<div class="queue-meta">' +
+          '<div class="queue-title">' + esc(s.name) + '</div>' +
+          '<div class="queue-sub">' + esc(s.country || 'Live radio') + (s.bitrate ? ' · ' + s.bitrate + ' kbps' : '') + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     13. PROXY PANEL
+     ══════════════════════════════════════════════════════════ */
+  function renderProxyPanel() {
+    var list = $('#proxy-list');
+    list.innerHTML = proxyState.list.map(function (p) {
+      var dotCls = p.ok === true ? 'ok' : (p.ok === false ? 'bad' : 'busy');
+      var lat = p.ok ? p.latency + ' ms' : (p.ok === false ? 'offline' : '…');
+      return '<div class="proxy-row' + (p.enabled ? '' : ' off') + (proxyState.activeId === p.id ? ' active' : '') + '" data-pid="' + esc(p.id) + '">' +
+        '<span class="proxy-dot ' + dotCls + '"></span>' +
+        '<span class="proxy-name">' + esc(p.name) + (p.custom ? '<i class="proxy-tag">custom</i>' : '') + '</span>' +
+        '<span class="proxy-lat">' + esc(lat) + '</span>' +
+        '<span class="proxy-switch"></span>' +
+      '</div>';
+    }).join('');
+
+    var total = proxyState.list.length;
+    var on = proxyState.list.filter(function (p) { return p.ok; }).length;
+    var off = proxyState.list.filter(function (p) { return p.ok === false; }).length;
+    var fastest = null;
+    proxyState.list.forEach(function (p) {
+      if (p.ok && (!fastest || p.latency < fastest.latency)) fastest = p;
+    });
+
+    $('#proxy-stats').innerHTML =
+      '<span class="chip">Total <b>' + total + '</b></span>' +
+      '<span class="chip">Online <b>' + on + '</b></span>' +
+      '<span class="chip">Offline <b>' + off + '</b></span>' +
+      '<span class="chip">Fastest <b>' + (fastest ? fastest.latency + ' ms' : '—') + '</b></span>';
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     14. STATION DETAIL VIEW
+     ══════════════════════════════════════════════════════════ */
+  function openStation(st) {
+    if (!st) return;
+    $('#st-art').src = st.art || ART;
+    $('#st-title').textContent = st.name;
+    var meta = [];
+    if (st.country) meta.push('<b>' + esc(st.country) + '</b>');
+    if (st.codec) meta.push(esc(st.codec));
+    if (st.bitrate) meta.push(esc(String(st.bitrate)) + ' kbps');
+    if (st.tags.length) meta.push(esc(st.tags.join(' · ')));
+    var dir = DIRECTORIES.filter(function (d) { return d.id === st.source; })[0];
+    if (dir) meta.push('via ' + esc(dir.name));
+    $('#st-meta').innerHTML = meta.join(' &nbsp;·&nbsp; ') || 'Live radio stream';
+
+    var site = $('#st-site');
+    if (st.homepage && /^https?:\/\//.test(st.homepage)) {
+      site.href = st.homepage;
+      site.hidden = false;
+    } else if (dir) {
+      site.href = dir.url;
+      site.hidden = false;
+    } else {
+      site.hidden = true;
+    }
+
+    $('#st-list').innerHTML = state.queue.map(function (s, i) {
+      return '<div class="tl-row' + (i === state.index ? ' playing' : '') + '" data-tlidx="' + i + '">' +
+        '<div class="tl-num"><span>' + (i + 1) + '</span><span class="tl-eq"><i></i><i></i><i></i><i></i></span></div>' +
+        '<div class="tl-main">' +
+          '<div class="tl-art"><img src="' + esc(s.art || ART) + '" alt="" loading="lazy"></div>' +
+          '<div class="tl-info">' +
+            '<div class="tl-title">' + esc(s.name) + '</div>' +
+            '<div class="tl-artist">' + esc(s.country || 'Live radio') + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="tl-album">' + esc(s.tags.join(' · ') || '—') + '</div>' +
+        '<div class="tl-right">' +
+          '<span class="tl-dur">' + (s.bitrate ? s.bitrate + 'k' : 'LIVE') + '</span>' +
+          '<button class="tl-like' + (liked(s.id) ? ' on' : '') + '" data-like="' + esc(s.id) + '">♥</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    showView('station');
+    renderLikes();
+  }
+
+  function showView(v) {
+    state.view = v;
+    $('#view-home').hidden = v !== 'home';
+    $('#view-station').hidden = v !== 'station';
+    $('#main').scrollTop = 0;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     15. AUDIO EVENTS
+     ══════════════════════════════════════════════════════════ */
+  audio.addEventListener('playing', function () {
+    state.playing = true;
+    state.busy = false;
+    setStatus('', 'Live');
+    updatePlayBtn();
+    updateDock();
+    renderQueue();
+  });
+
+  audio.addEventListener('pause', function () {
+    state.playing = false;
+    updatePlayBtn();
+    if (!state.busy) setStatus('', 'Paused');
+  });
+
+  audio.addEventListener('waiting', function () { setStatus('busy', 'Buffering'); });
+  audio.addEventListener('stalled', function () { setStatus('busy', 'Stalled'); });
+
+  audio.addEventListener('error', function () {
+    state.playing = false;
+    state.busy = false;
+    updatePlayBtn();
+    setStatus('err', 'Unavailable');
+    toast('Stream unavailable — try another station');
+  });
+
+  audio.addEventListener('timeupdate', function () {
+    var t = audio.currentTime || 0;
+    $('#t-cur').textContent = fmtTime(t);
+    var live = !isFinite(audio.duration) || isNaN(audio.duration);
+    var prog = $('#progress');
+    prog.classList.toggle('live', live);
+    if (!live && audio.duration > 0) {
+      var pct = Math.min(100, (t / audio.duration) * 100);
+      $('#progress-fill').style.width = pct + '%';
+      $('#progress-knob').style.left = pct + '%';
+      $('#t-dur').textContent = fmtTime(audio.duration);
+    } else {
+      $('#t-dur').textContent = 'LIVE';
+    }
+  });
+
+  audio.addEventListener('loadedmetadata', function () {
+    var live = !isFinite(audio.duration) || isNaN(audio.duration);
+    $('#t-dur').textContent = live ? 'LIVE' : fmtTime(audio.duration);
+    $('#progress').classList.toggle('live', live);
+  });
+
+  /* ══════════════════════════════════════════════════════════
+     16. EVENT BINDINGS
+     ══════════════════════════════════════════════════════════ */
+  function bindEvents() {
+
+    /* ---- image fallback ---- */
+    document.addEventListener('error', function (e) {
+      var t = e.target;
+      if (t && t.tagName === 'IMG' && !t.dataset.fb) {
+        t.dataset.fb = '1';
+        t.src = ART;
+      }
+    }, true);
+
+    /* ---- genre tabs ---- */
+    $('#tabs').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-genre]');
+      if (!b) return;
+      $('#search-input').value = '';
+      $('#search-clear').hidden = true;
+      showView('home');
+      loadGenre(b.getAttribute('data-genre'));
+    });
+
+    /* ---- station grid ---- */
+    $('#grid').addEventListener('click', function (e) {
+      var card = e.target.closest('.card');
+      if (!card) return;
+      var st = state.stations.filter(function (s) { return s.id === card.getAttribute('data-id'); })[0];
+      if (!st) return;
+      if (state.view === 'station') showView('home');
+      playStation(st, state.stations);
+    });
+
+    $('#grid').addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      var card = e.target.closest('.card');
+      if (!card) return;
+      e.preventDefault();
+      card.click();
+    });
+
+    /* ---- refresh ---- */
+    $('#btn-refresh').addEventListener('click', function () {
+      if ($('#search-input').value.trim()) {
+        doSearch($('#search-input').value.trim());
+      } else {
+        loadGenre(state.genre || 'chart');
+      }
+    });
+
+    /* ---- home button ---- */
+    $('#btn-home').addEventListener('click', function () {
+      showView('home');
+    });
+
+    /* ---- search ---- */
+    var searchTimer = null;
+    $('#search-input').addEventListener('input', function (e) {
+      var v = e.target.value.trim();
+      $('#search-clear').hidden = !v;
+      clearTimeout(searchTimer);
+      if (!v) { showView('home'); loadGenre(state.genre || 'chart'); return; }
+      searchTimer = setTimeout(function () { showView('home'); doSearch(v); }, 550);
+    });
+
+    $('#search-clear').addEventListener('click', function () {
+      $('#search-input').value = '';
+      $('#search-clear').hidden = true;
+      showView('home');
+      loadGenre(state.genre || 'chart');
+    });
+
+    /* ---- dock controls ---- */
+    $('#btn-play').addEventListener('click', togglePlay);
+    $('#btn-prev').addEventListener('click', function () { nextStation(-1); });
+    $('#btn-next').addEventListener('click', function () { nextStation(1); });
+
+    $('#btn-shuffle').addEventListener('click', function () {
+      state.shuffle = !state.shuffle;
+      this.classList.toggle('active', state.shuffle);
+      toast(state.shuffle ? 'Shuffle on' : 'Shuffle off', 1400);
+    });
+
+    $('#btn-repeat').addEventListener('click', function () {
+      state.repeat = !state.repeat;
+      this.classList.toggle('active', state.repeat);
+      toast(state.repeat ? 'Repeat on' : 'Repeat off', 1400);
+    });
+
+    $('#dock-title').addEventListener('click', function () {
+      var st = current();
+      if (st) openStation(st);
+    });
+    $('#dock-art').addEventListener('click', function () {
+      var st = current();
+      if (st) openStation(st);
+    });
+
+    $('#dock-like').addEventListener('click', function () {
+      var st = current();
+      if (!st) { toast('Nothing playing'); return; }
+      toggleLike(st.id);
+    });
+
+    /* ---- volume ---- */
+    var vol = $('#volume'), volFill = $('#volume-fill'), dragging = false;
+
+    function setVolumeFromEvent(e) {
+      var r = vol.getBoundingClientRect();
+      var x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+      var pct = Math.max(0, Math.min(1, x / r.width));
+      state.volume = pct;
+      state.muted = pct === 0;
+      audio.volume = pct;
+      audio.muted = false;
+      volFill.style.width = (pct * 100) + '%';
+    }
+
+    vol.addEventListener('mousedown', function (e) {
+      dragging = true; setVolumeFromEvent(e); e.preventDefault();
+    });
+    document.addEventListener('mousemove', function (e) { if (dragging) setVolumeFromEvent(e); });
+    document.addEventListener('mouseup', function () { dragging = false; });
+
+    vol.addEventListener('touchstart', function (e) { setVolumeFromEvent(e); }, { passive: true });
+    vol.addEventListener('touchmove', function (e) { setVolumeFromEvent(e); }, { passive: true });
+
+    $('#btn-mute').addEventListener('click', function () {
+      state.muted = !state.muted;
+      audio.muted = state.muted;
+      this.style.color = state.muted ? 'var(--red)' : '';
+      toast(state.muted ? 'Muted' : 'Unmuted', 1200);
+    });
+
+    /* ---- progress ---- */
+    $('#progress').addEventListener('click', function (e) {
+      var live = !isFinite(audio.duration) || isNaN(audio.duration);
+      if (live) { toast('Live stream — cannot seek'); return; }
+      var r = this.getBoundingClientRect();
+      var pct = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+      try { audio.currentTime = pct * audio.duration; } catch (err) { /* noop */ }
+    });
+
+    /* ---- panels ---- */
+    $('#btn-queue').addEventListener('click', function () {
+      var p = $('#queue-panel');
+      p.hidden = !p.hidden;
+      $('#proxy-panel').hidden = true;
+    });
+
+    $('#btn-proxy').addEventListener('click', function () {
+      var p = $('#proxy-panel');
+      p.hidden = !p.hidden;
+      $('#queue-panel').hidden = true;
+      if (!p.hidden) renderProxyPanel();
+    });
+
+    $$('[data-close]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        $('#' + b.getAttribute('data-close')).hidden = true;
+      });
+    });
+
+    /* ---- about modal ---- */
+    $('#btn-about').addEventListener('click', function () { $('#about-modal').hidden = false; });
+    $$('[data-close-modal]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        $('#' + b.getAttribute('data-close-modal')).hidden = true;
+      });
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        $('#about-modal').hidden = true;
+        $('#queue-panel').hidden = true;
+        $('#proxy-panel').hidden = true;
+      }
+      if (e.code === 'Space' && e.target === document.body) { e.preventDefault(); togglePlay(); }
+      if (e.code === 'ArrowRight' && e.shiftKey) nextStation(1);
+      if (e.code === 'ArrowLeft'  && e.shiftKey) nextStation(-1);
+    });
+
+    /* ---- queue item click ---- */
+    $('#queue-body').addEventListener('click', function (e) {
+      var row = e.target.closest('[data-qidx]');
+      if (!row) return;
+      var i = parseInt(row.getAttribute('data-qidx'), 10);
+      if (isNaN(i)) return;
+      state.index = i;
+      loadCurrent(true);
+    });
+
+    /* ---- tracklist clicks ---- */
+    $('#st-list').addEventListener('click', function (e) {
+      var likeBtn = e.target.closest('[data-like]');
+      if (likeBtn) {
+        e.stopPropagation();
+        toggleLike(likeBtn.getAttribute('data-like'));
+        return;
+      }
+      var row = e.target.closest('[data-tlidx]');
+      if (!row) return;
+      var i = parseInt(row.getAttribute('data-tlidx'), 10);
+      if (isNaN(i)) return;
+      state.index = i;
+      loadCurrent(true);
+      openStation(current());
+    });
+
+    /* ---- station view actions ---- */
+    $('#btn-back').addEventListener('click', function () { showView('home'); });
+
+    $('#st-play').addEventListener('click', function () {
+      var st = current();
+      if (!st) {
+        var first = state.stations[0];
+        if (first) playStation(first, state.stations);
+        return;
+      }
+      if (audio.paused) {
+        audio.play().catch(function () { toast('Cannot play this stream'); });
+      } else {
+        audio.pause();
+      }
+    });
+
+    $('#st-like').addEventListener('click', function () {
+      var st = current();
+      if (!st) return;
+      toggleLike(st.id);
+      renderLikes();
+    });
+
+    $('#st-share').addEventListener('click', function () {
+      var st = current();
+      if (!st) { toast('Nothing playing'); return; }
+      var text = st.name + ' — live on HEX RADIO';
+      var url = st.homepage || location.href;
+      if (navigator.share) {
+        navigator.share({ title: st.name, text: text, url: url }).catch(function () {});
+      } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(text + ' — ' + url)
+          .then(function () { toast('Link copied to clipboard'); })
+          .catch(function () { toast('Sharing not available'); });
+      } else {
+        toast('Sharing not available');
+      }
+    });
+
+    /* ---- proxy panel actions ---- */
+    $('#btn-proxy-refresh').addEventListener('click', function () { refreshProxies(false); });
+
+    $('#btn-proxy-auto').addEventListener('click', function () {
+      proxyState.auto = !proxyState.auto;
+      this.textContent = 'Auto: ' + (proxyState.auto ? 'ON' : 'OFF');
+      this.classList.toggle('btn-primary', proxyState.auto);
+      toast('Auto fallback ' + (proxyState.auto ? 'enabled' : 'disabled'), 1500);
+    });
+
+    $('#btn-proxy-direct').addEventListener('click', function () {
+      proxyState.activeId = null;
+      proxyState.lastUsed = null;
+      setNet('direct');
+      renderProxyPanel();
+      toast('Using direct connection', 1500);
+    });
+
+    $('#proxy-list').addEventListener('click', function (e) {
+      var sw = e.target.closest('.proxy-switch');
+      var row = e.target.closest('[data-pid]');
+      if (!row) return;
+      var id = row.getAttribute('data-pid');
+      var p = proxyState.list.filter(function (x) { return x.id === id; })[0];
+      if (!p) return;
+
+      if (sw) {
+        p.enabled = !p.enabled;
+        if (!p.enabled && proxyState.activeId === p.id) proxyState.activeId = null;
+        renderProxyPanel();
+        return;
+      }
+      proxyState.activeId = (proxyState.activeId === p.id) ? null : p.id;
+      proxyState.lastUsed = proxyState.activeId;
+      renderProxyPanel();
+      updateNetPill();
+      toast(proxyState.activeId ? 'Pinned: ' + p.name : 'Relay unpinned', 1500);
+    });
+
+    $('#btn-proxy-add').addEventListener('click', function () {
+      var input = $('#proxy-custom');
+      var v = input.value.trim();
+      if (!/^https?:\/\//.test(v)) { toast('Enter a valid relay URL'); return; }
+      var base = v.indexOf('{url}') !== -1 ? v
+               : (v.indexOf('?') !== -1 || v.slice(-1) === '=' ? v : v + '?url=');
+      var id = 'custom-' + Date.now();
+      proxyState.list.push({
+        id: id,
+        name: 'Custom relay ' + (proxyState.list.filter(function (p) { return p.custom; }).length + 1),
+        build: function (u) {
+          return base.indexOf('{url}') !== -1
+            ? base.replace('{url}', encodeURIComponent(u))
+            : base + encodeURIComponent(u);
+        },
+        unwrap: null,
+        ok: null,
+        latency: 0,
+        enabled: true,
+        custom: true
+      });
+      input.value = '';
+      renderProxyPanel();
+      toast('Relay added — testing…');
+      proxyHealth(proxyState.list[proxyState.list.length - 1]).then(function () {
+        renderProxyPanel();
+      });
+    });
+
+    /* ---- close panels when clicking outside ---- */
+    document.addEventListener('click', function (e) {
+      var qp = $('#queue-panel'), pp = $('#proxy-panel');
+      if (!qp.hidden && !qp.contains(e.target) && !e.target.closest('#btn-queue')) qp.hidden = true;
+      if (!pp.hidden && !pp.contains(e.target) && !e.target.closest('#btn-proxy')) pp.hidden = true;
+    });
+
+    /* ---- responsive recalculation ---- */
+    var rt = null;
+    window.addEventListener('resize', function () {
+      clearTimeout(rt);
+      rt = setTimeout(function () {
+        document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+      }, 120);
+    });
+    document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+
+    /* ---- orientation change (mobile-friendly auto adjust) ---- */
+    if (screen.orientation && screen.orientation.addEventListener) {
+      screen.orientation.addEventListener('change', function () {
+        document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+      });
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     17. GREETING
+     ══════════════════════════════════════════════════════════ */
+  function setGreeting() {
+    var h = new Date().getHours();
+    var g = h < 5 ? 'Good night' :
+            h < 12 ? 'Good morning' :
+            h < 17 ? 'Good afternoon' :
+            h < 22 ? 'Good evening' : 'Good night';
+    $('#greeting').textContent = g;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     18. INIT
+     ══════════════════════════════════════════════════════════ */
+  function init() {
+    $('#brand-logo').src = ART;
+    $('#dock-art-img').src = ART;
+
+    proxyState.list = buildProxies();
+
+    renderTabs();
+    renderProxyPanel();
+    renderQueue();
+    updateDock();
+    updatePlayBtn();
+    setGreeting();
+    setStatus('', 'Ready');
+    setNet('direct');
+
+    bindEvents();
+
+    /* Load chart stations immediately */
+    loadGenre('chart');
+
+    /* Quietly test the full proxy pool in the background */
+    setTimeout(function () { refreshProxies(true); }, 1500);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
+</script>
+<script>
+// Disable right-click
+document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+function ctrlShiftKey(e, keyCode) {
+  return e.ctrlKey && e.shiftKey && e.keyCode === keyCode.charCodeAt(0);
+}
+
+document.onkeydown = (e) => {
+  // Disable F12, Ctrl + Shift + I, Ctrl + Shift + J, Ctrl + U
+  if (
+    event.keyCode === 123 ||
+    ctrlShiftKey(e, 'I') ||
+    ctrlShiftKey(e, 'J') ||
+    ctrlShiftKey(e, 'C') ||
+    (e.ctrlKey && e.keyCode === 'U'.charCodeAt(0))
+  )
+    return false;
+};
+</script>
+<script>
+ if (typeof document.onselectstart!="undefined" ) {
+  document.onselectstart=new Function ("return false" );
+ }
+ else {
+  document.onmousedown=new Function ("return false" );
+  document.onmouseup=new Function ("return true" );
+ }
+</script>
+<script>
+   document.onkeydown = function(e) {
+if(event.keyCode == 123) {
+    return false;
+}
+if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)){
+    return false;
+}
+if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)){
+    return false;
+}
+if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)){
+    return false;
+}
+if(e.ctrlKey && e.keyCode == 'C'.charCodeAt(0)){
+    return false;
+}
+if(e.ctrlKey && e.keyCode == 'X'.charCodeAt(0)){
+    return false;
+}
+if(e.ctrlKey && e.keyCode == 'Y'.charCodeAt(0)){
+    return false;
+}
+if(e.ctrlKey && e.keyCode == 'Z'.charCodeAt(0)){
+    return false;
+}
+if(e.ctrlKey && e.keyCode == 'V'.charCodeAt(0)){
+    return false;
+}
+if (e.keyCode == 67 && e.shiftKey && (e.ctrlKey || e.metaKey)){
+    return false;
+}
+if (e.keyCode == 'J'.charCodeAt(0) && e.altKey && (e.ctrlKey || e.metaKey)){
+    return false;
+}
+if (e.keyCode == 'I'.charCodeAt(0) && e.altKey && (e.ctrlKey || e.metaKey)){
+    return false;
+}
+if ((e.keyCode == 'V'.charCodeAt(0) && e.metaKey) || (e.metaKey && e.altKey)){
+    return false;
+}
+if (e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)){
+    return false;
+}
+if(e.ctrlKey && e.keyCode == 'S'.charCodeAt(0)){
+    return false;
+}
+if(e.ctrlKey && e.keyCode == 'H'.charCodeAt(0)){
+    return false;
+}
+if(e.ctrlKey && e.keyCode == 'A'.charCodeAt(0)){
+    return false;
+}
+if(e.ctrlKey && e.keyCode == 'F'.charCodeAt(0)){
+    return false;
+}
+if(e.ctrlKey && e.keyCode == 'E'.charCodeAt(0)){
+    return false;
+}
+}
+if (document.addEventListener) {
+    document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    }, false);
+}else{
+    document.attachEvent('oncontextmenu', function() {
+    window.event.returnValue = false;
+    });
+}
+</script>
+</body>
+</html>
