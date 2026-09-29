@@ -7,6 +7,10 @@
 <meta name="theme-color" content="#000000">
 <meta name="description" content="HEX RADIO — Discover, share and listen to chart radio stations from all over the world.">
 <title>HEX RADIO — Chart Radio Stations</title>
+
+<!-- ═══════════ FONT AWESOME ═══════════ -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -26,6 +30,7 @@
   --green-hi: #1ed760;
   --red: #ff5c5c;
   --amber: #f0b429;
+  --violet: #7a5cff;
   --dock-h: 90px;
   --top-h: 64px;
 }
@@ -58,7 +63,7 @@ img { max-width: 100%; display: block; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.3); background-clip: padding-box; }
 
 /* ═══════════════════════════════════════════════════════════════════
-   APP LAYOUT  (single column — no sidebar, no slider button)
+   APP LAYOUT
    ═══════════════════════════════════════════════════════════════════ */
 #app {
   position: fixed; inset: 0;
@@ -97,12 +102,45 @@ img { max-width: 100%; display: block; }
   background: var(--bg-5); color: var(--muted);
   display: grid; place-items: center; flex: 0 0 auto;
   transition: background .15s, color .15s, transform .15s;
+  font-size: 17px;
 }
 .nav-btn:hover { background: #2e2e2e; color: #fff; }
 .nav-btn.active { color: #fff; background: var(--bg-5); }
 .nav-btn:active { transform: scale(.95); }
 
-.search-wrap { position: relative; flex: 1 1 auto; max-width: 480px; }
+/* animated radio nav button */
+.radio-nav-btn {
+  position: relative;
+  background: linear-gradient(145deg, #1f3a24, #0f1a12);
+  color: var(--green-hi);
+  border: 1px solid rgba(29,185,84,.35);
+}
+.radio-nav-btn:hover { background: linear-gradient(145deg, #26492d, #122016); color: #fff; }
+.radio-nav-btn::after {
+  content: "";
+  position: absolute; inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(29,185,84,.5);
+  opacity: 0;
+  animation: navRing 2.6s ease-out infinite;
+  pointer-events: none;
+}
+.radio-nav-btn::before {
+  content: "";
+  position: absolute; inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(29,185,84,.5);
+  opacity: 0;
+  animation: navRing 2.6s ease-out infinite;
+  animation-delay: 1.3s;
+  pointer-events: none;
+}
+@keyframes navRing {
+  0%   { transform: scale(.85); opacity: .85; }
+  100% { transform: scale(1.45); opacity: 0; }
+}
+
+.search-wrap { position: relative; flex: 1 1 auto; max-width: 480px; min-width: 0; }
 .search-ico {
   position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
   color: var(--muted); pointer-events: none;
@@ -148,6 +186,7 @@ img { max-width: 100%; display: block; }
   display: grid; place-items: center;
   color: var(--muted); flex: 0 0 auto;
   transition: color .15s, background .15s, transform .15s;
+  font-size: 15px;
 }
 .icon-btn:hover { color: #fff; background: rgba(255,255,255,.08); }
 .icon-btn:active { transform: scale(.92); }
@@ -157,10 +196,16 @@ img { max-width: 100%; display: block; }
   .brand-name { display: none; }
   .pill-badge { display: none; }
 }
+@media (max-width: 720px) {
+  .nav-btn { width: 38px; height: 38px; font-size: 15px; }
+}
 @media (max-width: 560px) {
   .topbar { padding: 0 12px; gap: 10px; }
-  .nav-btn { width: 40px; height: 40px; }
-  #search-input { height: 42px; font-size: 13px; }
+  .nav-btn { width: 36px; height: 36px; font-size: 14px; }
+  #search-input { height: 42px; font-size: 13px; padding: 0 38px 0 38px; }
+  .search-ico { left: 12px; }
+  #btn-charts, #btn-browse { display: none; }
+  .topbar-right { gap: 6px; }
 }
 
 /* ═══ MAIN ═══ */
@@ -240,6 +285,7 @@ img { max-width: 100%; display: block; }
   opacity: 0; transform: translateY(8px);
   transition: opacity .2s, transform .2s, background .15s, box-shadow .2s;
   box-shadow: 0 10px 24px rgba(0,0,0,.55);
+  font-size: 16px;
 }
 .card:hover .card-play { opacity: 1; transform: translateY(0); }
 .card-play:hover {
@@ -271,6 +317,31 @@ img { max-width: 100%; display: block; }
 }
 .tab:hover { background: var(--hover); }
 .tab.active { background: #fff; color: #000; }
+
+/* ── NEW: action tabs inside the Chart / Top 40 menu bar ── */
+.tab-action {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: linear-gradient(145deg, #1c2b20, #141414);
+  border: 1px solid rgba(29,185,84,.28);
+  color: #fff;
+}
+.tab-action i { font-size: 12px; color: var(--green-hi); }
+.tab-action:hover {
+  background: linear-gradient(145deg, #24402c, #191919);
+  border-color: rgba(29,185,84,.55);
+  color: #fff;
+}
+.tab-action.active {
+  background: var(--green); color: #000; border-color: var(--green);
+}
+.tab-action.active i { color: #000; }
+
+.tabs-sep {
+  flex: 0 0 auto; width: 1px; align-self: stretch;
+  background: rgba(255,255,255,.16);
+  margin: 3px 7px; border-radius: 2px;
+}
+
 @media (max-width: 720px) {
   .tabs {
     flex-wrap: nowrap; overflow-x: auto; padding-bottom: 10px;
@@ -278,6 +349,7 @@ img { max-width: 100%; display: block; }
   }
   .tabs::-webkit-scrollbar { display: none; }
   .tab { padding: 8px 15px; font-size: 12.5px; }
+  .tab-action { gap: 7px; }
 }
 
 .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
@@ -301,6 +373,7 @@ img { max-width: 100%; display: block; }
   background: rgba(0,0,0,.7); color: #fff;
   display: grid; place-items: center; margin-bottom: 20px;
   transition: background .15s, transform .15s;
+  font-size: 17px;
 }
 .btn-back:hover { background: rgba(0,0,0,.9); transform: scale(1.05); }
 
@@ -342,7 +415,7 @@ img { max-width: 100%; display: block; }
 }
 .btn-hero:hover { background: var(--green-hi); transform: scale(1.04); box-shadow: 0 16px 40px rgba(29,185,84,.5); }
 .btn-hero:active { transform: scale(.98); }
-.btn-hero svg { width: 20px; height: 20px; }
+.btn-hero i, .btn-hero svg { width: 20px; height: 20px; font-size: 17px; }
 
 .tracklist { margin-top: 12px; }
 .tl-head {
@@ -393,6 +466,98 @@ img { max-width: 100%; display: block; }
   .tl-row { grid-template-columns: 32px 1fr auto; gap: 10px; padding: 10px 8px; }
   .tl-album { display: none; }
 }
+
+/* ═══ CHART LIST (top-charts.com) ═══ */
+.chart-list { display: flex; flex-direction: column; gap: 2px; }
+.chart-row {
+  display: grid; grid-template-columns: 54px 46px 1fr auto;
+  gap: 14px; align-items: center;
+  padding: 10px 14px; border-radius: 8px; cursor: pointer;
+  transition: background .15s;
+}
+.chart-row:hover { background: rgba(255,255,255,.06); }
+.chart-rank {
+  font-size: 20px; font-weight: 800; color: var(--muted);
+  text-align: center; font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+}
+.chart-row:nth-child(1) .chart-rank { color: #ffd24a; }
+.chart-row:nth-child(2) .chart-rank { color: #d8d8d8; }
+.chart-row:nth-child(3) .chart-rank { color: #d18a4a; }
+.chart-art {
+  width: 46px; height: 46px; border-radius: 8px;
+  background: linear-gradient(135deg, #2a2a2a, #101010);
+  display: grid; place-items: center;
+  color: var(--muted); font-size: 15px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.chart-art img {
+  width: 100%; height: 100%; object-fit: cover;
+  border-radius: 8px; display: block;
+}
+
+/* ── NEW: round profile pictures for the Artists chart ── */
+.chart-art.is-artist {
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.18);
+  background: linear-gradient(135deg, #2f2f2f, #101010);
+  box-shadow: 0 3px 12px rgba(0,0,0,.55);
+}
+.chart-art.is-artist img {
+  border-radius: 50%;
+}
+
+.chart-main { min-width: 0; }
+.chart-title {
+  font-size: 15px; font-weight: 600; color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.chart-artist {
+  font-size: 12.5px; color: var(--muted); margin-top: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.chart-go {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--green); color: #000;
+  display: grid; place-items: center; font-size: 14px;
+  opacity: 0; transform: scale(.85);
+  transition: opacity .18s, transform .18s, background .15s;
+}
+.chart-row:hover .chart-go { opacity: 1; transform: scale(1); }
+.chart-go:hover { background: var(--green-hi); }
+@media (hover: none) { .chart-go { opacity: 1; transform: scale(1); } }
+
+@media (max-width: 560px) {
+  .chart-row { grid-template-columns: 36px 1fr auto; gap: 10px; padding: 9px 8px; }
+  .chart-art { display: none; }
+  .chart-rank { font-size: 16px; }
+
+  /* artist rows keep their round avatar on small screens */
+  .chart-row.is-artist { grid-template-columns: 30px 40px 1fr auto; }
+  .chart-row.is-artist .chart-art.is-artist { display: grid; }
+}
+
+/* ═══ FILTER CHIPS (OnlineRadioFM) ═══ */
+.filter-group { margin-bottom: 18px; }
+.filter-group h4 {
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: .15em;
+  color: var(--muted); font-weight: 700; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.filter-group h4 i { color: var(--green); font-size: 11px; }
+.filter-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip-btn {
+  padding: 7px 14px; border-radius: 999px;
+  background: var(--bg-5); color: #fff;
+  font-size: 12.5px; font-weight: 600;
+  display: inline-flex; align-items: center; gap: 7px;
+  transition: background .15s, color .15s, transform .12s;
+  white-space: nowrap;
+}
+.chip-btn:hover { background: var(--hover); }
+.chip-btn.active { background: var(--green); color: #000; }
+.chip-btn:active { transform: scale(.95); }
 
 /* ═══════════════════════════════════════════════════════════════════
    PLAYER DOCK
@@ -449,6 +614,7 @@ img { max-width: 100%; display: block; }
   display: grid; place-items: center;
   transition: transform .12s, background .15s;
   margin: 0 4px;
+  font-size: 15px;
 }
 .play-btn:hover { transform: scale(1.06); background: #f5f5f5; }
 .play-btn:active { transform: scale(.96); }
@@ -493,7 +659,6 @@ img { max-width: 100%; display: block; }
 
 .dock-right { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
 
-/* ── network pill ── */
 .net-pill {
   display: inline-flex; align-items: center; gap: 7px;
   font-size: 10.5px; font-weight: 700;
@@ -509,7 +674,7 @@ img { max-width: 100%; display: block; }
   width: 6px; height: 6px; border-radius: 50%; flex: 0 0 auto;
   background: var(--green); box-shadow: 0 0 8px var(--green);
 }
-.net-pill.is-relay .net-dot { background: #7a5cff; box-shadow: 0 0 8px #7a5cff; }
+.net-pill.is-relay .net-dot { background: var(--violet); box-shadow: 0 0 8px var(--violet); }
 .net-pill.is-down  .net-dot { background: var(--red);  box-shadow: 0 0 8px var(--red); animation: pulse 1s infinite; }
 
 .status {
@@ -537,7 +702,6 @@ img { max-width: 100%; display: block; }
   .dock-right .status { display: none; }
 }
 
-/* ═══ MOBILE DOCK ═══ */
 @media (max-width: 720px) {
   :root { --dock-h: 74px; }
   .dock { grid-template-columns: 1fr auto auto; gap: 8px; padding: 0 10px; }
@@ -555,7 +719,7 @@ img { max-width: 100%; display: block; }
   .dock-artist { display: none; }
 }
 
-/* ═══ QUEUE PANEL ═══ */
+/* ═══ SIDE PANELS ═══ */
 .queue-panel {
   position: fixed; right: 12px; bottom: calc(var(--dock-h) + 12px);
   width: min(360px, calc(100vw - 24px));
@@ -578,7 +742,11 @@ img { max-width: 100%; display: block; }
   padding: 16px 18px; border-bottom: 1px solid var(--border);
   flex: 0 0 auto;
 }
-.queue-head h3 { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; }
+.queue-head h3 {
+  font-size: 16px; font-weight: 700; letter-spacing: -0.02em;
+  display: flex; align-items: center; gap: 10px;
+}
+.queue-head h3 i { color: var(--green); font-size: 14px; }
 .queue-body { overflow-y: auto; padding: 8px; -webkit-overflow-scrolling: touch; }
 .queue-item {
   display: flex; align-items: center; gap: 12px;
@@ -592,6 +760,7 @@ img { max-width: 100%; display: block; }
 .queue-meta { min-width: 0; flex: 1; }
 .queue-title { font-size: 13.5px; font-weight: 500; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .queue-sub { font-size: 11.5px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.side-empty { padding: 34px 20px; text-align: center; color: var(--muted); font-size: 13px; line-height: 1.7; }
 
 /* ═══ PROXY PANEL ═══ */
 .proxy-panel { width: min(430px, calc(100vw - 24px)); max-height: min(660px, 76vh); }
@@ -601,9 +770,8 @@ img { max-width: 100%; display: block; }
   display: flex; flex-direction: column; gap: 16px;
   -webkit-overflow-scrolling: touch;
 }
-.proxy-intro {
-  font-size: 12px; color: var(--muted); line-height: 1.65;
-}
+.proxy-intro { font-size: 12px; color: var(--muted); line-height: 1.65; }
+.proxy-intro b { color: #fff; }
 .proxy-field { display: flex; flex-direction: column; gap: 8px; }
 .proxy-field label {
   font-size: 10.5px; text-transform: uppercase;
@@ -654,7 +822,7 @@ img { max-width: 100%; display: block; }
 .proxy-tag {
   font-style: normal; font-size: 9.5px; font-weight: 700;
   text-transform: uppercase; letter-spacing: .08em;
-  color: #7a5cff; background: rgba(122,92,255,.15);
+  color: var(--violet); background: rgba(122,92,255,.15);
   padding: 2px 6px; border-radius: 4px; margin-left: 6px;
 }
 .proxy-lat {
@@ -684,6 +852,350 @@ img { max-width: 100%; display: block; }
   padding: 1px 5px; border-radius: 4px; font-size: 10.5px;
 }
 
+/* ═══ SOURCES PANEL ═══ */
+.sources-panel { width: min(430px, calc(100vw - 24px)); max-height: min(660px, 76vh); }
+.sources-body {
+  overflow-y: auto; padding: 14px;
+  display: flex; flex-direction: column; gap: 6px;
+  -webkit-overflow-scrolling: touch;
+}
+.src-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 11px; border-radius: 8px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.src-row:hover { background: rgba(255,255,255,.08); border-color: var(--border-2); }
+.src-ico { color: var(--green); font-size: 12px; width: 14px; text-align: center; flex: 0 0 auto; }
+.src-name {
+  flex: 1; min-width: 0; font-size: 12.5px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.src-go {
+  color: var(--muted); font-size: 11px; flex: 0 0 auto;
+  transition: color .15s, transform .15s;
+}
+.src-row:hover .src-go { color: #fff; transform: translateX(2px); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   ANIMATED RADIO  (HEX Sleuth FM)
+   ═══════════════════════════════════════════════════════════════════ */
+.radio-card { width: min(560px, calc(100vw - 24px)); }
+.radio-body-wrap {
+  padding: 20px 24px 24px !important;
+  gap: 14px !important;
+  max-height: 74vh !important;
+  align-items: center;
+  text-align: center;
+}
+
+.radio-stage {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 30px 0 22px;
+  display: grid;
+  place-items: center;
+}
+
+/* radiating waves */
+.radio-waves { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+.radio-waves i {
+  position: absolute;
+  width: 130px; height: 130px; border-radius: 50%;
+  border: 2px solid rgba(29,185,84,.55);
+  opacity: 0;
+}
+.radio-stage.loading .radio-waves i { animation: radioWave 2.4s ease-out infinite; }
+.radio-stage.loading .radio-waves i:nth-child(2) { animation-delay: .8s; }
+.radio-stage.loading .radio-waves i:nth-child(3) { animation-delay: 1.6s; }
+@keyframes radioWave {
+  0%   { transform: scale(.55); opacity: .9; }
+  100% { transform: scale(2.8); opacity: 0; }
+}
+
+/* radio chassis */
+.radio-body {
+  position: relative;
+  width: 300px;
+  border-radius: 22px;
+  background: linear-gradient(160deg, #2e2e2e 0%, #171717 55%, #0b0b0b 100%);
+  border: 1px solid rgba(255,255,255,.13);
+  box-shadow:
+    0 26px 64px rgba(0,0,0,.9),
+    inset 0 1px 0 rgba(255,255,255,.1),
+    inset 0 -2px 8px rgba(0,0,0,.7);
+  padding: 14px;
+  z-index: 2;
+  transition: box-shadow .3s;
+}
+.radio-stage.loading .radio-body {
+  box-shadow:
+    0 26px 70px rgba(29,185,84,.28),
+    0 0 0 1px rgba(29,185,84,.25),
+    inset 0 1px 0 rgba(255,255,255,.1),
+    inset 0 -2px 8px rgba(0,0,0,.7);
+}
+.radio-handle {
+  position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+  width: 108px; height: 20px;
+  border: 3px solid #232323;
+  border-bottom: 0;
+  border-radius: 40px 40px 0 0;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.6);
+}
+
+.radio-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px; padding: 0 2px;
+}
+.radio-brand {
+  font-size: 9.5px; font-weight: 800;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: var(--muted);
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.radio-brand i { color: var(--green); font-size: 11px; }
+.radio-led {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #3a3a3a;
+  box-shadow: inset 0 0 3px rgba(0,0,0,.9);
+  transition: background .25s, box-shadow .25s;
+}
+.radio-stage.loading .radio-led {
+  background: var(--green);
+  box-shadow: 0 0 12px var(--green), 0 0 24px rgba(29,185,84,.5);
+  animation: pulse 1s ease-in-out infinite;
+}
+.radio-stage.done .radio-led {
+  background: var(--green);
+  box-shadow: 0 0 12px var(--green);
+}
+.radio-stage.error .radio-led {
+  background: var(--red);
+  box-shadow: 0 0 12px var(--red);
+}
+
+/* dial */
+.radio-dial {
+  position: relative;
+  height: 92px;
+  border-radius: 12px;
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(29,185,84,.10), transparent 70%),
+    linear-gradient(180deg, #070707, #131313);
+  border: 1px solid rgba(255,255,255,.08);
+  overflow: hidden;
+  box-shadow: inset 0 3px 12px rgba(0,0,0,.9);
+}
+.radio-ticks {
+  position: absolute; left: 12px; right: 12px; top: 10px; height: 14px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(255,255,255,.38) 0 1px,
+    transparent 1px 11px
+  );
+  opacity: .55;
+}
+.radio-ticks::after {
+  content: "";
+  position: absolute; left: 0; right: 0; top: 0; height: 7px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(255,255,255,.7) 0 1px,
+    transparent 1px 55px
+  );
+}
+.radio-needle {
+  position: absolute;
+  top: 24px; bottom: 26px;
+  width: 2px;
+  background: linear-gradient(180deg, var(--green-hi), rgba(29,185,84,0));
+  box-shadow: 0 0 10px var(--green), 0 0 22px rgba(29,185,84,.7);
+  border-radius: 2px;
+  transition: left .12s linear;
+  z-index: 3;
+}
+.radio-needle::after {
+  content: "";
+  position: absolute; top: -4px; left: 50%; transform: translateX(-50%);
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green-hi);
+  box-shadow: 0 0 12px var(--green-hi);
+}
+.radio-freq {
+  position: absolute; left: 0; right: 0; bottom: 6px;
+  text-align: center;
+  font-size: 22px; font-weight: 800;
+  letter-spacing: .06em;
+  font-variant-numeric: tabular-nums;
+  color: var(--green-hi);
+  text-shadow: 0 0 14px rgba(29,185,84,.85), 0 0 30px rgba(29,185,84,.4);
+  font-family: "Courier New", ui-monospace, monospace;
+}
+.radio-band {
+  position: absolute; right: 10px; bottom: 10px;
+  font-size: 8.5px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--muted-2);
+  font-weight: 700;
+}
+.radio-stage:not(.loading) .radio-freq { animation: freqGlow 3s ease-in-out infinite; }
+@keyframes freqGlow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .78; }
+}
+
+/* speaker grille */
+.radio-grille {
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  gap: 4px;
+  margin-top: 11px;
+  padding: 10px;
+  border-radius: 10px;
+  background: #080808;
+  border: 1px solid rgba(255,255,255,.06);
+  box-shadow: inset 0 2px 8px rgba(0,0,0,.9);
+}
+.radio-grille span {
+  height: 32px;
+  border-radius: 3px;
+  background: rgba(255,255,255,.06);
+  transition: background .2s, box-shadow .2s;
+}
+.radio-stage.loading .radio-grille span {
+  animation: grillePulse 1.1s ease-in-out infinite;
+  background: rgba(29,185,84,.35);
+  box-shadow: 0 0 10px rgba(29,185,84,.35);
+}
+@keyframes grillePulse {
+  0%, 100% { opacity: .3; }
+  50%      { opacity: 1; }
+}
+.radio-grille span:nth-child(1)  { animation-delay: 0s; }
+.radio-grille span:nth-child(2)  { animation-delay: .05s; }
+.radio-grille span:nth-child(3)  { animation-delay: .1s; }
+.radio-grille span:nth-child(4)  { animation-delay: .15s; }
+.radio-grille span:nth-child(5)  { animation-delay: .2s; }
+.radio-grille span:nth-child(6)  { animation-delay: .25s; }
+.radio-grille span:nth-child(7)  { animation-delay: .3s; }
+.radio-grille span:nth-child(8)  { animation-delay: .35s; }
+.radio-grille span:nth-child(9)  { animation-delay: .4s; }
+.radio-grille span:nth-child(10) { animation-delay: .45s; }
+.radio-grille span:nth-child(11) { animation-delay: .5s; }
+
+/* bottom row: EQ + knobs */
+.radio-bottom {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 11px; padding: 0 3px;
+}
+.radio-eq { display: flex; align-items: flex-end; gap: 3px; height: 24px; }
+.radio-eq i {
+  width: 4px; height: 18%;
+  background: linear-gradient(180deg, var(--green-hi), var(--green));
+  border-radius: 2px;
+  transition: height .2s;
+  box-shadow: 0 0 6px rgba(29,185,84,.6);
+}
+.radio-stage.loading .radio-eq i { animation: eqBar .7s ease-in-out infinite; }
+.radio-eq i:nth-child(1) { animation-delay: 0s; }
+.radio-eq i:nth-child(2) { animation-delay: .09s; }
+.radio-eq i:nth-child(3) { animation-delay: .18s; }
+.radio-eq i:nth-child(4) { animation-delay: .27s; }
+.radio-eq i:nth-child(5) { animation-delay: .36s; }
+.radio-eq i:nth-child(6) { animation-delay: .45s; }
+.radio-eq i:nth-child(7) { animation-delay: .54s; }
+.radio-eq i:nth-child(8) { animation-delay: .63s; }
+@keyframes eqBar {
+  0%, 100% { height: 18%; }
+  50%      { height: 100%; }
+}
+
+.radio-knobs { display: flex; align-items: center; gap: 12px; }
+.radio-knob {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: radial-gradient(circle at 34% 28%, #434343, #111 72%);
+  border: 1px solid rgba(255,255,255,.16);
+  position: relative;
+  box-shadow: 0 5px 14px rgba(0,0,0,.75), inset 0 1px 0 rgba(255,255,255,.12);
+}
+.radio-knob::after {
+  content: "";
+  position: absolute; left: 50%; top: 5px;
+  width: 2.5px; height: 12px;
+  background: var(--green-hi);
+  border-radius: 2px;
+  transform: translateX(-50%);
+  box-shadow: 0 0 7px var(--green);
+}
+.radio-knob.small { width: 26px; height: 26px; }
+.radio-knob.small::after { height: 7px; width: 2px; }
+.radio-stage.loading .radio-knob { animation: spinKnob 1.5s linear infinite; }
+.radio-stage.loading .radio-knob.small { animation: spinKnob 2.3s linear infinite reverse; }
+@keyframes spinKnob { to { transform: rotate(360deg); } }
+
+/* radio status + log */
+.radio-status {
+  font-size: 12.5px; font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--muted);
+  text-transform: uppercase;
+  transition: color .2s;
+}
+.radio-stage.loading ~ .radio-status { color: var(--green-hi); }
+
+.radio-log {
+  width: 100%;
+  max-height: 148px;
+  overflow-y: auto;
+  border-radius: 10px;
+  background: rgba(0,0,0,.45);
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  font-family: "Courier New", ui-monospace, monospace;
+  font-size: 11px;
+  line-height: 1.75;
+  text-align: left;
+  -webkit-overflow-scrolling: touch;
+}
+.radio-log:empty::after {
+  content: "› waiting for tune command…";
+  color: var(--muted-2);
+}
+.radio-log-line {
+  display: flex; align-items: flex-start; gap: 8px;
+  color: var(--muted);
+  animation: logIn .2s ease;
+}
+@keyframes logIn { from { opacity: 0; transform: translateX(-5px); } to { opacity: 1; transform: none; } }
+.radio-log-line i { font-size: 10px; margin-top: 4px; flex: 0 0 auto; color: var(--muted-2); }
+.radio-log-line.is-ok   { color: var(--green-hi); }
+.radio-log-line.is-ok i { color: var(--green); }
+.radio-log-line.is-err  { color: var(--red); }
+.radio-log-line.is-err i { color: var(--red); }
+.radio-log-line.is-warn { color: var(--amber); }
+.radio-log-line.is-warn i { color: var(--amber); }
+.radio-log-line.is-busy i { color: var(--green); }
+
+.radio-actions {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .radio-body { width: 262px; padding: 12px; }
+  .radio-grille span { height: 26px; }
+  .radio-dial { height: 82px; }
+  .radio-freq { font-size: 19px; }
+  .radio-body-wrap { padding: 16px 14px 20px !important; }
+  .radio-knob { width: 36px; height: 36px; }
+  .radio-knob.small { width: 22px; height: 22px; }
+}
+
 /* ═══ MODAL ═══ */
 .modal { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; }
 .modal[hidden] { display: none; }
@@ -711,7 +1223,11 @@ img { max-width: 100%; display: block; }
   display: flex; align-items: center; justify-content: space-between;
   padding: 20px 24px; border-bottom: 1px solid var(--border);
 }
-.modal-head h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
+.modal-head h3 {
+  font-size: 18px; font-weight: 800; letter-spacing: -0.02em;
+  display: flex; align-items: center; gap: 11px;
+}
+.modal-head h3 i { color: var(--green); font-size: 16px; }
 .modal-body {
   padding: 24px; display: flex; flex-direction: column; gap: 14px;
   color: var(--muted); font-size: 14px; line-height: 1.65;
@@ -721,12 +1237,59 @@ img { max-width: 100%; display: block; }
 .modal-body a { color: var(--green-hi); }
 .modal-fine { font-size: 12px; color: var(--muted-2); font-style: italic; }
 .modal-foot {
-  display: flex; justify-content: flex-end;
+  display: flex; justify-content: flex-end; gap: 10px;
   padding: 16px 24px;
   background: rgba(0,0,0,.35);
   border-top: 1px solid var(--border);
 }
 
+/* ═══ ABOUT: FA feature list ═══ */
+.fa-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin: 4px 0 6px;
+}
+.fa-card {
+  display: flex; align-items: center; gap: 11px;
+  padding: 12px 13px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  font-size: 12.5px; font-weight: 600; color: #fff;
+  transition: background .15s, border-color .15s, transform .15s;
+}
+.fa-card:hover { background: rgba(255,255,255,.08); border-color: var(--border-2); transform: translateY(-1px); }
+.fa-card i {
+  width: 30px; height: 30px; border-radius: 8px;
+  display: grid; place-items: center;
+  background: rgba(29,185,84,.14);
+  color: var(--green-hi);
+  font-size: 13px;
+  flex: 0 0 auto;
+}
+.fa-card.violet i { background: rgba(122,92,255,.16); color: #a58fff; }
+.fa-card.amber  i { background: rgba(240,180,41,.16); color: var(--amber); }
+.fa-card.red    i { background: rgba(255,92,92,.16);  color: var(--red); }
+
+.about-src-title {
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: .14em;
+  color: var(--muted); font-weight: 700; margin-top: 6px;
+  display: flex; align-items: center; gap: 8px;
+}
+.about-src-title i { color: var(--green); }
+.about-src-list {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.about-src-list span {
+  padding: 4px 10px; border-radius: 99px;
+  background: rgba(255,255,255,.06);
+  font-size: 11px; font-weight: 600; color: var(--muted);
+  transition: background .15s, color .15s;
+}
+.about-src-list span:hover { background: rgba(29,185,84,.16); color: #fff; }
+
+/* ═══ BUTTONS ═══ */
 .btn {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 11px 22px; border-radius: 999px;
@@ -737,8 +1300,15 @@ img { max-width: 100%; display: block; }
 }
 .btn:hover { background: var(--hover); transform: scale(1.03); }
 .btn:active { transform: scale(.98); }
+.btn i { font-size: 12.5px; }
 .btn-primary { background: var(--green); color: #000; }
 .btn-primary:hover { background: var(--green-hi); }
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border-2);
+  color: #fff;
+}
+.btn-ghost:hover { background: rgba(255,255,255,.07); }
 
 /* ═══ TOAST ═══ */
 .toast {
@@ -782,8 +1352,15 @@ img { max-width: 100%; display: block; }
 
     <div class="nav">
       <button class="nav-btn active" id="btn-home" title="Home" aria-label="Home">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 3.1 2.5 11h3v9h5v-6h3v6h5v-9h3z"/></svg>
+        <i class="fa-solid fa-house"></i>
       </button>
+      <button class="nav-btn" id="btn-charts" title="Top Charts" aria-label="Top Charts">
+        <i class="fa-solid fa-chart-line"></i>
+      </button>
+      <button class="nav-btn" id="btn-browse" title="Browse Stations" aria-label="Browse Stations">
+        <i class="fa-solid fa-compass"></i>
+      </button>
+
       <div class="search-wrap">
         <span class="search-ico">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -792,22 +1369,28 @@ img { max-width: 100%; display: block; }
         </span>
         <input id="search-input" type="search" placeholder="Search stations, countries, genres…" autocomplete="off" spellcheck="false">
         <button class="search-clear" id="search-clear" hidden aria-label="Clear search">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
     </div>
 
     <div class="topbar-right">
       <span class="pill-badge"><span class="pill-dot"></span> LIVE 24/7</span>
-      <button class="icon-btn" id="btn-proxy" title="Relay proxies" aria-label="Relay proxies">
-        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9">
-          <circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.8 3.8 9S14.5 18.3 12 21c-2.5-2.7-3.8-5.8-3.8-9S9.5 5.7 12 3z"/>
-        </svg>
+
+      <button class="nav-btn radio-nav-btn" id="btn-radio" title="HEX Sleuth FM Radio" aria-label="HEX Sleuth FM Radio">
+        <i class="fa-solid fa-radio"></i>
       </button>
+
+      <button class="icon-btn" id="btn-sources" title="Station directories" aria-label="Station directories">
+        <i class="fa-solid fa-database"></i>
+      </button>
+
+      <button class="icon-btn" id="btn-proxy" title="Relay proxies" aria-label="Relay proxies">
+        <i class="fa-solid fa-globe"></i>
+      </button>
+
       <button class="icon-btn" id="btn-about" title="About" aria-label="About">
-        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
-          <circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="7.6" r="1.1" fill="currentColor" stroke="none"/>
-        </svg>
+        <i class="fa-solid fa-circle-info"></i>
       </button>
     </div>
   </header>
@@ -815,29 +1398,31 @@ img { max-width: 100%; display: block; }
   <!-- ══════════ MAIN ══════════ -->
   <main id="main">
 
-    <!-- HOME VIEW -->
+    <!-- ───── HOME VIEW ───── -->
     <section class="view" id="view-home">
       <h1 class="greeting" id="greeting">Good evening</h1>
       <p class="tagline">
         Discover, share, and listen to chart radio stations from all over the world.
-        Find the best free chart Internet radio, AM and FM stations, and live web radio stations.
+        Find the best free chart Internet radio, AM and FM stations, and live web radio stations —
+        routed through an unlimited, cost-free proxy pool.
       </p>
 
+      <!-- Chart / Top 40 genre tabs + Top Charts / Browse / HEX FM / Sources actions -->
       <div class="tabs" id="tabs"></div>
 
       <div class="section">
         <div class="section-head">
           <h2 id="grid-title">Chart radio stations</h2>
-          <button class="section-link" id="btn-refresh">↻ Refresh</button>
+          <button class="section-link" id="btn-refresh"><i class="fa-solid fa-rotate"></i> Refresh</button>
         </div>
         <div class="card-grid" id="grid"></div>
       </div>
     </section>
 
-    <!-- STATION VIEW -->
+    <!-- ───── STATION VIEW ───── -->
     <section class="view" id="view-station" hidden>
       <button class="btn-back" id="btn-back" aria-label="Back">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+        <i class="fa-solid fa-chevron-left"></i>
       </button>
 
       <div class="detail-hero">
@@ -848,12 +1433,14 @@ img { max-width: 100%; display: block; }
           <p class="detail-meta" id="st-meta">—</p>
           <div class="detail-actions">
             <button class="btn-hero" id="st-play">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <i class="fa-solid fa-play"></i>
               <span id="st-play-label">Play</span>
             </button>
-            <button class="btn" id="st-like">♡ Like</button>
-            <button class="btn" id="st-share">Share</button>
-            <a class="btn" id="st-site" target="_blank" rel="noopener noreferrer" hidden>Website</a>
+            <button class="btn" id="st-like"><i class="fa-regular fa-heart"></i> Like</button>
+            <button class="btn" id="st-share"><i class="fa-solid fa-share-nodes"></i> Share</button>
+            <a class="btn" id="st-site" target="_blank" rel="noopener noreferrer" hidden>
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Website
+            </a>
           </div>
         </div>
       </div>
@@ -861,6 +1448,48 @@ img { max-width: 100%; display: block; }
       <div class="section">
         <div class="section-head"><h2>Up next in queue</h2></div>
         <div class="tracklist" id="st-list"></div>
+      </div>
+    </section>
+
+    <!-- ───── CHARTS VIEW (top-charts.com) ───── -->
+    <section class="view" id="view-charts" hidden>
+      <h1 class="greeting">Top Charts</h1>
+      <p class="tagline">
+        Live worldwide charts pulled from <b>top-charts.com</b> through the relay pool.
+        Tap any entry to instantly find radio stations playing that song or artist.
+      </p>
+
+      <div class="tabs" id="chart-tabs">
+        <button class="tab active" data-chart="songs"><i class="fa-solid fa-music"></i> Songs</button>
+        <button class="tab" data-chart="artists"><i class="fa-solid fa-user"></i> Artists</button>
+        <button class="tab" data-chart="in"><i class="fa-solid fa-location-dot"></i> India</button>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2 id="chart-title">Worldwide — Songs</h2>
+          <button class="section-link" id="btn-chart-refresh"><i class="fa-solid fa-rotate"></i> Reload</button>
+        </div>
+        <div class="chart-list" id="chart-list"></div>
+      </div>
+    </section>
+
+    <!-- ───── BROWSE VIEW (OnlineRadioFM filters) ───── -->
+    <section class="view" id="view-browse" hidden>
+      <h1 class="greeting">Browse Stations</h1>
+      <p class="tagline">
+        Live station index modelled on <b>onlineradiofm.in/stations</b> — filter by language,
+        format, largest cities and countries.
+      </p>
+
+      <div id="filter-groups"></div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2 id="browse-title">All stations</h2>
+          <button class="section-link" id="btn-browse-refresh"><i class="fa-solid fa-rotate"></i> Refresh</button>
+        </div>
+        <div class="card-grid" id="browse-grid"></div>
       </div>
     </section>
 
@@ -877,26 +1506,26 @@ img { max-width: 100%; display: block; }
         <span class="dock-artist" id="dock-artist">Pick a station to start listening</span>
       </div>
       <button class="icon-btn dock-like" id="dock-like" aria-label="Like">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 21s-8-5.1-8-10.4A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 8 3.6C20 15.9 12 21 12 21z"/></svg>
+        <i class="fa-solid fa-heart"></i>
       </button>
     </div>
 
     <div class="dock-center">
       <div class="dock-buttons">
         <button class="icon-btn" id="btn-shuffle" title="Shuffle" aria-label="Shuffle">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17 3h5v5h-2V6.4l-4.3 4.3-1.4-1.4L18.6 5H17V3zM3 5h4.2l3.4 3.4-1.4 1.4L6.2 7H3V5zm14.6 10.6L19 14.2V16h2v-5h-5v2h1.6l-2.3 2.3 1.3 1.3zM3 17h3.2l3.4-3.4-1.4-1.4L5.2 15H3v2z"/></svg>
+          <i class="fa-solid fa-shuffle"></i>
         </button>
         <button class="icon-btn" id="btn-prev" title="Previous" aria-label="Previous">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M7 6h2v12H7zM19 6v12l-9-6z"/></svg>
+          <i class="fa-solid fa-backward-step"></i>
         </button>
         <button class="play-btn" id="btn-play" aria-label="Play">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <i class="fa-solid fa-play"></i>
         </button>
         <button class="icon-btn" id="btn-next" title="Next" aria-label="Next">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M15 6h2v12h-2zM5 6v12l9-6z"/></svg>
+          <i class="fa-solid fa-forward-step"></i>
         </button>
         <button class="icon-btn" id="btn-repeat" title="Repeat" aria-label="Repeat">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
+          <i class="fa-solid fa-repeat"></i>
         </button>
       </div>
 
@@ -914,10 +1543,10 @@ img { max-width: 100%; display: block; }
       <div class="net-pill" id="net-pill"><span class="net-dot"></span><span id="net-label">Direct</span></div>
       <div class="status" id="status"><span class="status-dot"></span><span id="status-text">Ready</span></div>
       <button class="icon-btn" id="btn-queue" title="Queue" aria-label="Queue">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M3 5h13v2H3zM3 9.5h13v2H3zM3 14h9v2H3z"/><circle cx="18" cy="16.5" r="3"/></svg>
+        <i class="fa-solid fa-list-ul"></i>
       </button>
       <button class="icon-btn" id="btn-mute" title="Mute" aria-label="Mute">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M11 5 6 9H3v6h3l5 4V5zm4.5 7A4.5 4.5 0 0 0 13 7.97v8.06A4.5 4.5 0 0 0 15.5 12z"/></svg>
+        <i class="fa-solid fa-volume-high"></i>
       </button>
       <div class="volume" id="volume"><div class="volume-fill" id="volume-fill"></div></div>
     </div>
@@ -927,20 +1556,31 @@ img { max-width: 100%; display: block; }
 <!-- ══════════ QUEUE PANEL ══════════ -->
 <div class="queue-panel" id="queue-panel" hidden>
   <div class="queue-head">
-    <h3>Queue</h3>
+    <h3><i class="fa-solid fa-list-ul"></i> Queue</h3>
     <button class="icon-btn" data-close="queue-panel" aria-label="Close">
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      <i class="fa-solid fa-xmark"></i>
     </button>
   </div>
   <div class="queue-body" id="queue-body"></div>
 </div>
 
+<!-- ══════════ SOURCES PANEL ══════════ -->
+<div class="queue-panel sources-panel" id="sources-panel" hidden>
+  <div class="queue-head">
+    <h3><i class="fa-solid fa-database"></i> Station Directories</h3>
+    <button class="icon-btn" data-close="sources-panel" aria-label="Close">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+  <div class="sources-body" id="sources-list"></div>
+</div>
+
 <!-- ══════════ PROXY PANEL ══════════ -->
 <div class="queue-panel proxy-panel" id="proxy-panel" hidden>
   <div class="queue-head">
-    <h3>Relay Proxies</h3>
+    <h3><i class="fa-solid fa-globe"></i> Relay Proxies</h3>
     <button class="icon-btn" data-close="proxy-panel" aria-label="Close">
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      <i class="fa-solid fa-xmark"></i>
     </button>
   </div>
 
@@ -952,9 +1592,11 @@ img { max-width: 100%; display: block; }
     </p>
 
     <div class="proxy-actions">
-      <button class="btn btn-primary btn-sm" id="btn-proxy-refresh">↻ Refresh &amp; Test All</button>
-      <button class="btn btn-sm" id="btn-proxy-auto">Auto: ON</button>
-      <button class="btn btn-sm" id="btn-proxy-direct">Force Direct</button>
+      <button class="btn btn-primary btn-sm" id="btn-proxy-refresh">
+        <i class="fa-solid fa-rotate"></i> Refresh &amp; Test All
+      </button>
+      <button class="btn btn-sm" id="btn-proxy-auto"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto: ON</button>
+      <button class="btn btn-sm" id="btn-proxy-direct"><i class="fa-solid fa-plug"></i> Force Direct</button>
     </div>
 
     <div class="proxy-stats" id="proxy-stats"></div>
@@ -963,7 +1605,7 @@ img { max-width: 100%; display: block; }
     <div class="proxy-field">
       <label for="proxy-custom">Add your own relay</label>
       <input id="proxy-custom" type="text" placeholder="https://my-relay.example/?url=" autocomplete="off" spellcheck="false">
-      <button class="btn btn-sm" id="btn-proxy-add">Add relay</button>
+      <button class="btn btn-sm" id="btn-proxy-add"><i class="fa-solid fa-plus"></i> Add relay</button>
     </div>
 
     <p class="proxy-note">
@@ -974,28 +1616,107 @@ img { max-width: 100%; display: block; }
   </div>
 </div>
 
+<!-- ══════════ ANIMATED RADIO MODAL ══════════ -->
+<div class="modal" id="radio-modal" hidden>
+  <div class="modal-backdrop" data-close-modal="radio-modal"></div>
+  <div class="modal-card radio-card">
+    <div class="modal-head">
+      <h3><i class="fa-solid fa-radio"></i> HEX Sleuth FM Radio</h3>
+      <button class="icon-btn" data-close-modal="radio-modal" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="modal-body radio-body-wrap">
+
+      <div class="radio-stage" id="radio-stage">
+        <div class="radio-waves"><i></i><i></i><i></i></div>
+
+        <div class="radio-body">
+          <div class="radio-handle"></div>
+
+          <div class="radio-top">
+            <span class="radio-brand"><i class="fa-solid fa-tower-broadcast"></i> HEX SLEUTH FM</span>
+            <span class="radio-led" id="radio-led"></span>
+          </div>
+
+          <div class="radio-dial">
+            <div class="radio-ticks"></div>
+            <div class="radio-needle" id="radio-needle" style="left:4%"></div>
+            <div class="radio-freq" id="radio-freq">88.0</div>
+            <div class="radio-band">FM · MHz</div>
+          </div>
+
+          <div class="radio-grille" id="radio-grille"></div>
+
+          <div class="radio-bottom">
+            <div class="radio-eq" id="radio-eq"></div>
+            <div class="radio-knobs">
+              <div class="radio-knob" id="radio-knob"></div>
+              <div class="radio-knob small"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="radio-status" id="radio-status">Ready to tune</div>
+
+      <div class="radio-log" id="radio-log"></div>
+
+      <div class="radio-actions">
+        <button class="btn btn-primary" id="btn-radio-tune">
+          <i class="fa-solid fa-satellite-dish"></i> Fetch &amp; Tune
+        </button>
+        <button class="btn" id="btn-radio-stop">
+          <i class="fa-solid fa-stop"></i> Stop
+        </button>
+        <button class="btn btn-ghost" id="btn-radio-open">
+          <i class="fa-solid fa-up-right-from-square"></i> Open Source
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════ ABOUT MODAL ══════════ -->
 <div class="modal" id="about-modal" hidden>
   <div class="modal-backdrop" data-close-modal="about-modal"></div>
   <div class="modal-card">
     <div class="modal-head">
-      <h3>About HEX RADIO</h3>
+      <h3><i class="fa-solid fa-tower-broadcast"></i> About HEX RADIO</h3>
       <button class="icon-btn" data-close-modal="about-modal" aria-label="Close">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        <i class="fa-solid fa-xmark"></i>
       </button>
     </div>
+
     <div class="modal-body">
       <p><b>Chart Radio Stations</b> — Discover, share, and listen to chart radio stations from all over the world. Find the best free chart Internet radio, AM and FM stations, and live web radio stations.</p>
-      <p>Station data is aggregated live from open radio directories and chart indexes including
-        Radio-Browser, HEX Sleuth FM Radio, RCAST, Radio Garden, Radio India, OnlineRadioFM,
-        Akashvani (All India Radio), LiveRadios, OnlineRadioBox, RadioOnlineLive, Radio.net
-        Top Stations, Internet-Radio, Billboard Hot 100, OnlineRadioStations, FMOnline,
-        RadioBarfi, TheNonStopRadio, IndianRadio, The Current and RadioLy.</p>
+
+      <div class="fa-grid">
+        <div class="fa-card"><i class="fa-solid fa-tower-broadcast"></i> Live FM &amp; AM</div>
+        <div class="fa-card violet"><i class="fa-solid fa-globe"></i> Worldwide index</div>
+        <div class="fa-card amber"><i class="fa-solid fa-bolt"></i> Instant tuning</div>
+        <div class="fa-card"><i class="fa-solid fa-shield-halved"></i> No cookies</div>
+        <div class="fa-card violet"><i class="fa-solid fa-mobile-screen-button"></i> Mobile ready</div>
+        <div class="fa-card amber"><i class="fa-solid fa-music"></i> Top charts</div>
+        <div class="fa-card red"><i class="fa-solid fa-radio"></i> HEX Sleuth FM</div>
+        <div class="fa-card"><i class="fa-solid fa-heart"></i> Favourites</div>
+      </div>
+
+      <div class="about-src-title"><i class="fa-solid fa-database"></i> Live data sources</div>
+      <div class="about-src-list" id="about-src-list"></div>
+
       <p class="modal-fine">Streams are provided by the broadcasters themselves. HEX RADIO hosts no audio and stores no cookies. Everything runs locally in your browser.</p>
       <p class="modal-fine">Forced dark mode · auto-adjusting for mobile screens.</p>
     </div>
+
     <div class="modal-foot">
-      <button class="btn btn-primary" data-close-modal="about-modal">Got it</button>
+      <button class="btn btn-ghost" data-close-modal="about-modal">
+        <i class="fa-solid fa-xmark"></i> Close
+      </button>
+      <button class="btn btn-primary" data-close-modal="about-modal">
+        <i class="fa-solid fa-check"></i> Got it
+      </button>
     </div>
   </div>
 </div>
@@ -1012,8 +1733,9 @@ img { max-width: 100%; display: block; }
      ══════════════════════════════════════════════════════════ */
   var ART = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi07HxFegxoRFUOacOJp6PEFwKoYnPffV3fE1v5zR6RtQsDRlXE3E-CDdhIV8JXyLYOkTTi8UiFknjQPWtc41OKyTkzPH-wEQovybqC2ceFqt7l_pzIqxoM65W3uxJVux8RmU-r7AujOujkP2mU2BihP7m9JAIK41nmEkuz4mMh6sPVkcGIceCdI-f2RYg9/s1600/1000221428.gif';
 
-  /* Multiple mirrors of the free Radio-Browser open API — the largest
-     open radio index, which itself aggregates all the directories below. */
+  var HEX_URL = 'https://hexsleuth.github.io/FM-Radio/';
+
+  /* Multiple mirrors of the free Radio-Browser open API */
   var RB_BASES = [
     'https://de1.api.radio-browser.info',
     'https://nl1.api.radio-browser.info',
@@ -1023,28 +1745,92 @@ img { max-width: 100%; display: block; }
     'https://fi1.api.radio-browser.info'
   ];
 
-  /* Every directory HEX RADIO draws from.
-     These are the sources whose stations are baked into the offline
-     fallback library below and are also reachable through the relays. */
-  var DIRECTORIES = [
-    { id:'hexsleuth',  name:'HEX Sleuth FM Radio', url:'https://hexsleuth.github.io/FM-Radio/' },
-    { id:'rcast',      name:'RCAST.net',           url:'https://www.rcast.net/dir?p=4&q=chart&s=2' },
-    { id:'garden',     name:'Radio Garden',        url:'https://radio.garden/' },
-    { id:'orfm',       name:'OnlineRadioFM',       url:'https://onlineradiofm.in/' },
-    { id:'radioindia', name:'Radio India',         url:'https://www.radioindia.in/' },
-    { id:'liveradios', name:'Live Radios',         url:'https://liveradios.in/' },
-    { id:'orb',        name:'OnlineRadioBox',      url:'https://onlineradiobox.com/in/' },
-    { id:'rol',        name:'Radio Online Live',   url:'https://radioonlinelive.com/' },
-    { id:'radionet',   name:'Radio.net',           url:'https://www.radio.net/top-stations' },
-    { id:'internet',   name:'Internet-Radio',      url:'https://www.internet-radio.com/' },
-    { id:'billboard',  name:'Billboard Hot 100',   url:'https://www.billboard.com/charts/hot-100/' },
-    { id:'ors',        name:'OnlineRadioStations', url:'https://onlineradiostations.in/' },
-    { id:'fmonline',   name:'FM Online',           url:'https://www.fmonline.co.in/' },
-    { id:'barfi',      name:'Radio Barfi',         url:'https://radiobarfi.com/' },
-    { id:'nonstop',    name:'The NonStop Radio',   url:'https://thenonstopradio.com/' },
-    { id:'indian',     name:'Indian Radio',        url:'https://indianradio.in/' },
-    { id:'current',    name:'The Current',         url:'https://www.thecurrent.org/' },
-    { id:'radioly',    name:'RadioLy',             url:'https://radioly.app/' }
+  /* ══════════════════════════════════════════════════════════
+     SOURCE DIRECTORIES — every URL requested, wired live
+     ══════════════════════════════════════════════════════════ */
+  var SOURCES = [
+    { id:'topcharts-songs',   name:'Top Charts — Songs',        url:'https://www.top-charts.com/songs/all-genres/worldwide/total', icon:'fa-music',            kind:'chart' },
+    { id:'topcharts-all',     name:'Top Charts — All Genres',   url:'https://www.top-charts.com/songs',                            icon:'fa-list-ol',          kind:'chart' },
+    { id:'topcharts-artists', name:'Top Charts — Artists',      url:'https://www.top-charts.com/artists',                          icon:'fa-user',             kind:'chart' },
+    { id:'orfm',              name:'OnlineRadioFM Stations',    url:'https://onlineradiofm.in/stations',                           icon:'fa-radio',            kind:'stations' },
+    { id:'rcast',             name:'RCAST.net — Chart',         url:'https://www.rcast.net/dir?p=4&q=chart&s=2',                   icon:'fa-chart-simple',     kind:'stations' },
+    { id:'garden',            name:'Radio Garden — Katihar',    url:'https://radio.garden/visit/katihar/VWAytgvf',                 icon:'fa-earth-asia',       kind:'stations' },
+    { id:'radioindia',        name:'Radio India',               url:'https://www.radioindia.in/',                                  icon:'fa-flag',             kind:'stations' },
+    { id:'akashvani',         name:'Akashvani (All India Radio)',url:'https://akashvani.gov.in/radio/live.php',                    icon:'fa-tower-broadcast',  kind:'stations' },
+    { id:'liveradios',        name:'Live Radios',               url:'https://liveradios.in/',                                      icon:'fa-signal',           kind:'stations' },
+    { id:'orb',               name:'OnlineRadioBox India',      url:'https://onlineradiobox.com/in/',                              icon:'fa-cube',             kind:'stations' },
+    { id:'rol',               name:'Radio Online Live',         url:'https://radioonlinelive.com/',                                icon:'fa-tv',               kind:'stations' },
+    { id:'radionet',          name:'Radio.net Top Stations',    url:'https://www.radio.net/top-stations',                          icon:'fa-ranking-star',     kind:'stations' },
+    { id:'internet',          name:'Internet-Radio.com',        url:'https://www.internet-radio.com/',                             icon:'fa-network-wired',    kind:'stations' },
+    { id:'billboard',         name:'Billboard Hot 100',         url:'https://www.billboard.com/charts/hot-100/',                   icon:'fa-award',            kind:'chart' },
+    { id:'ors',               name:'OnlineRadioStations.in',    url:'https://onlineradiostations.in/',                             icon:'fa-satellite',        kind:'stations' },
+    { id:'fmonline',          name:'FM Online India',           url:'https://www.fmonline.co.in/',                                 icon:'fa-fm',               kind:'stations' },
+    { id:'barfi',             name:'Radio Barfi',               url:'https://radiobarfi.com/',                                     icon:'fa-cake-candles',     kind:'stations' },
+    { id:'nonstop',           name:'The NonStop Radio',         url:'https://thenonstopradio.com/',                                icon:'fa-infinity',         kind:'stations' },
+    { id:'indian',            name:'Indian Radio',              url:'https://indianradio.in/',                                     icon:'fa-headphones',       kind:'stations' },
+    { id:'current',           name:'The Current',               url:'https://www.thecurrent.org/',                                 icon:'fa-wave-square',      kind:'stations' },
+    { id:'radioly',           name:'RadioLy',                   url:'https://radioly.app/',                                        icon:'fa-mobile-screen',    kind:'stations' }
+  ];
+
+  /* ══════════════════════════════════════════════════════════
+     OnlineRadioFM FILTER TAXONOMY
+     ══════════════════════════════════════════════════════════ */
+  var FILTER_GROUPS = [
+    {
+      id:'language', label:'Languages', icon:'fa-language', items:[
+        { id:'hindi',     name:'Hindi',     tag:'hindi' },
+        { id:'tamil',     name:'Tamil',     tag:'tamil' },
+        { id:'urdu',      name:'Urdu',      tag:'urdu' },
+        { id:'telugu',    name:'Telugu',    tag:'telugu' },
+        { id:'english',   name:'English',   tag:'english' },
+        { id:'malayalam', name:'Malayalam', tag:'malayalam' },
+        { id:'kannada',   name:'Kannada',   tag:'kannada' },
+        { id:'punjabi',   name:'Punjabi',   tag:'punjabi' },
+        { id:'bangla',    name:'Bangla',    tag:'bangla' }
+      ]
+    },
+    {
+      id:'format', label:'Formats', icon:'fa-sliders', items:[
+        { id:'bollywood',  name:'Bollywood',    tag:'bollywood' },
+        { id:'talk',       name:'Talk',         tag:'talk' },
+        { id:'oldsongs',   name:'Old songs',    tag:'oldies' },
+        { id:'news',       name:'News',         tag:'news' },
+        { id:'indianmusic',name:'Indian music', tag:'indian' },
+        { id:'community',  name:'Community',    tag:'community' },
+        { id:'lovesongs',  name:'Love Songs',   tag:'love songs' }
+      ]
+    },
+    {
+      id:'city', label:'Largest cities', icon:'fa-city', items:[
+        { id:'delhi',      name:'Delhi',         nameQ:'Delhi' },
+        { id:'bangalore',  name:'Bangalore',     nameQ:'Bangalore' },
+        { id:'mumbai',     name:'Mumbai',        nameQ:'Mumbai' },
+        { id:'chennai',    name:'Chennai',       nameQ:'Chennai' },
+        { id:'hyderabad',  name:'Hyderabad',     nameQ:'Hyderabad' },
+        { id:'kolkata',    name:'Kolkata',       nameQ:'Kolkata' },
+        { id:'vizag',      name:'Visakhapatnam', nameQ:'Visakhapatnam' },
+        { id:'guwahati',   name:'Guwahati',      nameQ:'Guwahati' },
+        { id:'patna',      name:'Patna',         nameQ:'Patna' },
+        { id:'chandigarh', name:'Chandigarh',    nameQ:'Chandigarh' },
+        { id:'ahmedabad',  name:'Ahmedabad',     nameQ:'Ahmedabad' },
+        { id:'shimla',     name:'Shimla',        nameQ:'Shimla' }
+      ]
+    },
+    {
+      id:'country', label:'Countries', icon:'fa-globe', items:[
+        { id:'in', name:'India',         cc:'IN' },
+        { id:'lk', name:'Sri Lanka',     cc:'LK' },
+        { id:'bd', name:'Bangladesh',    cc:'BD' },
+        { id:'np', name:'Nepal',         cc:'NP' },
+        { id:'pk', name:'Pakistan',      cc:'PK' },
+        { id:'qa', name:'Qatar',         cc:'QA' },
+        { id:'gb', name:'United Kingdom',cc:'GB' },
+        { id:'ca', name:'Canada',        cc:'CA' },
+        { id:'us', name:'USA',           cc:'US' },
+        { id:'ae', name:'UAE',           cc:'AE' },
+        { id:'au', name:'Australia',     cc:'AU' }
+      ]
+    }
   ];
 
   /* Genre shortcuts — each maps to a Radio-Browser search query. */
@@ -1068,8 +1854,6 @@ img { max-width: 100%; display: block; }
 
   /* ══════════════════════════════════════════════════════════
      1. OFFLINE STATION LIBRARY
-     Built from the exact stations exposed by the directories
-     listed above. Only used when every route to the live API fails.
      ══════════════════════════════════════════════════════════ */
   var FALLBACK_RAW = [
     /* ── Chart / Top 40 (RCAST.net + Radio.net Top Stations) ── */
@@ -1101,10 +1885,10 @@ img { max-width: 100%; display: block; }
 
     /* ── India / Bollywood (OnlineRadioFM.in + RadioIndia.in) ── */
     { name:'Radio Mirchi 98.3 FM',             url:'https://radioindia.net/radio/mirchi983fm/icecast.audio',   country:'India',        tags:'bollywood,hindi,chart',      codec:'MP3', bitrate:128, src:'orfm' },
-    { name:'Vividh Bharati (AIR)',             url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio001/playlist.m3u8', country:'India', tags:'hindi,oldies,bollywood',    codec:'HLS', bitrate:96,  src:'orfm' },
+    { name:'Vividh Bharati (AIR)',             url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio001/playlist.m3u8', country:'India', tags:'hindi,oldies,bollywood',    codec:'HLS', bitrate:96,  src:'akashvani' },
     { name:'92.7 Big FM',                      url:'https://eu10.fastcast4u.com/bigfm',                        country:'India',        tags:'bollywood,pop,hindi',        codec:'MP3', bitrate:128, src:'orfm' },
-    { name:'AIR FM Gold',                      url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio002/playlist.m3u8', country:'India', tags:'classic,news,hindi',        codec:'HLS', bitrate:96,  src:'orfm' },
-    { name:'AIR FM Rainbow',                   url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio005/playlist.m3u8', country:'India', tags:'variety,hindi',            codec:'HLS', bitrate:96,  src:'orfm' },
+    { name:'AIR FM Gold',                      url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio002/playlist.m3u8', country:'India', tags:'classic,news,hindi',        codec:'HLS', bitrate:96,  src:'akashvani' },
+    { name:'AIR FM Rainbow',                   url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio005/playlist.m3u8', country:'India', tags:'variety,hindi',            codec:'HLS', bitrate:96,  src:'akashvani' },
     { name:'Radio City 91.1 FM',               url:'https://prclive1.listenon.in/Hindi',                       country:'India',        tags:'bollywood,hindi',            codec:'MP3', bitrate:128, src:'orfm' },
     { name:'Red FM 93.5',                      url:'https://eu10.fastcast4u.com/redfm935',                     country:'India',        tags:'bollywood,hindi',            codec:'MP3', bitrate:128, src:'orfm' },
     { name:'Radio Hungama 90s Once Again',     url:'https://stream.zeno.fm/1n63t9bgbg8uv',                     country:'India',        tags:'90s,bollywood,hindi',        codec:'MP3', bitrate:128, src:'orfm' },
@@ -1117,7 +1901,7 @@ img { max-width: 100%; display: block; }
     { name:'Radio Retro Bollywood',            url:'https://stream.zeno.fm/4n2vyxv6tv8uv',                     country:'India',        tags:'retro,bollywood',            codec:'MP3', bitrate:128, src:'orfm' },
     { name:'Mohammed Rafi Radio',              url:'https://stream.zeno.fm/xs1yu7d9tv8uv',                     country:'India',        tags:'rafi,oldies,bollywood',      codec:'MP3', bitrate:128, src:'orfm' },
     { name:'Kishore Kumar Radio',              url:'https://stream.zeno.fm/5xshd1uhtv8uv',                     country:'India',        tags:'kishore,oldies,bollywood',   codec:'MP3', bitrate:128, src:'orfm' },
-    { name:'Raagam Radio (Carnatic)',          url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio138/playlist.m3u8', country:'India', tags:'carnatic,classical',        codec:'HLS', bitrate:96,  src:'orfm' },
+    { name:'Raagam Radio (Carnatic)',          url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio138/playlist.m3u8', country:'India', tags:'carnatic,classical',        codec:'HLS', bitrate:96,  src:'akashvani' },
     { name:'Radio City Tamil',                 url:'https://prclive1.listenon.in/Tamil',                       country:'India',        tags:'tamil',                      codec:'MP3', bitrate:128, src:'orfm' },
     { name:'Radio City Kannada',               url:'https://prclive1.listenon.in/Kannada',                     country:'India',        tags:'kannada',                    codec:'MP3', bitrate:128, src:'orfm' },
     { name:'Radio City Punjabi',               url:'https://prclive1.listenon.in/Punjabi',                     country:'India',        tags:'punjabi',                    codec:'MP3', bitrate:128, src:'orfm' },
@@ -1128,16 +1912,16 @@ img { max-width: 100%; display: block; }
     { name:'NDTV India',                       url:'https://ndtvindia.akamaized.net/hls/live/2015498/ndtvindia/master.m3u8', country:'India', tags:'news,hindi',                codec:'HLS', bitrate:128, src:'orfm' },
     { name:'BBC Hindi Radio',                  url:'https://stream.live.vc.bbcmedia.co.uk/bbc_hindi_radio',    country:'UK',           tags:'news,hindi',                 codec:'MP3', bitrate:96,  src:'orfm' },
     { name:'BBC World Service',                url:'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service',  country:'UK',           tags:'news,english',               codec:'MP3', bitrate:96,  src:'orfm' },
-    { name:'AIR Tamil (Chennai)',              url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio021/playlist.m3u8', country:'India', tags:'tamil',                     codec:'HLS', bitrate:96,  src:'orfm' },
-    { name:'AIR Malayalam',                    url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio039/playlist.m3u8', country:'India', tags:'malayalam',                 codec:'HLS', bitrate:96,  src:'orfm' },
-    { name:'AIR Marathi (Pune)',               url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio018/playlist.m3u8', country:'India', tags:'marathi',                   codec:'HLS', bitrate:96,  src:'orfm' },
-    { name:'AIR Urdu',                         url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio070/playlist.m3u8', country:'India', tags:'urdu',                      codec:'HLS', bitrate:96,  src:'orfm' },
-    { name:'AIR Punjabi',                      url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio090/playlist.m3u8', country:'India', tags:'punjabi',                   codec:'HLS', bitrate:96,  src:'orfm' },
-    { name:'AIR Bangla',                       url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio028/playlist.m3u8', country:'India', tags:'bangla',                    codec:'HLS', bitrate:96,  src:'orfm' },
-    { name:'AIR Kannada (Bengaluru)',          url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio030/playlist.m3u8', country:'India', tags:'kannada',                   codec:'HLS', bitrate:96,  src:'orfm' },
-    { name:'AIR Telugu (Hyderabad)',           url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio020/playlist.m3u8', country:'India', tags:'telugu',                    codec:'HLS', bitrate:96,  src:'orfm' },
-    { name:'AIR Odia',                         url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio088/playlist.m3u8', country:'India', tags:'odia',                      codec:'HLS', bitrate:96,  src:'orfm' },
-    { name:'AIR Assamese',                     url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio084/playlist.m3u8', country:'India', tags:'assamese',                  codec:'HLS', bitrate:96,  src:'orfm' },
+    { name:'AIR Tamil (Chennai)',              url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio021/playlist.m3u8', country:'India', tags:'tamil',                     codec:'HLS', bitrate:96,  src:'akashvani' },
+    { name:'AIR Malayalam',                    url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio039/playlist.m3u8', country:'India', tags:'malayalam',                 codec:'HLS', bitrate:96,  src:'akashvani' },
+    { name:'AIR Marathi (Pune)',               url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio018/playlist.m3u8', country:'India', tags:'marathi',                   codec:'HLS', bitrate:96,  src:'akashvani' },
+    { name:'AIR Urdu',                         url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio070/playlist.m3u8', country:'India', tags:'urdu',                      codec:'HLS', bitrate:96,  src:'akashvani' },
+    { name:'AIR Punjabi',                      url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio090/playlist.m3u8', country:'India', tags:'punjabi',                   codec:'HLS', bitrate:96,  src:'akashvani' },
+    { name:'AIR Bangla',                       url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio028/playlist.m3u8', country:'India', tags:'bangla',                    codec:'HLS', bitrate:96,  src:'akashvani' },
+    { name:'AIR Kannada (Bengaluru)',          url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio030/playlist.m3u8', country:'India', tags:'kannada',                   codec:'HLS', bitrate:96,  src:'akashvani' },
+    { name:'AIR Telugu (Hyderabad)',           url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio020/playlist.m3u8', country:'India', tags:'telugu',                    codec:'HLS', bitrate:96,  src:'akashvani' },
+    { name:'AIR Odia',                         url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio088/playlist.m3u8', country:'India', tags:'odia',                      codec:'HLS', bitrate:96,  src:'akashvani' },
+    { name:'AIR Assamese',                     url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio084/playlist.m3u8', country:'India', tags:'assamese',                  codec:'HLS', bitrate:96,  src:'akashvani' },
 
     /* ── Radio Garden regional favourites ── */
     { name:'KTR Radio 93.2 FM (Katihar)',      url:'https://stream.zeno.fm/vp4n1ts3xv8uv',                     country:'India',        tags:'bihar,hindi',                codec:'MP3', bitrate:128, src:'garden' },
@@ -1145,13 +1929,13 @@ img { max-width: 100%; display: block; }
     { name:'Radio Padma 99.2',                 url:'https://stream.zeno.fm/wyfv2n6mxv8uv',                     country:'Bangladesh',   tags:'bengali',                    codec:'MP3', bitrate:128, src:'garden' },
     { name:'Vaigai FM',                        url:'https://stream.zeno.fm/y5n3r6avtv8uv',                     country:'India',        tags:'tamil',                      codec:'MP3', bitrate:128, src:'garden' },
 
-    /* ── The Current / KEXP / public radio (TheCurrent.org) ── */
+    /* ── The Current / public radio ── */
     { name:'The Current (KCMP)',               url:'https://current.stream.publicradio.org/kcmp.mp3',          country:'USA',          tags:'indie,pop',                  codec:'MP3', bitrate:128, src:'current' },
     { name:'KEXP 90.3 FM',                     url:'https://kexp-mp3-128.streamguys1.com/kexp128.mp3',         country:'USA',          tags:'indie,rock',                 codec:'MP3', bitrate:128, src:'internet' },
     { name:'Radio Paradise',                   url:'https://stream.radioparadise.com/mp3-192',                 country:'USA',          tags:'eclectic,rock',              codec:'MP3', bitrate:192, src:'internet' },
     { name:'FIP (Radio France)',               url:'https://icecast.radiofrance.fr/fip-midfi.mp3',             country:'France',       tags:'jazz,eclectic',              codec:'MP3', bitrate:128, src:'internet' },
 
-    /* ── SomaFM (Internet-Radio.com featured) ── */
+    /* ── SomaFM ── */
     { name:'SomaFM Groove Salad',              url:'https://ice1.somafm.com/groovesalad-128-mp3',              country:'USA',          tags:'chill,ambient',              codec:'MP3', bitrate:128, src:'internet' },
     { name:'SomaFM Lush',                      url:'https://ice1.somafm.com/lush-128-mp3',                     country:'USA',          tags:'chill,vocal',                codec:'MP3', bitrate:128, src:'internet' },
     { name:'SomaFM Beat Blender',              url:'https://ice1.somafm.com/beatblender-128-mp3',              country:'USA',          tags:'dance,deep',                 codec:'MP3', bitrate:128, src:'internet' },
@@ -1178,15 +1962,7 @@ img { max-width: 100%; display: block; }
   });
 
   /* ══════════════════════════════════════════════════════════
-     2. ICONS
-     ══════════════════════════════════════════════════════════ */
-  var I = {
-    play:  '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
-    pause: '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>'
-  };
-
-  /* ══════════════════════════════════════════════════════════
-     3. UTILITIES
+     2. UTILITIES
      ══════════════════════════════════════════════════════════ */
   function $(s, r) { return (r || document).querySelector(s); }
   function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
@@ -1210,6 +1986,52 @@ img { max-width: 100%; display: block; }
     if (!isFinite(sec) || sec < 0) sec = 0;
     var m = Math.floor(sec / 60), s = Math.floor(sec % 60);
     return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function hashStr(s) {
+    var h = 0, i;
+    s = String(s || '');
+    for (i = 0; i < s.length; i++) { h = ((h << 5) - h + s.charCodeAt(i)) | 0; }
+    return Math.abs(h).toString(36);
+  }
+
+  /* ── NEW: guaranteed-to-render round profile picture generator ──
+     Builds an inline SVG data-URI avatar (initials on a colour derived
+     from the name). Never hits the network, so it can never 404.     */
+  function avatarDataUri(name) {
+    var n = String(name == null ? '' : name).trim() || '?';
+    var parts = n.split(/\s+/).filter(Boolean);
+    var initials;
+
+    if (parts.length > 1) {
+      initials = parts[0].charAt(0) + parts[1].charAt(0);
+    } else {
+      initials = n.slice(0, 2);
+    }
+    initials = initials.toUpperCase().replace(/[&<>"']/g, '');
+    if (!initials) initials = '?';
+    if (initials.length > 2) initials = initials.slice(0, 2);
+
+    var h = 0, i;
+    for (i = 0; i < n.length; i++) h = (h * 31 + n.charCodeAt(i)) >>> 0;
+    var hue  = h % 360;
+    var hue2 = (hue + 48) % 360;
+
+    var svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">' +
+        '<defs>' +
+          '<linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+            '<stop offset="0" stop-color="hsl(' + hue + ',64%,54%)"/>' +
+            '<stop offset="1" stop-color="hsl(' + hue2 + ',64%,32%)"/>' +
+          '</linearGradient>' +
+        '</defs>' +
+        '<circle cx="60" cy="60" r="60" fill="url(#g)"/>' +
+        '<text x="60" y="61" text-anchor="middle" dominant-baseline="middle" ' +
+          'font-family="Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif" ' +
+          'font-size="46" font-weight="700" fill="#ffffff">' + initials + '</text>' +
+      '</svg>';
+
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
   }
 
   var toastTimer = null;
@@ -1237,159 +2059,57 @@ img { max-width: 100%; display: block; }
     } catch (e) { return null; }
   }
 
+  function now() {
+    return (window.performance && performance.now) ? performance.now() : Date.now();
+  }
+
+  function absUrl(href, base) {
+    if (!href) return '';
+    if (/^(mailto:|javascript:|tel:|#|data:|blob:)/i.test(href)) return '';
+    try { return new URL(href, base).href; } catch (e) { return ''; }
+  }
+
   /* ══════════════════════════════════════════════════════════
-     4. UNLIMITED FREE PROXY POOL
-     Every entry is a public, cost-free, no-signup CORS relay.
-     They are tried in health-sorted order; unhealthy relays are
-     skipped on the fast path but still retried in the background.
+     3. UNLIMITED FREE PROXY POOL
      ══════════════════════════════════════════════════════════ */
   var PROXY_SEED = [
-    {
-      id:'allorigins-raw', name:'AllOrigins Raw',
-      build:function (u) { return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u); }
-    },
-    {
-      id:'allorigins-json', name:'AllOrigins JSON',
-      build:function (u) { return 'https://api.allorigins.win/get?url=' + encodeURIComponent(u); },
-      unwrap:function (d) {
-        if (d && typeof d.contents === 'string') {
-          try { return JSON.parse(d.contents); } catch (e) { return d.contents; }
-        }
-        return d;
-      }
-    },
-    {
-      id:'codetabs', name:'CodeTabs Proxy',
-      build:function (u) { return 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u); }
-    },
-    {
-      id:'corsproxy-io', name:'corsproxy.io',
-      build:function (u) { return 'https://corsproxy.io/?url=' + encodeURIComponent(u); }
-    },
-    {
-      id:'workers-dev', name:'CORS Workers',
-      build:function (u) { return 'https://test.cors.workers.dev/?' + u; }
-    },
-    {
-      id:'isomorphic-git', name:'Isomorphic Git',
-      build:function (u) { return 'https://cors.isomorphic-git.org/' + u; }
-    },
-    {
-      id:'thingproxy', name:'ThingProxy',
-      build:function (u) { return 'https://thingproxy.freeboard.io/fetch/' + u; }
-    },
-    {
-      id:'jina', name:'Jina Reader',
-      build:function (u) { return 'https://r.jina.ai/' + u; }
-    },
-    {
-      id:'whateverorigin', name:'WhateverOrigin',
-      build:function (u) { return 'https://whateverorigin.org/get?url=' + encodeURIComponent(u); },
-      unwrap:function (d) {
-        if (d && typeof d.contents === 'string') {
-          try { return JSON.parse(d.contents); } catch (e) { return d.contents; }
-        }
-        return d;
-      }
-    },
-    {
-      id:'cors-sh', name:'proxy.cors.sh',
-      build:function (u) { return 'https://proxy.cors.sh/' + u; }
-    },
-    {
-      id:'cors-anywhere', name:'CORS Anywhere',
-      build:function (u) { return 'https://cors-anywhere.herokuapp.com/' + u; }
-    },
-    {
-      id:'cors-lol', name:'api.cors.lol',
-      build:function (u) { return 'https://api.cors.lol/?url=' + encodeURIComponent(u); }
-    },
-    {
-      id:'corsproxy-org', name:'corsproxy.org',
-      build:function (u) { return 'https://corsproxy.org/?' + encodeURIComponent(u); }
-    },
-    {
-      id:'crossorigin-me', name:'crossorigin.me',
-      build:function (u) { return 'https://crossorigin.me/' + u; }
-    },
-    {
-      id:'yacdn', name:'Yacdn Proxy',
-      build:function (u) { return 'https://yacdn.org/proxy/' + u; }
-    },
-    {
-      id:'cors-workers-io', name:'api.cors.workers.dev',
-      build:function (u) { return 'https://api.cors.workers.dev/?' + u; }
-    },
-    {
-      id:'cors-eu-org', name:'cors.eu.org',
-      build:function (u) { return 'https://cors.eu.org/' + u; }
-    },
-    {
-      id:'corsfix', name:'corsfix.com',
-      build:function (u) { return 'https://proxy.corsfix.com/?' + u; }
-    },
-    {
-      id:'corsproxy-live', name:'corsproxy.live',
-      build:function (u) { return 'https://corsproxy.live/?url=' + encodeURIComponent(u); }
-    },
-    {
-      id:'jsonp-afeld', name:'jsonp.afeld.me',
-      build:function (u) { return 'https://jsonp.afeld.me/?url=' + encodeURIComponent(u); }
-    },
-    {
-      id:'bridged-cc', name:'cors.bridged.cc',
-      build:function (u) { return 'https://cors.bridged.cc/' + u; }
-    },
-    {
-      id:'corsproxy-cn', name:'corsproxy.cn',
-      build:function (u) { return 'https://corsproxy.cn/?url=' + encodeURIComponent(u); }
-    },
-    {
-      id:'cors-anywhere-2', name:'CORS Anywhere (alt)',
-      build:function (u) { return 'https://cors-anywhere.herokuapp.com/' + u; }
-    },
-    {
-      id:'cors-proxy-io', name:'cors-proxy.io',
-      build:function (u) { return 'https://cors-proxy.io/' + u; }
-    },
-    {
-      id:'allorigins-cache', name:'AllOrigins (2)',
-      build:function (u) { return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u); }
-    },
-    {
-      id:'corsproxy-alt', name:'corsproxy.io (alt)',
-      build:function (u) { return 'https://corsproxy.io/?' + encodeURIComponent(u); }
-    },
-    {
-      id:'codetabs-2', name:'CodeTabs (2)',
-      build:function (u) { return 'https://api.codetabs.com/v1/proxy/?quest=' + encodeURIComponent(u); }
-    },
-    {
-      id:'jina-http', name:'Jina Reader (http)',
-      build:function (u) { return 'https://r.jina.ai/http://r.jina.ai/' + u; }
-    },
-    {
-      id:'cors-sh-2', name:'cors.sh (2)',
-      build:function (u) { return 'https://proxy.cors.sh/' + u.replace(/^https?:\/\//, ''); }
-    },
-    {
-      id:'whateverorigin-2', name:'WhateverOrigin (2)',
-      build:function (u) { return 'https://whateverorigin.org/get?url=' + encodeURIComponent(u); },
-      unwrap:function (d) {
-        if (d && typeof d.contents === 'string') {
-          try { return JSON.parse(d.contents); } catch (e) { return d.contents; }
-        }
-        return d;
-      }
-    },
-    {
-      id:'cors-bridge', name:'CORS Bridge',
-      build:function (u) { return 'https://cors.bridged.cc/' + u; }
-    },
-    {
-      id:'api-cors-io', name:'api.cors.lol (2)',
-      build:function (u) { return 'https://api.cors.lol/?url=' + encodeURIComponent(u); }
-    }
+    { id:'allorigins-raw',  name:'AllOrigins Raw',    build:function (u) { return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u); } },
+    { id:'allorigins-json', name:'AllOrigins JSON',   build:function (u) { return 'https://api.allorigins.win/get?url=' + encodeURIComponent(u); },
+      unwrap:function (d) { if (d && typeof d.contents === 'string') { try { return JSON.parse(d.contents); } catch (e) { return d.contents; } } return d; } },
+    { id:'codetabs',        name:'CodeTabs Proxy',    build:function (u) { return 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u); } },
+    { id:'corsproxy-io',    name:'corsproxy.io',      build:function (u) { return 'https://corsproxy.io/?url=' + encodeURIComponent(u); } },
+    { id:'workers-dev',     name:'CORS Workers',      build:function (u) { return 'https://test.cors.workers.dev/?' + u; } },
+    { id:'isomorphic-git',  name:'Isomorphic Git',    build:function (u) { return 'https://cors.isomorphic-git.org/' + u; } },
+    { id:'thingproxy',      name:'ThingProxy',        build:function (u) { return 'https://thingproxy.freeboard.io/fetch/' + u; } },
+    { id:'jina',            name:'Jina Reader',       build:function (u) { return 'https://r.jina.ai/' + u; } },
+    { id:'whateverorigin',  name:'WhateverOrigin',    build:function (u) { return 'https://whateverorigin.org/get?url=' + encodeURIComponent(u); },
+      unwrap:function (d) { if (d && typeof d.contents === 'string') { try { return JSON.parse(d.contents); } catch (e) { return d.contents; } } return d; } },
+    { id:'cors-sh',         name:'proxy.cors.sh',     build:function (u) { return 'https://proxy.cors.sh/' + u; } },
+    { id:'cors-anywhere',   name:'CORS Anywhere',     build:function (u) { return 'https://cors-anywhere.herokuapp.com/' + u; } },
+    { id:'cors-lol',        name:'api.cors.lol',      build:function (u) { return 'https://api.cors.lol/?url=' + encodeURIComponent(u); } },
+    { id:'corsproxy-org',   name:'corsproxy.org',     build:function (u) { return 'https://corsproxy.org/?' + encodeURIComponent(u); } },
+    { id:'crossorigin-me',  name:'crossorigin.me',    build:function (u) { return 'https://crossorigin.me/' + u; } },
+    { id:'yacdn',           name:'Yacdn Proxy',       build:function (u) { return 'https://yacdn.org/proxy/' + u; } },
+    { id:'cors-workers-io', name:'api.cors.workers.dev', build:function (u) { return 'https://api.cors.workers.dev/?' + u; } },
+    { id:'cors-eu-org',     name:'cors.eu.org',       build:function (u) { return 'https://cors.eu.org/' + u; } },
+    { id:'corsfix',         name:'corsfix.com',       build:function (u) { return 'https://proxy.corsfix.com/?' + u; } },
+    { id:'corsproxy-live',  name:'corsproxy.live',    build:function (u) { return 'https://corsproxy.live/?url=' + encodeURIComponent(u); } },
+    { id:'jsonp-afeld',     name:'jsonp.afeld.me',    build:function (u) { return 'https://jsonp.afeld.me/?url=' + encodeURIComponent(u); } },
+    { id:'bridged-cc',      name:'cors.bridged.cc',   build:function (u) { return 'https://cors.bridged.cc/' + u; } },
+    { id:'corsproxy-cn',    name:'corsproxy.cn',      build:function (u) { return 'https://corsproxy.cn/?url=' + encodeURIComponent(u); } },
+    { id:'cors-proxy-io',   name:'cors-proxy.io',     build:function (u) { return 'https://cors-proxy.io/' + u; } },
+    { id:'allorigins-alt',  name:'AllOrigins (2)',    build:function (u) { return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u); } },
+    { id:'corsproxy-alt',   name:'corsproxy.io (alt)',build:function (u) { return 'https://corsproxy.io/?' + encodeURIComponent(u); } },
+    { id:'codetabs-2',      name:'CodeTabs (2)',      build:function (u) { return 'https://api.codetabs.com/v1/proxy/?quest=' + encodeURIComponent(u); } },
+    { id:'jina-2',          name:'Jina Reader (2)',   build:function (u) { return 'https://r.jina.ai/' + u.replace(/^https?:\/\//, 'https://'); } },
+    { id:'cors-sh-2',       name:'cors.sh (2)',       build:function (u) { return 'https://proxy.cors.sh/' + u.replace(/^https?:\/\//, ''); } },
+    { id:'whateverorigin-2',name:'WhateverOrigin (2)',build:function (u) { return 'https://whateverorigin.org/get?url=' + encodeURIComponent(u); },
+      unwrap:function (d) { if (d && typeof d.contents === 'string') { try { return JSON.parse(d.contents); } catch (e) { return d.contents; } } return d; } },
+    { id:'cors-bridge',     name:'CORS Bridge',       build:function (u) { return 'https://cors.bridged.cc/' + u; } },
+    { id:'api-cors-io-2',   name:'api.cors.lol (2)',  build:function (u) { return 'https://api.cors.lol/?url=' + encodeURIComponent(u); } },
+    { id:'yacdn-2',         name:'Yacdn Proxy (2)',   build:function (u) { return 'https://yacdn.org/proxy/' + u; } },
+    { id:'isomorphic-2',    name:'Isomorphic (2)',    build:function (u) { return 'https://cors.isomorphic-git.org/' + u; } },
+    { id:'workers-dev-2',   name:'CORS Workers (2)',  build:function (u) { return 'https://test.cors.workers.dev/?' + u; } }
   ];
 
   var proxyState = {
@@ -1416,7 +2136,7 @@ img { max-width: 100%; display: block; }
 
   function proxyHealth(p) {
     var url = RB_BASES[0] + '/json/stats';
-    var t0 = (window.performance && performance.now) ? performance.now() : Date.now();
+    var t0 = now();
     return fetchTimeout(p.build(url), 8000)
       .then(function (r) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -1426,7 +2146,7 @@ img { max-width: 100%; display: block; }
         var parsed = JSON.parse(txt);
         if (p.unwrap) parsed = p.unwrap(parsed);
         if (!parsed) throw new Error('empty');
-        p.latency = Math.round(((window.performance && performance.now) ? performance.now() : Date.now()) - t0);
+        p.latency = Math.round(now() - t0);
         p.ok = true;
         return p;
       })
@@ -1461,10 +2181,6 @@ img { max-width: 100%; display: block; }
     });
   }
 
-  function enabledProxies() {
-    return proxyState.list.filter(function (p) { return p.enabled; });
-  }
-
   function healthyProxies() {
     var healthy = proxyState.list.filter(function (p) { return p.enabled && p.ok === true; });
     var unknown = proxyState.list.filter(function (p) { return p.enabled && p.ok === null; });
@@ -1479,7 +2195,7 @@ img { max-width: 100%; display: block; }
   }
 
   /* ══════════════════════════════════════════════════════════
-     5. RADIO DIRECTORY API
+     4. RADIO-BROWSER DIRECTORY API
      ══════════════════════════════════════════════════════════ */
   function rbSearchPath(params, limit) {
     var p = new URLSearchParams();
@@ -1487,14 +2203,16 @@ img { max-width: 100%; display: block; }
     p.set('hidebroken', 'true');
     p.set('order', 'clickcount');
     p.set('reverse', 'true');
-    Object.keys(params || {}).forEach(function (k) { p.set(k, params[k]); });
+    Object.keys(params || {}).forEach(function (k) {
+      if (params[k] !== '' && params[k] != null) p.set(k, params[k]);
+    });
     return '/json/stations/search?' + p.toString();
   }
 
   function normStation(s) {
     var url = String(s.url_resolved || s.url || '').trim();
     return {
-      id: s.stationuuid || ('st-' + Math.random().toString(36).slice(2, 10)),
+      id: s.stationuuid || ('st-' + hashStr(url)),
       name: String(s.name || 'Unknown station').trim(),
       url: url,
       art: String(s.favicon || '').trim(),
@@ -1515,7 +2233,7 @@ img { max-width: 100%; display: block; }
   }
 
   /* ══════════════════════════════════════════════════════════
-     6. MULTI-ROUTE FETCH  (direct mirrors → relays)
+     5. MULTI-ROUTE JSON FETCH
      ══════════════════════════════════════════════════════════ */
   function tryDirectMirrors(path) {
     var bases = shuffle(RB_BASES);
@@ -1538,14 +2256,14 @@ img { max-width: 100%; display: block; }
     return attempt();
   }
 
-  function tryRelays(path) {
+  function tryRelaysJson(path) {
     var pool = healthyProxies();
     if (!pool.length) return Promise.reject(new Error('no-relays'));
     var pi = 0;
     function attemptProxy() {
       if (pi >= pool.length) return Promise.reject(new Error('relays-exhausted'));
       var px = pool[pi++];
-      var bases = shuffle(RB_BASES).slice(0, 2); /* 2 mirrors per relay keeps latency sane */
+      var bases = shuffle(RB_BASES).slice(0, 2);
       var bi = 0;
       function attemptBase() {
         if (bi >= bases.length) return attemptProxy();
@@ -1574,17 +2292,261 @@ img { max-width: 100%; display: block; }
     return tryDirectMirrors(path)
       .catch(function () {
         if (!proxyState.auto) throw new Error('auto-relays-disabled');
-        return tryRelays(path);
+        return tryRelaysJson(path);
       });
   }
 
   /* ══════════════════════════════════════════════════════════
-     7. STATE
+     6. RAW HTML FETCH + STREAM EXTRACTION
+     ══════════════════════════════════════════════════════════ */
+  function tryDirectHtml(url) {
+    return fetchTimeout(url, 8000, { mode: 'cors' })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.text();
+      });
+  }
+
+  function tryRelaysHtml(url, onLog) {
+    var pool = healthyProxies();
+    if (!pool.length) return Promise.reject(new Error('no-relays'));
+    var i = 0;
+    function step() {
+      if (i >= pool.length) return Promise.reject(new Error('relays-exhausted'));
+      var px = pool[i++];
+      if (onLog) onLog('Trying ' + px.name + '…', 'busy');
+      return fetchTimeout(px.build(url), 14000)
+        .then(function (r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.text();
+        })
+        .then(function (t) {
+          if (px.unwrap) {
+            try {
+              var j = JSON.parse(t);
+              var u = px.unwrap(j);
+              t = (typeof u === 'string') ? u : JSON.stringify(u);
+            } catch (e) { /* keep raw text */ }
+          }
+          if (!t || t.length < 40) throw new Error('empty');
+          px.ok = true;
+          proxyState.lastUsed = px.id;
+          setNet('relay', px.name);
+          renderProxyPanel();
+          if (onLog) onLog(px.name + ' ✓ ' + Math.round(t.length / 1024) + ' KB', 'ok');
+          return t;
+        })
+        .catch(function (e) {
+          px.ok = false;
+          renderProxyPanel();
+          if (onLog) onLog(px.name + ' ✗ ' + (e && e.message ? e.message : 'failed'), 'err');
+          return step();
+        });
+    }
+    return step();
+  }
+
+  function htmlFetch(url, onLog) {
+    return tryDirectHtml(url)
+      .then(function (t) {
+        if (onLog) onLog('Direct connection OK', 'ok');
+        setNet('direct');
+        return t;
+      })
+      .catch(function () {
+        if (onLog) onLog('Direct blocked by CORS — falling back to relays', 'warn');
+        if (!proxyState.auto) throw new Error('auto-relays-disabled');
+        return tryRelaysHtml(url, onLog);
+      });
+  }
+
+  /* ── stream URL detection ── */
+  var STREAM_EXT_RE = /\.(mp3|m3u8|aac|aacp|ogg|oga|opus|pls|m3u|flac|mp4|webm)(\?|#|$)/i;
+
+  function looksLikeStream(u) {
+    if (!/^https?:\/\//i.test(u)) return false;
+    if (STREAM_EXT_RE.test(u)) return true;
+    if (/:(8000|8010|8020|8030|9000|9999|8100|7000|5000|2199|3690|1400)\b/.test(u)) return true;
+    if (/\/(stream|live|listen|icecast|shoutcast|hls|radio|audio)\b/i.test(u)) return true;
+    return false;
+  }
+
+  function makeStation(name, url, sourceId) {
+    var host = '';
+    try { host = new URL(url).hostname.replace(/^www\./, ''); } catch (e) { host = ''; }
+    var label = (name && String(name).trim().length > 1) ? String(name).trim() : host;
+    return {
+      id: 'src-' + hashStr(sourceId + '|' + url),
+      name: label,
+      url: url,
+      art: '',
+      tags: [sourceId || 'web'],
+      country: '',
+      codec: /\.m3u8/i.test(url) ? 'HLS' : (/\.aac/i.test(url) ? 'AAC' : 'MP3'),
+      bitrate: 0,
+      votes: 0,
+      homepage: '',
+      source: sourceId || 'web'
+    };
+  }
+
+  function extractStationsFromHtml(html, pageUrl, sourceId) {
+    var doc;
+    try { doc = new DOMParser().parseFromString(html, 'text/html'); } catch (e) { return []; }
+
+    var seen = {}, out = [];
+
+    function add(name, url) {
+      url = String(url || '').trim().replace(/[),.;'"]+$/, '');
+      if (!looksLikeStream(url)) return;
+      if (seen[url]) return;
+      seen[url] = 1;
+      out.push(makeStation(name, url, sourceId));
+    }
+
+    /* 1 — anchors */
+    var anchors = doc.querySelectorAll('a[href]');
+    Array.prototype.forEach.call(anchors, function (a) {
+      var href = a.getAttribute('href') || '';
+      var abs = absUrl(href, pageUrl);
+      if (!abs) return;
+      var label = (a.textContent || '').replace(/\s+/g, ' ').trim();
+      var title = a.getAttribute('title') || a.getAttribute('aria-label') || '';
+      add(label || title, abs);
+    });
+
+    /* 2 — media / data attributes */
+    var media = doc.querySelectorAll('audio[src],video[src],source[src],[data-src],[data-url],[data-stream],[data-href]');
+    Array.prototype.forEach.call(media, function (el) {
+      var raw = el.getAttribute('src') || el.getAttribute('data-src') ||
+                el.getAttribute('data-url') || el.getAttribute('data-stream') ||
+                el.getAttribute('data-href') || '';
+      var abs = absUrl(raw, pageUrl) || raw;
+      var label = el.getAttribute('title') || el.getAttribute('data-name') || '';
+      add(label, abs);
+    });
+
+    /* 3 — raw text scan (JS-embedded streams, JSON blobs, etc.) */
+    var re = /https?:\/\/[^\s"'`<>\\{}|\u0000-\u001f]+/g, m;
+    while ((m = re.exec(html))) {
+      var u = m[0].replace(/[),.;'"]+$/, '');
+      if (u.indexOf('github.io') !== -1 && u.indexOf('FM-Radio') !== -1) continue;
+      add('', u);
+    }
+
+    /* 4 — protocol-relative + relative stream paths */
+    var rel = /["'](\/[^"'\s<>]*\.(?:mp3|m3u8|aac|ogg|pls|m3u))["']/gi;
+    while ((m = rel.exec(html))) {
+      add('', absUrl(m[1], pageUrl));
+    }
+
+    return out;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     7. TOP-CHARTS.COM PARSER
+     ══════════════════════════════════════════════════════════ */
+  var STATIC_CHART_SONGS = [
+    { rank:1, title:'Die With A Smile',        artist:'Lady Gaga & Bruno Mars' },
+    { rank:2, title:'APT.',                    artist:'ROSÉ & Bruno Mars' },
+    { rank:3, title:'Birds of a Feather',      artist:'Billie Eilish' },
+    { rank:4, title:'Espresso',                artist:'Sabrina Carpenter' },
+    { rank:5, title:'Taste',                   artist:'Sabrina Carpenter' },
+    { rank:6, title:'Beautiful Things',        artist:'Benson Boone' },
+    { rank:7, title:'Lose Control',            artist:'Teddy Swims' },
+    { rank:8, title:'Good Luck, Babe!',        artist:'Chappell Roan' },
+    { rank:9, title:'Not Like Us',             artist:'Kendrick Lamar' },
+    { rank:10,title:'Fortnight',               artist:'Taylor Swift ft. Post Malone' },
+    { rank:11,title:'Stargazing',              artist:'Myles Smith' },
+    { rank:12,title:'Too Sweet',               artist:'Hozier' },
+    { rank:13,title:'Sailor Song',             artist:'Gigi Perez' },
+    { rank:14,title:'I Had Some Help',         artist:'Post Malone ft. Morgan Wallen' },
+    { rank:15,title:'A Bar Song (Tipsy)',      artist:'Shaboozey' }
+  ];
+
+  var STATIC_CHART_ARTISTS = [
+    { rank:1, title:'Taylor Swift',   artist:'Pop · US' },
+    { rank:2, title:'Drake',          artist:'Hip-Hop · CA' },
+    { rank:3, title:'The Weeknd',     artist:'R&B · CA' },
+    { rank:4, title:'Billie Eilish',  artist:'Alt · US' },
+    { rank:5, title:'Ed Sheeran',     artist:'Pop · UK' },
+    { rank:6, title:'Ariana Grande',  artist:'Pop · US' },
+    { rank:7, title:'Bruno Mars',     artist:'Pop · US' },
+    { rank:8, title:'Bad Bunny',      artist:'Latin · PR' },
+    { rank:9, title:'Coldplay',       artist:'Rock · UK' },
+    { rank:10,title:'Arijit Singh',   artist:'Playback · IN' },
+    { rank:11,title:'Shreya Ghoshal', artist:'Playback · IN' },
+    { rank:12,title:'Diljit Dosanjh', artist:'Punjabi · IN' },
+    { rank:13,title:'A. R. Rahman',   artist:'Composer · IN' },
+    { rank:14,title:'Neha Kakkar',    artist:'Playback · IN' },
+    { rank:15,title:'Pritam',         artist:'Composer · IN' }
+  ];
+
+  function parseTopCharts(html, kind) {
+    var doc;
+    try { doc = new DOMParser().parseFromString(html, 'text/html'); } catch (e) { return []; }
+
+    var out = [];
+
+    /* 1 — tabular rows */
+    var trs = doc.querySelectorAll('table tr');
+    Array.prototype.forEach.call(trs, function (tr) {
+      var cells = [];
+      Array.prototype.forEach.call(tr.querySelectorAll('td,th'), function (td) {
+        cells.push((td.textContent || '').replace(/\s+/g, ' ').trim());
+      });
+      if (cells.length < 2) return;
+      if (/^(rank|#|pos|position|no\.?)$/i.test(cells[0])) return;
+
+      var rank = parseInt(String(cells[0]).replace(/[^\d]/g, ''), 10);
+      if (!rank || rank > 300) return;
+
+      var title = cells[1] || '';
+      var artist = cells[2] || '';
+      if (!title) return;
+
+      if (kind === 'artists') {
+        out.push({ rank: rank, title: title, artist: '', extra: cells.slice(2).join(' · ') });
+      } else {
+        out.push({ rank: rank, title: title, artist: artist, extra: cells.slice(3).join(' · ') });
+      }
+    });
+
+    /* 2 — anchor fallback */
+    if (out.length < 5) {
+      var sel = (kind === 'artists') ? 'a[href*="/artists/"]' : 'a[href*="/songs/"]';
+      var seen = {};
+      Array.prototype.forEach.call(doc.querySelectorAll(sel), function (a) {
+        var t = (a.textContent || '').replace(/\s+/g, ' ').trim();
+        if (!t || t.length > 80 || seen[t]) return;
+        seen[t] = 1;
+        out.push({ rank: out.length + 1, title: t, artist: '', extra: '' });
+      });
+    }
+
+    /* 3 — generic repeated blocks */
+    if (out.length < 5) {
+      var blocks = doc.querySelectorAll('[class*="chart"],[class*="ranking"],[class*="top"]');
+      var seenB = {};
+      Array.prototype.forEach.call(blocks, function (b) {
+        var t = (b.textContent || '').replace(/\s+/g, ' ').trim();
+        if (!t || t.length < 3 || t.length > 90 || seenB[t]) return;
+        seenB[t] = 1;
+        out.push({ rank: out.length + 1, title: t, artist: '', extra: '' });
+      });
+    }
+
+    return out.slice(0, 100);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     8. STATE
      ══════════════════════════════════════════════════════════ */
   var state = {
     genre: 'chart',
     title: 'Chart radio stations',
     stations: [],
+    browseStations: [],
     queue: [],
     index: -1,
     playing: false,
@@ -1594,13 +2556,19 @@ img { max-width: 100%; display: block; }
     repeat: false,
     liked: [],
     view: 'home',
-    busy: false
+    busy: false,
+    chartKind: 'songs',
+    chartRows: []
   };
 
   try {
     var savedLiked = JSON.parse(store('hex.liked') || '[]');
     if (Array.isArray(savedLiked)) state.liked = savedLiked;
   } catch (e) { state.liked = []; }
+
+  var sourceState = {};
+
+  var browseSel = { language: null, format: null, city: null, country: null };
 
   var audio = $('#audio');
 
@@ -1615,7 +2583,7 @@ img { max-width: 100%; display: block; }
   function current() { return state.queue[state.index] || null; }
 
   /* ══════════════════════════════════════════════════════════
-     8. NETWORK / STATUS INDICATORS
+     9. NETWORK / STATUS INDICATORS
      ══════════════════════════════════════════════════════════ */
   function setNet(kind, label) {
     var pill = $('#net-pill');
@@ -1651,18 +2619,61 @@ img { max-width: 100%; display: block; }
   }
 
   /* ══════════════════════════════════════════════════════════
-     9. RENDERING
+     10. RENDERING — HOME
      ══════════════════════════════════════════════════════════ */
+
+  /* ── UPDATED: genre tabs + Top Charts / Browse / HEX FM / Sources actions ── */
   function renderTabs() {
-    $('#tabs').innerHTML = GENRES.map(function (g) {
-      return '<button class="tab' + (g.id === state.genre ? ' active' : '') + '" data-genre="' + g.id + '">' + esc(g.label) + '</button>';
+    var html = GENRES.map(function (g) {
+      return '<button class="tab' + (g.id === state.genre ? ' active' : '') +
+             '" data-genre="' + g.id + '">' + esc(g.label) + '</button>';
     }).join('');
+
+    html += '<span class="tabs-sep" aria-hidden="true"></span>';
+
+    html += '<button class="tab tab-action" data-action="charts">' +
+              '<i class="fa-solid fa-chart-line"></i> Top Charts</button>';
+    html += '<button class="tab tab-action" data-action="browse">' +
+              '<i class="fa-solid fa-compass"></i> Browse</button>';
+    html += '<button class="tab tab-action" data-action="radio">' +
+              '<i class="fa-solid fa-radio"></i> HEX FM</button>';
+    html += '<button class="tab tab-action" data-action="sources">' +
+              '<i class="fa-solid fa-database"></i> Sources</button>';
+
+    $('#tabs').innerHTML = html;
+  }
+
+  /* ── NEW: shared action dispatcher for the menu-bar action tabs ── */
+  function handleAction(kind) {
+    if (kind === 'charts') {
+      showView('charts');
+      if (!state.chartRows.length) loadCharts(state.chartKind || 'songs');
+      return;
+    }
+    if (kind === 'browse') {
+      showView('browse');
+      if (!state.browseStations.length) runBrowse();
+      return;
+    }
+    if (kind === 'radio') {
+      $('#radio-modal').hidden = false;
+      radioBuildParts();
+      radioSetFreq(88.0);
+      return;
+    }
+    if (kind === 'sources') {
+      $('#sources-panel').hidden = false;
+      $('#queue-panel').hidden = true;
+      $('#proxy-panel').hidden = true;
+      renderSources();
+      return;
+    }
   }
 
   function stationMeta(s) {
     var bits = [];
     if (s.country) bits.push(s.country);
-    if (s.tags.length) bits.push(s.tags.join(' · '));
+    if (s.tags && s.tags.length) bits.push(s.tags.join(' · '));
     if (s.bitrate) bits.push(s.bitrate + ' kbps');
     return bits.join(' — ') || 'Live radio';
   }
@@ -1671,7 +2682,7 @@ img { max-width: 100%; display: block; }
     return '<article class="card" data-id="' + esc(s.id) + '" role="button" tabindex="0">' +
       '<div class="card-art">' +
         '<img src="' + esc(s.art || ART) + '" alt="" loading="lazy" decoding="async">' +
-        '<span class="card-play">' + I.play + '</span>' +
+        '<span class="card-play"><i class="fa-solid fa-play"></i></span>' +
       '</div>' +
       '<h3 class="card-title" title="' + esc(s.name) + '">' + esc(s.name) + '</h3>' +
       '<p class="card-sub">' + esc(stationMeta(s)) + '</p>' +
@@ -1690,7 +2701,7 @@ img { max-width: 100%; display: block; }
     if (!state.stations.length) {
       grid.innerHTML =
         '<div class="empty" style="grid-column:1/-1">' +
-          '<div class="empty-ico">📡</div>' +
+          '<div class="empty-ico"><i class="fa-solid fa-satellite-dish"></i></div>' +
           '<div class="empty-title">No stations found</div>' +
           '<div class="empty-sub">Try another genre or search term.</div>' +
         '</div>';
@@ -1699,14 +2710,26 @@ img { max-width: 100%; display: block; }
     grid.innerHTML = state.stations.map(cardHTML).join('');
   }
 
-  /* Pick a genre-appropriate slice of the offline library */
+  function renderBrowseGrid(list) {
+    var grid = $('#browse-grid');
+    if (!list || !list.length) {
+      grid.innerHTML =
+        '<div class="empty" style="grid-column:1/-1">' +
+          '<div class="empty-ico"><i class="fa-solid fa-compass"></i></div>' +
+          '<div class="empty-title">Nothing loaded yet</div>' +
+          '<div class="empty-sub">Pick a filter above, or fetch a live directory from Sources.</div>' +
+        '</div>';
+      return;
+    }
+    grid.innerHTML = list.map(cardHTML).join('');
+  }
+
   function fallbackFor(genreId) {
     var g = GENRES.filter(function (x) { return x.id === genreId; })[0];
     if (!g) return FALLBACK.slice();
     var wanted = [];
     if (g.q.tag) wanted.push(String(g.q.tag).toLowerCase());
-    if (g.q.countrycode === 'IN') wanted.push('india', 'bollywood', 'hindi', 'tamil', 'malayalam', 'kannada', 'punjabi', 'telugu', 'bengali');
-
+    if (g.q.countrycode === 'IN') wanted.push('india', 'bollywood', 'hindi', 'tamil', 'malayalam', 'kannada', 'punjabi', 'telugu', 'bengali', 'akashvani');
     if (!wanted.length) return FALLBACK.slice();
 
     var hits = FALLBACK.filter(function (s) {
@@ -1717,7 +2740,7 @@ img { max-width: 100%; display: block; }
   }
 
   /* ══════════════════════════════════════════════════════════
-     10. LOADING DATA
+     11. LOADING DATA
      ══════════════════════════════════════════════════════════ */
   function loadGenre(id) {
     var g = GENRES.filter(function (x) { return x.id === id; })[0] || GENRES[0];
@@ -1735,7 +2758,6 @@ img { max-width: 100%; display: block; }
         if (!state.stations.length) throw new Error('empty');
         renderStations();
         setStatus('', 'Ready');
-        setNet(proxyState.lastUsed ? 'relay' : 'direct');
       })
       .catch(function () {
         state.stations = fallbackFor(state.genre);
@@ -1776,13 +2798,226 @@ img { max-width: 100%; display: block; }
   }
 
   /* ══════════════════════════════════════════════════════════
-     11. PLAYER
+     12. BROWSE VIEW (OnlineRadioFM filters)
+     ══════════════════════════════════════════════════════════ */
+  function renderFilterGroups() {
+    $('#filter-groups').innerHTML = FILTER_GROUPS.map(function (grp) {
+      return '<div class="filter-group">' +
+        '<h4><i class="fa-solid ' + grp.icon + '"></i> ' + esc(grp.label) + '</h4>' +
+        '<div class="filter-chips">' +
+          grp.items.map(function (it) {
+            var active = browseSel[grp.id] && browseSel[grp.id].id === it.id;
+            return '<button class="chip-btn' + (active ? ' active' : '') +
+                   '" data-fgroup="' + grp.id + '" data-fid="' + it.id + '">' + esc(it.name) + '</button>';
+          }).join('') +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function runBrowse() {
+    var q = {};
+    var titleBits = [];
+
+    if (browseSel.format) { q.tag = browseSel.format.tag; titleBits.push(browseSel.format.name); }
+    else if (browseSel.language) { q.tag = browseSel.language.tag; titleBits.push(browseSel.language.name); }
+
+    if (browseSel.country) { q.countrycode = browseSel.country.cc; titleBits.push(browseSel.country.name); }
+    if (browseSel.city) { q.name = browseSel.city.nameQ; titleBits.push(browseSel.city.name); }
+
+    $('#browse-title').textContent = titleBits.length ? titleBits.join(' · ') : 'All stations';
+    $('#browse-grid').innerHTML = skeleton();
+    setStatus('busy', 'Loading');
+
+    return rbFetch(rbSearchPath(q, 72))
+      .then(function (raw) {
+        var list = Array.isArray(raw) ? raw : [];
+        var norm = rankStations(list.map(normStation).filter(function (s) { return /^https?:\/\//.test(s.url); }));
+        if (!norm.length) throw new Error('empty');
+        state.browseStations = norm.slice(0, 84);
+        renderBrowseGrid(state.browseStations);
+        setStatus('', 'Ready');
+      })
+      .catch(function () {
+        var needles = [];
+        Object.keys(browseSel).forEach(function (k) {
+          var it = browseSel[k];
+          if (!it) return;
+          if (it.tag) needles.push(it.tag.toLowerCase());
+          if (it.nameQ) needles.push(it.nameQ.toLowerCase());
+          if (it.name) needles.push(it.name.toLowerCase());
+        });
+
+        var hits = FALLBACK.filter(function (s) {
+          if (!needles.length) return true;
+          var hay = (s.tags.join(' ') + ' ' + s.name + ' ' + s.country).toLowerCase();
+          return needles.some(function (n) { return hay.indexOf(n) !== -1; });
+        });
+
+        state.browseStations = hits.length ? hits : FALLBACK.slice(0, 40);
+        renderBrowseGrid(state.browseStations);
+        setStatus('err', 'Offline library');
+        toast('Directory unreachable — showing offline library');
+      });
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     13. CHARTS VIEW (top-charts.com)
+     ══════════════════════════════════════════════════════════ */
+  var CHART_URLS = {
+    songs:   'https://www.top-charts.com/songs/all-genres/worldwide/total',
+    artists: 'https://www.top-charts.com/artists',
+    in:      'https://www.top-charts.com/songs/all-genres/india/total'
+  };
+
+  var CHART_TITLES = {
+    songs:   'Worldwide — Songs',
+    artists: 'Worldwide — Artists',
+    in:      'India — Songs'
+  };
+
+  /* ── UPDATED: round profile pictures for the Artists chart ── */
+  function renderChartList(rows) {
+    var el = $('#chart-list');
+    if (!rows || !rows.length) {
+      el.innerHTML =
+        '<div class="empty">' +
+          '<div class="empty-ico"><i class="fa-solid fa-chart-line"></i></div>' +
+          '<div class="empty-title">No chart data</div>' +
+          '<div class="empty-sub">Reload to try again.</div>' +
+        '</div>';
+      return;
+    }
+
+    var isArtist = (state.chartKind === 'artists');
+
+    el.innerHTML = rows.map(function (r) {
+      var sub = r.artist || r.extra || '';
+
+      var artHtml = isArtist
+        ? '<div class="chart-art is-artist">' +
+            '<img src="' + avatarDataUri(r.title) + '" alt="" loading="lazy" decoding="async">' +
+          '</div>'
+        : '<div class="chart-art"><i class="fa-solid fa-music"></i></div>';
+
+      return '<div class="chart-row' + (isArtist ? ' is-artist' : '') +
+               '" data-title="' + esc(r.title) + '" data-artist="' + esc(r.artist || '') + '">' +
+        '<div class="chart-rank">' + esc(String(r.rank)) + '</div>' +
+        artHtml +
+        '<div class="chart-main">' +
+          '<div class="chart-title">' + esc(r.title) + '</div>' +
+          '<div class="chart-artist">' + esc(sub || '—') + '</div>' +
+        '</div>' +
+        '<div class="chart-go"><i class="fa-solid fa-magnifying-glass"></i></div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function loadCharts(kind) {
+    state.chartKind = kind;
+    $('#chart-title').textContent = CHART_TITLES[kind] || 'Top Charts';
+    $('#chart-list').innerHTML = skeleton();
+    setStatus('busy', 'Loading charts');
+
+    return htmlFetch(CHART_URLS[kind])
+      .then(function (html) {
+        var rows = parseTopCharts(html, kind === 'artists' ? 'artists' : 'songs');
+        if (!rows.length) throw new Error('no-rows');
+        state.chartRows = rows;
+        renderChartList(rows);
+        setStatus('', 'Ready');
+      })
+      .catch(function () {
+        var fallbackRows = (kind === 'artists') ? STATIC_CHART_ARTISTS : STATIC_CHART_SONGS;
+        state.chartRows = fallbackRows;
+        renderChartList(fallbackRows);
+        setStatus('err', 'Offline chart');
+        toast('Chart source unreachable — showing cached chart');
+      });
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     14. SOURCES PANEL
+     ══════════════════════════════════════════════════════════ */
+  function renderSources() {
+    var list = $('#sources-list');
+    list.innerHTML = SOURCES.map(function (s) {
+      var st = sourceState[s.id] || {};
+      var cls = st.status === 'ok' ? 'ok' : st.status === 'err' ? 'bad' : st.status === 'busy' ? 'busy' : '';
+      var txt = st.status === 'ok'
+        ? (st.count + ' streams')
+        : st.status === 'err' ? 'failed'
+        : st.status === 'busy' ? '…'
+        : s.kind;
+      return '<div class="src-row" data-sid="' + esc(s.id) + '">' +
+        '<span class="proxy-dot ' + cls + '"></span>' +
+        '<i class="fa-solid ' + s.icon + ' src-ico"></i>' +
+        '<span class="src-name">' + esc(s.name) + '</span>' +
+        '<span class="proxy-lat">' + esc(txt) + '</span>' +
+        '<i class="fa-solid fa-chevron-right src-go"></i>' +
+      '</div>';
+    }).join('');
+  }
+
+  function fetchSource(id) {
+    var s = SOURCES.filter(function (x) { return x.id === id; })[0];
+    if (!s) return;
+    sourceState[id] = { status: 'busy', count: 0 };
+    renderSources();
+    toast('Fetching ' + s.name + '…', 1800);
+    setStatus('busy', 'Fetching');
+
+    htmlFetch(s.url)
+      .then(function (html) {
+        if (s.kind === 'chart') {
+          var rows = parseTopCharts(html, s.id.indexOf('artists') !== -1 ? 'artists' : 'songs');
+          if (!rows.length) throw new Error('no-chart-rows');
+          state.chartKind = s.id.indexOf('artists') !== -1 ? 'artists' : 'songs';
+          state.chartRows = rows;
+          $('#chart-title').textContent = s.name;
+          $$('#chart-tabs .tab').forEach(function (t) { t.classList.remove('active'); });
+          renderChartList(rows);
+          sourceState[id] = { status: 'ok', count: rows.length };
+          renderSources();
+          showView('charts');
+          setStatus('', 'Ready');
+          toast(rows.length + ' chart entries from ' + s.name);
+          return;
+        }
+
+        var list = extractStationsFromHtml(html, s.url, id);
+        sourceState[id] = { status: list.length ? 'ok' : 'err', count: list.length };
+        renderSources();
+
+        if (list.length) {
+          state.browseStations = list;
+          $('#browse-title').textContent = s.name + ' — ' + list.length + ' streams';
+          renderBrowseGrid(list);
+          showView('browse');
+          setStatus('', 'Ready');
+          toast(list.length + ' streams found in ' + s.name);
+        } else {
+          setStatus('err', 'No streams');
+          toast('No stream links found in ' + s.name);
+        }
+      })
+      .catch(function () {
+        sourceState[id] = { status: 'err', count: 0 };
+        renderSources();
+        setStatus('err', 'Failed');
+        toast('Could not reach ' + s.name);
+      });
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     15. PLAYER
      ══════════════════════════════════════════════════════════ */
   function playStation(st, list) {
+    if (!st) return;
     if (list && list.length) state.queue = list.slice();
 
-    var idx = -1;
-    for (var i = 0; i < state.queue.length; i++) {
+    var idx = -1, i;
+    for (i = 0; i < state.queue.length; i++) {
       if (state.queue[i].id === st.id) { idx = i; break; }
     }
     if (idx === -1) { state.queue.push(st); idx = state.queue.length - 1; }
@@ -1849,11 +3084,14 @@ img { max-width: 100%; display: block; }
 
   function updatePlayBtn() {
     var b = $('#btn-play');
-    b.innerHTML = state.playing ? I.pause : I.play;
+    b.innerHTML = state.playing
+      ? '<i class="fa-solid fa-pause"></i>'
+      : '<i class="fa-solid fa-play"></i>';
     b.setAttribute('aria-label', state.playing ? 'Pause' : 'Play');
+
     var spi = $('#st-play');
     if (spi) {
-      spi.innerHTML = (state.playing ? I.pause : I.play) +
+      spi.innerHTML = (state.playing ? '<i class="fa-solid fa-pause"></i>' : '<i class="fa-solid fa-play"></i>') +
         '<span id="st-play-label">' + (state.playing ? 'Pause' : 'Play') + '</span>';
     }
   }
@@ -1877,18 +3115,22 @@ img { max-width: 100%; display: block; }
   function renderLikes() {
     var st = current();
     $('#dock-like').classList.toggle('on', !!st && liked(st.id));
+
     var sb = $('#st-like');
     if (sb) {
       var s2 = current();
-      sb.textContent = s2 && liked(s2.id) ? '♥ Liked' : '♡ Like';
+      sb.innerHTML = (s2 && liked(s2.id))
+        ? '<i class="fa-solid fa-heart"></i> Liked'
+        : '<i class="fa-regular fa-heart"></i> Like';
     }
+
     $$('[data-like]').forEach(function (b) {
       b.classList.toggle('on', liked(b.getAttribute('data-like')));
     });
   }
 
   /* ══════════════════════════════════════════════════════════
-     12. QUEUE PANEL
+     16. QUEUE PANEL
      ══════════════════════════════════════════════════════════ */
   function renderQueue() {
     var body = $('#queue-body');
@@ -1908,14 +3150,16 @@ img { max-width: 100%; display: block; }
   }
 
   /* ══════════════════════════════════════════════════════════
-     13. PROXY PANEL
+     17. PROXY PANEL
      ══════════════════════════════════════════════════════════ */
   function renderProxyPanel() {
     var list = $('#proxy-list');
     list.innerHTML = proxyState.list.map(function (p) {
       var dotCls = p.ok === true ? 'ok' : (p.ok === false ? 'bad' : 'busy');
       var lat = p.ok ? p.latency + ' ms' : (p.ok === false ? 'offline' : '…');
-      return '<div class="proxy-row' + (p.enabled ? '' : ' off') + (proxyState.activeId === p.id ? ' active' : '') + '" data-pid="' + esc(p.id) + '">' +
+      return '<div class="proxy-row' + (p.enabled ? '' : ' off') +
+             (proxyState.activeId === p.id ? ' active' : '') +
+             '" data-pid="' + esc(p.id) + '">' +
         '<span class="proxy-dot ' + dotCls + '"></span>' +
         '<span class="proxy-name">' + esc(p.name) + (p.custom ? '<i class="proxy-tag">custom</i>' : '') + '</span>' +
         '<span class="proxy-lat">' + esc(lat) + '</span>' +
@@ -1939,28 +3183,28 @@ img { max-width: 100%; display: block; }
   }
 
   /* ══════════════════════════════════════════════════════════
-     14. STATION DETAIL VIEW
+     18. STATION DETAIL VIEW
      ══════════════════════════════════════════════════════════ */
   function openStation(st) {
     if (!st) return;
     $('#st-art').src = st.art || ART;
     $('#st-title').textContent = st.name;
+
     var meta = [];
     if (st.country) meta.push('<b>' + esc(st.country) + '</b>');
     if (st.codec) meta.push(esc(st.codec));
     if (st.bitrate) meta.push(esc(String(st.bitrate)) + ' kbps');
-    if (st.tags.length) meta.push(esc(st.tags.join(' · ')));
-    var dir = DIRECTORIES.filter(function (d) { return d.id === st.source; })[0];
+    if (st.tags && st.tags.length) meta.push(esc(st.tags.join(' · ')));
+
+    var dir = SOURCES.filter(function (d) { return d.id === st.source; })[0];
     if (dir) meta.push('via ' + esc(dir.name));
     $('#st-meta').innerHTML = meta.join(' &nbsp;·&nbsp; ') || 'Live radio stream';
 
     var site = $('#st-site');
     if (st.homepage && /^https?:\/\//.test(st.homepage)) {
-      site.href = st.homepage;
-      site.hidden = false;
+      site.href = st.homepage; site.hidden = false;
     } else if (dir) {
-      site.href = dir.url;
-      site.hidden = false;
+      site.href = dir.url; site.hidden = false;
     } else {
       site.hidden = true;
     }
@@ -1975,10 +3219,11 @@ img { max-width: 100%; display: block; }
             '<div class="tl-artist">' + esc(s.country || 'Live radio') + '</div>' +
           '</div>' +
         '</div>' +
-        '<div class="tl-album">' + esc(s.tags.join(' · ') || '—') + '</div>' +
+        '<div class="tl-album">' + esc((s.tags || []).join(' · ') || '—') + '</div>' +
         '<div class="tl-right">' +
           '<span class="tl-dur">' + (s.bitrate ? s.bitrate + 'k' : 'LIVE') + '</span>' +
-          '<button class="tl-like' + (liked(s.id) ? ' on' : '') + '" data-like="' + esc(s.id) + '">♥</button>' +
+          '<button class="tl-like' + (liked(s.id) ? ' on' : '') + '" data-like="' + esc(s.id) + '">' +
+            '<i class="fa-solid fa-heart"></i></button>' +
         '</div>' +
       '</div>';
     }).join('');
@@ -1989,13 +3234,20 @@ img { max-width: 100%; display: block; }
 
   function showView(v) {
     state.view = v;
-    $('#view-home').hidden = v !== 'home';
+    $('#view-home').hidden    = v !== 'home';
     $('#view-station').hidden = v !== 'station';
+    $('#view-charts').hidden  = v !== 'charts';
+    $('#view-browse').hidden  = v !== 'browse';
+
+    $('#btn-home').classList.toggle('active', v === 'home');
+    $('#btn-charts').classList.toggle('active', v === 'charts');
+    $('#btn-browse').classList.toggle('active', v === 'browse');
+
     $('#main').scrollTop = 0;
   }
 
   /* ══════════════════════════════════════════════════════════
-     15. AUDIO EVENTS
+     19. AUDIO EVENTS
      ══════════════════════════════════════════════════════════ */
   audio.addEventListener('playing', function () {
     state.playing = true;
@@ -2046,7 +3298,211 @@ img { max-width: 100%; display: block; }
   });
 
   /* ══════════════════════════════════════════════════════════
-     16. EVENT BINDINGS
+     20. ANIMATED RADIO CONTROLLER  (HEX Sleuth FM)
+     ══════════════════════════════════════════════════════════ */
+  var radioTimer = null;
+  var radioActive = false;
+
+  function radioBuildParts() {
+    var g = $('#radio-grille');
+    if (g && !g.children.length) {
+      var html = '';
+      for (var i = 0; i < 11; i++) html += '<span></span>';
+      g.innerHTML = html;
+    }
+    var eq = $('#radio-eq');
+    if (eq && !eq.children.length) {
+      var e = '';
+      for (var j = 0; j < 8; j++) e += '<i></i>';
+      eq.innerHTML = e;
+    }
+  }
+
+  function radioSetFreq(f) {
+    var el = $('#radio-freq');
+    var needle = $('#radio-needle');
+    if (el) el.textContent = f.toFixed(1);
+    if (needle) {
+      var pct = ((f - 87.5) / (108 - 87.5)) * 100;
+      pct = Math.max(2, Math.min(98, pct));
+      needle.style.left = pct + '%';
+    }
+  }
+
+  function radioStartSweep() {
+    radioStopSweep();
+    var f = 87.5;
+    radioTimer = setInterval(function () {
+      f += 0.35;
+      if (f > 108) f = 87.5;
+      radioSetFreq(f);
+    }, 42);
+  }
+
+  function radioStopSweep() {
+    if (radioTimer) { clearInterval(radioTimer); radioTimer = null; }
+  }
+
+  function radioSetLoading(on) {
+    var stage = $('#radio-stage');
+    if (!stage) return;
+    stage.classList.toggle('loading', !!on);
+    stage.classList.remove('done', 'error');
+    if (on) radioStartSweep(); else radioStopSweep();
+  }
+
+  function radioSetResult(kind) {
+    var stage = $('#radio-stage');
+    if (!stage) return;
+    stage.classList.remove('loading');
+    radioStopSweep();
+    if (kind === 'ok') stage.classList.add('done');
+    if (kind === 'err') stage.classList.add('error');
+  }
+
+  function radioStatus(txt) {
+    var el = $('#radio-status');
+    if (el) el.textContent = txt;
+  }
+
+  function radioClearLog() {
+    var el = $('#radio-log');
+    if (el) el.innerHTML = '';
+  }
+
+  function radioLog(text, kind) {
+    var el = $('#radio-log');
+    if (!el) return;
+    var line = document.createElement('div');
+    line.className = 'radio-log-line' + (kind ? ' is-' + kind : '');
+    var icon = kind === 'ok'   ? 'fa-circle-check'
+             : kind === 'err'  ? 'fa-circle-xmark'
+             : kind === 'warn' ? 'fa-triangle-exclamation'
+             : 'fa-circle-notch fa-spin';
+    line.innerHTML = '<i class="fa-solid ' + icon + '"></i><span>' + esc(text) + '</span>';
+    el.appendChild(line);
+    el.scrollTop = el.scrollHeight;
+    while (el.children.length > 80) el.removeChild(el.firstChild);
+  }
+
+  function stopRadioLoad() {
+    radioActive = false;
+    radioSetLoading(false);
+    radioSetResult('err');
+    radioStatus('Stopped');
+    radioLog('Cancelled by user', 'warn');
+    setStatus('', 'Ready');
+  }
+
+  /* ── NEW: live directory fallback used when the HEX page is unreachable ── */
+  function hexLiveDirectory() {
+    radioLog('Probing live chart directory…', 'busy');
+    return rbFetch(rbSearchPath({ tag: 'chart' }, 60))
+      .then(function (raw) {
+        var arr = Array.isArray(raw) ? raw : [];
+        var norm = rankStations(arr.map(normStation).filter(function (s) {
+          return /^https?:\/\//.test(s.url);
+        }));
+        if (!norm.length) throw new Error('empty-directory');
+        radioLog('Live directory returned ' + norm.length + ' chart stations', 'ok');
+        return norm;
+      });
+  }
+
+  /* ── NEW: staged fetch that can never dead-end ── */
+  function fetchHexStreams() {
+    return htmlFetch(HEX_URL, function (msg, kind) {
+      if (radioActive) radioLog(msg, kind);
+    })
+      .then(function (html) {
+        if (!radioActive) throw new Error('cancelled');
+        radioLog('Parsing ' + Math.round(html.length / 1024) + ' KB of markup…', 'busy');
+        var list = extractStationsFromHtml(html, HEX_URL, 'hexsleuth');
+        if (list.length) {
+          radioLog('Found ' + list.length + ' stream endpoints', 'ok');
+          return list;
+        }
+        throw new Error('no-streams-in-page');
+      })
+      .catch(function (e) {
+        if (!radioActive) throw new Error('cancelled');
+        radioLog('HEX source page: ' + (e && e.message ? e.message : 'unreachable'), 'warn');
+        return hexLiveDirectory();
+      })
+      .catch(function (e) {
+        if (!radioActive) throw new Error('cancelled');
+        radioLog('Live directory: ' + (e && e.message ? e.message : 'unreachable'), 'warn');
+        radioLog('Loading bundled HEX Sleuth FM library', 'warn');
+        return shuffle(FALLBACK).slice(0, 40);
+      });
+  }
+
+  /* ── NEW: always delivers a working, playable station list ── */
+  function finalizeHex(list) {
+    list = (list && list.length) ? list : shuffle(FALLBACK).slice(0, 40);
+
+    state.stations = list;
+    state.genre = '';
+    state.title = 'HEX Sleuth FM — ' + list.length + ' stations';
+    renderTabs();
+    renderStations();
+    showView('home');
+
+    radioSetLoading(false);
+    radioSetResult('ok');
+    radioSetFreq(98.4);
+    radioStatus(list.length + ' stations tuned');
+    radioLog('Tuning complete — ' + list.length + ' stations ready', 'ok');
+
+    setStatus('', 'Ready');
+    toast(list.length + ' stations loaded from HEX Sleuth FM Radio');
+
+    /* Auto-tune the first station — the click on "Fetch & Tune" is the gesture. */
+    playStation(list[0], list);
+    radioLog('Now playing: ' + list[0].name, 'ok');
+  }
+
+  function loadHexSleuth() {
+    radioActive = true;
+    radioBuildParts();
+    radioClearLog();
+    radioSetResult(null);
+    radioSetLoading(true);
+    radioStatus('Tuning…');
+    setStatus('busy', 'Tuning');
+
+    radioLog('HEX Sleuth FM Radio — ' + HEX_URL, 'busy');
+    radioLog('Mode: ' + (proxyState.auto ? 'direct → relay fallback' : 'direct only'), 'busy');
+    radioLog('Relay pool: ' + proxyState.list.filter(function (p) { return p.enabled; }).length + ' routes', 'busy');
+
+    fetchHexStreams()
+      .then(function (list) {
+        if (!radioActive) return;
+        finalizeHex(list);
+      })
+      .catch(function (e) {
+        if (!radioActive) return;
+        radioLog('Unrecoverable: ' + (e && e.message ? e.message : 'unknown'), 'err');
+        radioLog('Loading bundled HEX Sleuth FM library', 'warn');
+        finalizeHex(shuffle(FALLBACK).slice(0, 40));
+        radioSetResult('err');
+        radioStatus('Offline library loaded');
+      });
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     21. ABOUT MODAL SOURCE CHIPS
+     ══════════════════════════════════════════════════════════ */
+  function renderAboutSources() {
+    var el = $('#about-src-list');
+    if (!el) return;
+    el.innerHTML = SOURCES.map(function (s) {
+      return '<span title="' + esc(s.url) + '">' + esc(s.name) + '</span>';
+    }).join('') + '<span>Radio-Browser API</span>' + '<span>HEX Sleuth FM Radio</span>';
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     22. EVENT BINDINGS
      ══════════════════════════════════════════════════════════ */
   function bindEvents() {
 
@@ -2059,8 +3515,13 @@ img { max-width: 100%; display: block; }
       }
     }, true);
 
-    /* ---- genre tabs ---- */
+    /* ---- genre tabs + menu-bar action tabs ---- */
     $('#tabs').addEventListener('click', function (e) {
+      var action = e.target.closest('[data-action]');
+      if (action) {
+        handleAction(action.getAttribute('data-action'));
+        return;
+      }
       var b = e.target.closest('[data-genre]');
       if (!b) return;
       $('#search-input').value = '';
@@ -2069,7 +3530,7 @@ img { max-width: 100%; display: block; }
       loadGenre(b.getAttribute('data-genre'));
     });
 
-    /* ---- station grid ---- */
+    /* ---- home grid ---- */
     $('#grid').addEventListener('click', function (e) {
       var card = e.target.closest('.card');
       if (!card) return;
@@ -2087,6 +3548,15 @@ img { max-width: 100%; display: block; }
       card.click();
     });
 
+    /* ---- browse grid ---- */
+    $('#browse-grid').addEventListener('click', function (e) {
+      var card = e.target.closest('.card');
+      if (!card) return;
+      var st = state.browseStations.filter(function (s) { return s.id === card.getAttribute('data-id'); })[0];
+      if (!st) return;
+      playStation(st, state.browseStations);
+    });
+
     /* ---- refresh ---- */
     $('#btn-refresh').addEventListener('click', function () {
       if ($('#search-input').value.trim()) {
@@ -2096,10 +3566,66 @@ img { max-width: 100%; display: block; }
       }
     });
 
-    /* ---- home button ---- */
-    $('#btn-home').addEventListener('click', function () {
-      showView('home');
+    /* ---- nav ---- */
+    $('#btn-home').addEventListener('click', function () { showView('home'); });
+
+    $('#btn-charts').addEventListener('click', function () {
+      showView('charts');
+      if (!state.chartRows.length) loadCharts(state.chartKind || 'songs');
     });
+
+    $('#btn-browse').addEventListener('click', function () {
+      showView('browse');
+      if (!state.browseStations.length) runBrowse();
+    });
+
+    /* ---- chart tabs ---- */
+    $('#chart-tabs').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-chart]');
+      if (!b) return;
+      $$('#chart-tabs .tab').forEach(function (t) { t.classList.remove('active'); });
+      b.classList.add('active');
+      loadCharts(b.getAttribute('data-chart'));
+    });
+
+    $('#btn-chart-refresh').addEventListener('click', function () {
+      loadCharts(state.chartKind || 'songs');
+    });
+
+    /* ---- chart row click → find radio stations ---- */
+    $('#chart-list').addEventListener('click', function (e) {
+      var row = e.target.closest('.chart-row');
+      if (!row) return;
+      var q = row.getAttribute('data-artist') || row.getAttribute('data-title');
+      if (!q) return;
+      $('#search-input').value = q;
+      $('#search-clear').hidden = false;
+      showView('home');
+      doSearch(q);
+      toast('Finding radio stations for “' + q + '”');
+    });
+
+    /* ---- browse filters ---- */
+    $('#filter-groups').addEventListener('click', function (e) {
+      var chip = e.target.closest('[data-fgroup]');
+      if (!chip) return;
+      var gid = chip.getAttribute('data-fgroup');
+      var fid = chip.getAttribute('data-fid');
+      var grp = FILTER_GROUPS.filter(function (g) { return g.id === gid; })[0];
+      if (!grp) return;
+      var item = grp.items.filter(function (i) { return i.id === fid; })[0];
+      if (!item) return;
+
+      if (browseSel[gid] && browseSel[gid].id === fid) {
+        browseSel[gid] = null;
+      } else {
+        browseSel[gid] = item;
+      }
+      renderFilterGroups();
+      runBrowse();
+    });
+
+    $('#btn-browse-refresh').addEventListener('click', function () { runBrowse(); });
 
     /* ---- search ---- */
     var searchTimer = null;
@@ -2136,12 +3662,10 @@ img { max-width: 100%; display: block; }
     });
 
     $('#dock-title').addEventListener('click', function () {
-      var st = current();
-      if (st) openStation(st);
+      var st = current(); if (st) openStation(st);
     });
     $('#dock-art').addEventListener('click', function () {
-      var st = current();
-      if (st) openStation(st);
+      var st = current(); if (st) openStation(st);
     });
 
     $('#dock-like').addEventListener('click', function () {
@@ -2162,6 +3686,9 @@ img { max-width: 100%; display: block; }
       audio.volume = pct;
       audio.muted = false;
       volFill.style.width = (pct * 100) + '%';
+      $('#btn-mute').innerHTML = pct === 0
+        ? '<i class="fa-solid fa-volume-xmark"></i>'
+        : (pct < 0.5 ? '<i class="fa-solid fa-volume-low"></i>' : '<i class="fa-solid fa-volume-high"></i>');
     }
 
     vol.addEventListener('mousedown', function (e) {
@@ -2176,6 +3703,9 @@ img { max-width: 100%; display: block; }
     $('#btn-mute').addEventListener('click', function () {
       state.muted = !state.muted;
       audio.muted = state.muted;
+      this.innerHTML = state.muted
+        ? '<i class="fa-solid fa-volume-xmark"></i>'
+        : '<i class="fa-solid fa-volume-high"></i>';
       this.style.color = state.muted ? 'var(--red)' : '';
       toast(state.muted ? 'Muted' : 'Unmuted', 1200);
     });
@@ -2190,17 +3720,30 @@ img { max-width: 100%; display: block; }
     });
 
     /* ---- panels ---- */
-    $('#btn-queue').addEventListener('click', function () {
+    $('#btn-queue').addEventListener('click', function (e) {
+      e.stopPropagation();
       var p = $('#queue-panel');
       p.hidden = !p.hidden;
       $('#proxy-panel').hidden = true;
+      $('#sources-panel').hidden = true;
     });
 
-    $('#btn-proxy').addEventListener('click', function () {
+    $('#btn-proxy').addEventListener('click', function (e) {
+      e.stopPropagation();
       var p = $('#proxy-panel');
       p.hidden = !p.hidden;
       $('#queue-panel').hidden = true;
+      $('#sources-panel').hidden = true;
       if (!p.hidden) renderProxyPanel();
+    });
+
+    $('#btn-sources').addEventListener('click', function (e) {
+      e.stopPropagation();
+      var p = $('#sources-panel');
+      p.hidden = !p.hidden;
+      $('#queue-panel').hidden = true;
+      $('#proxy-panel').hidden = true;
+      if (!p.hidden) renderSources();
     });
 
     $$('[data-close]').forEach(function (b) {
@@ -2209,8 +3752,31 @@ img { max-width: 100%; display: block; }
       });
     });
 
+    /* ---- radio modal ---- */
+    $('#btn-radio').addEventListener('click', function () {
+      $('#radio-modal').hidden = false;
+      radioBuildParts();
+      radioSetFreq(88.0);
+    });
+
+    $('#btn-radio-tune').addEventListener('click', function () {
+      loadHexSleuth();
+    });
+
+    $('#btn-radio-stop').addEventListener('click', function () {
+      stopRadioLoad();
+    });
+
+    $('#btn-radio-open').addEventListener('click', function () {
+      window.open(HEX_URL, '_blank', 'noopener,noreferrer');
+    });
+
     /* ---- about modal ---- */
-    $('#btn-about').addEventListener('click', function () { $('#about-modal').hidden = false; });
+    $('#btn-about').addEventListener('click', function () {
+      $('#about-modal').hidden = false;
+      renderAboutSources();
+    });
+
     $$('[data-close-modal]').forEach(function (b) {
       b.addEventListener('click', function () {
         $('#' + b.getAttribute('data-close-modal')).hidden = true;
@@ -2220,8 +3786,10 @@ img { max-width: 100%; display: block; }
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
         $('#about-modal').hidden = true;
+        $('#radio-modal').hidden = true;
         $('#queue-panel').hidden = true;
         $('#proxy-panel').hidden = true;
+        $('#sources-panel').hidden = true;
       }
       if (e.code === 'Space' && e.target === document.body) { e.preventDefault(); togglePlay(); }
       if (e.code === 'ArrowRight' && e.shiftKey) nextStation(1);
@@ -2300,7 +3868,7 @@ img { max-width: 100%; display: block; }
 
     $('#btn-proxy-auto').addEventListener('click', function () {
       proxyState.auto = !proxyState.auto;
-      this.textContent = 'Auto: ' + (proxyState.auto ? 'ON' : 'OFF');
+      this.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Auto: ' + (proxyState.auto ? 'ON' : 'OFF');
       this.classList.toggle('btn-primary', proxyState.auto);
       toast('Auto fallback ' + (proxyState.auto ? 'enabled' : 'disabled'), 1500);
     });
@@ -2341,7 +3909,7 @@ img { max-width: 100%; display: block; }
       var base = v.indexOf('{url}') !== -1 ? v
                : (v.indexOf('?') !== -1 || v.slice(-1) === '=' ? v : v + '?url=');
       var id = 'custom-' + Date.now();
-      proxyState.list.push({
+      var newProxy = {
         id: id,
         name: 'Custom relay ' + (proxyState.list.filter(function (p) { return p.custom; }).length + 1),
         build: function (u) {
@@ -2354,20 +3922,28 @@ img { max-width: 100%; display: block; }
         latency: 0,
         enabled: true,
         custom: true
-      });
+      };
+      proxyState.list.push(newProxy);
       input.value = '';
       renderProxyPanel();
       toast('Relay added — testing…');
-      proxyHealth(proxyState.list[proxyState.list.length - 1]).then(function () {
-        renderProxyPanel();
-      });
+      proxyHealth(newProxy).then(function () { renderProxyPanel(); });
+    });
+
+    /* ---- sources panel ---- */
+    $('#sources-list').addEventListener('click', function (e) {
+      var row = e.target.closest('[data-sid]');
+      if (!row) return;
+      fetchSource(row.getAttribute('data-sid'));
     });
 
     /* ---- close panels when clicking outside ---- */
     document.addEventListener('click', function (e) {
-      var qp = $('#queue-panel'), pp = $('#proxy-panel');
+      var qp = $('#queue-panel'), pp = $('#proxy-panel'), sp = $('#sources-panel');
       if (!qp.hidden && !qp.contains(e.target) && !e.target.closest('#btn-queue')) qp.hidden = true;
       if (!pp.hidden && !pp.contains(e.target) && !e.target.closest('#btn-proxy')) pp.hidden = true;
+      if (!sp.hidden && !sp.contains(e.target) && !e.target.closest('#btn-sources') &&
+          !e.target.closest('[data-action="sources"]')) sp.hidden = true;
     });
 
     /* ---- responsive recalculation ---- */
@@ -2380,7 +3956,6 @@ img { max-width: 100%; display: block; }
     });
     document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
 
-    /* ---- orientation change (mobile-friendly auto adjust) ---- */
     if (screen.orientation && screen.orientation.addEventListener) {
       screen.orientation.addEventListener('change', function () {
         document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
@@ -2389,7 +3964,7 @@ img { max-width: 100%; display: block; }
   }
 
   /* ══════════════════════════════════════════════════════════
-     17. GREETING
+     23. GREETING
      ══════════════════════════════════════════════════════════ */
   function setGreeting() {
     var h = new Date().getHours();
@@ -2401,7 +3976,7 @@ img { max-width: 100%; display: block; }
   }
 
   /* ══════════════════════════════════════════════════════════
-     18. INIT
+     24. INIT
      ══════════════════════════════════════════════════════════ */
   function init() {
     $('#brand-logo').src = ART;
@@ -2410,13 +3985,20 @@ img { max-width: 100%; display: block; }
     proxyState.list = buildProxies();
 
     renderTabs();
+    renderFilterGroups();
     renderProxyPanel();
+    renderSources();
     renderQueue();
+    renderAboutSources();
+    renderBrowseGrid([]);
     updateDock();
     updatePlayBtn();
     setGreeting();
     setStatus('', 'Ready');
     setNet('direct');
+
+    radioBuildParts();
+    radioSetFreq(88.0);
 
     bindEvents();
 
