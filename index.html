@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -318,7 +318,7 @@ img { max-width: 100%; display: block; }
 .tab:hover { background: var(--hover); }
 .tab.active { background: #fff; color: #000; }
 
-/* ── NEW: action tabs inside the Chart / Top 40 menu bar ── */
+/* ── action tabs inside the Chart / Top 40 menu bar ── */
 .tab-action {
   display: inline-flex; align-items: center; gap: 8px;
   background: linear-gradient(145deg, #1c2b20, #141414);
@@ -497,7 +497,7 @@ img { max-width: 100%; display: block; }
   border-radius: 8px; display: block;
 }
 
-/* ── NEW: round profile pictures for the Artists chart ── */
+/* ── round profile pictures for the Artists chart ── */
 .chart-art.is-artist {
   border-radius: 50%;
   border: 1px solid rgba(255,255,255,.18);
@@ -1337,6 +1337,486 @@ img { max-width: 100%; display: block; }
     transition-duration: .001ms !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   SETTINGS MODAL  —  THEME / FEEDS / PROXIES / ABOUT
+   ═══════════════════════════════════════════════════════════════════ */
+.settings-card {
+  width: min(820px, calc(100vw - 24px));
+  max-height: 90vh;
+  display: flex; flex-direction: column;
+}
+.settings-tabs {
+  display: flex; gap: 6px; padding: 12px 18px 0;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto; scrollbar-width: none;
+  flex: 0 0 auto;
+}
+.settings-tabs::-webkit-scrollbar { display: none; }
+.stab {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 16px; border-radius: 10px 10px 0 0;
+  font-size: 12.5px; font-weight: 700; color: var(--muted);
+  background: transparent; white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: color .15s, background .15s, border-color .15s;
+}
+.stab i { font-size: 12px; }
+.stab:hover { color: #fff; background: rgba(255,255,255,.05); }
+.stab.active { color: #fff; border-bottom-color: var(--green); }
+.stab.active i { color: var(--green-hi); }
+
+.settings-body {
+  padding: 18px 20px 24px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1 1 auto;
+}
+.stab-pane[hidden] { display: none; }
+
+.settings-section-title {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .14em;
+  color: var(--muted); font-weight: 700;
+  margin: 4px 0 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.settings-section-title i { color: var(--green); }
+
+/* ── theme gallery ── */
+.theme-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 9px;
+  margin-bottom: 22px;
+}
+.theme-card {
+  border-radius: 9px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1.5px solid var(--border);
+  background: var(--bg-4);
+  transition: border-color .15s, transform .15s, box-shadow .15s;
+  user-select: none;
+}
+.theme-card:hover { transform: translateY(-2px); border-color: var(--border-2); }
+.theme-card.active {
+  border-color: var(--green);
+  box-shadow: 0 0 0 2px rgba(29,185,84,.28);
+}
+.swatch-strip { display: flex; height: 30px; }
+.swatch-strip span { flex: 1 1 0; min-width: 0; }
+.theme-label {
+  display: block;
+  padding: 7px 9px;
+  font-size: 11px; font-weight: 700;
+  text-transform: capitalize;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.theme-card .check { display: none; color: var(--green); }
+.theme-card.active .check { display: inline; }
+
+/* ── custom colours ── */
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.color-field {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.color-field label {
+  font-size: 10px; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--muted); font-weight: 700;
+}
+.color-field input[type="color"] {
+  width: 100%; height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg-5);
+  cursor: pointer; padding: 2px;
+}
+.color-field input[type="color"]::-webkit-color-swatch-wrapper { padding: 2px; }
+.color-field input[type="color"]::-webkit-color-swatch { border: none; border-radius: 5px; }
+
+.settings-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  margin-bottom: 10px;
+}
+.settings-row-text { min-width: 0; }
+.settings-row-text b {
+  display: block; font-size: 13.5px; font-weight: 700; color: var(--text);
+  margin-bottom: 3px;
+}
+.settings-row-text span { font-size: 11.5px; color: var(--muted); }
+
+.switch {
+  position: relative; width: 46px; height: 26px;
+  border-radius: 99px; background: rgba(255,255,255,.14);
+  flex: 0 0 auto; cursor: pointer; transition: background .2s;
+}
+.switch::after {
+  content: ""; position: absolute; top: 3px; left: 3px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #fff; transition: transform .2s;
+}
+.switch.on { background: var(--green); }
+.switch.on::after { transform: translateX(20px); }
+.switch input { position: absolute; opacity: 0; pointer-events: none; }
+
+.settings-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+
+/* ── RSS widget ── */
+.feed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+}
+.feed-card {
+  border-radius: 11px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: border-color .15s, background .15s;
+}
+.feed-card:hover { border-color: var(--border-2); background: rgba(255,255,255,.06); }
+.feed-head {
+  display: flex; align-items: center; gap: 9px;
+  padding: 11px 13px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px; font-weight: 700; color: var(--text);
+  min-width: 0;
+}
+.feed-head i { color: var(--green); font-size: 12px; flex: 0 0 auto; }
+.feed-head span {
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.feed-head .feed-refresh {
+  margin-left: auto; color: var(--muted); font-size: 11px;
+  width: 22px; height: 22px; border-radius: 50%;
+  display: grid; place-items: center; flex: 0 0 auto;
+  transition: color .15s, background .15s;
+}
+.feed-head .feed-refresh:hover { color: #fff; background: rgba(255,255,255,.1); }
+.feed-body {
+  padding: 6px;
+  max-height: 224px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.feed-item {
+  display: block;
+  padding: 8px 9px;
+  border-radius: 7px;
+  transition: background .15s;
+  cursor: pointer;
+}
+.feed-item:hover { background: rgba(255,255,255,.07); }
+.feed-item-title {
+  font-size: 12px; font-weight: 600; color: var(--text);
+  line-height: 1.45;
+  display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+.feed-item-date {
+  font-size: 10px; color: var(--muted-2); margin-top: 4px;
+  text-transform: uppercase; letter-spacing: .06em; font-weight: 600;
+}
+.feed-empty {
+  padding: 22px 14px; text-align: center;
+  color: var(--muted-2); font-size: 11.5px; line-height: 1.7;
+}
+.feed-loading {
+  padding: 18px 14px; text-align: center;
+  color: var(--muted); font-size: 11.5px;
+}
+.feed-loading i { color: var(--green); margin-right: 6px; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   THEME SYSTEM — 34 PALETTES (incl. default hexdark)
+   (Dark base override first, then every theme palette. Themes are
+    defined AFTER `html.dark` so a selected theme always wins.)
+   ═══════════════════════════════════════════════════════════════════ */
+
+html.dark {
+  --bg:#000; --bg-2:#121212; --bg-3:#181818; --bg-4:#1f1f1f; --bg-5:#242424;
+  --hover:#2a2a2a;
+  --border:rgba(255,255,255,.08); --border-2:rgba(255,255,255,.14);
+  --text:#fff; --muted:#a7a7a7; --muted-2:#6a6a6a;
+  --green:#1DB954; --green-hi:#1ed760;
+  --red:#ff5c5c; --amber:#f0b429; --violet:#7a5cff;
+}
+
+/* ── structural overrides that let any palette repaint the shell ── */
+html[data-theme] #app,
+html[data-theme] .topbar,
+html[data-theme] .dock { background: var(--bg); }
+html[data-theme] .dock { border-top-color: var(--border); }
+html[data-theme] #main {
+  background: linear-gradient(180deg, var(--bg-2) 0%, var(--bg-3) 340px, var(--bg-3) 100%);
+}
+html[data-theme] .nav-btn:hover,
+html[data-theme] #search-input:hover,
+html[data-theme] #search-input:focus { background: var(--hover); }
+html[data-theme] #search-input:focus { border-color: var(--text); }
+html[data-theme] .tab { color: var(--text); }
+html[data-theme] .tab.active { background: var(--text); color: var(--bg); }
+html[data-theme] .chip-btn { color: var(--text); }
+html[data-theme] .chip-btn.active { background: var(--green); color: var(--bg); }
+html[data-theme] .btn { color: var(--text); }
+html[data-theme] .btn:hover { background: var(--hover); }
+html[data-theme] .btn-primary { color: var(--bg); }
+html[data-theme] .btn-ghost { color: var(--text); }
+html[data-theme] .btn-hero { color: var(--bg); }
+html[data-theme] .play-btn { background: var(--text); color: var(--bg); }
+html[data-theme] .play-btn:hover { background: var(--text); opacity: .9; }
+html[data-theme] .progress { background: rgba(128,128,128,.4); }
+html[data-theme] .progress-fill { background: var(--text); }
+html[data-theme] .volume { background: rgba(128,128,128,.4); }
+html[data-theme] .volume-fill { background: var(--text); }
+html[data-theme] .modal-card,
+html[data-theme] .queue-panel { background: var(--bg-3); }
+html[data-theme] .modal-foot { background: rgba(0,0,0,.12); }
+html[data-theme] .toast { background: var(--text); color: var(--bg); }
+html[data-theme] .section-head .section-link:hover,
+html[data-theme] .icon-btn:hover { color: var(--text); }
+html[data-theme] .tl-title,
+html[data-theme] .chart-title,
+html[data-theme] .dock-title,
+html[data-theme] .queue-title,
+html[data-theme] .empty-title,
+html[data-theme] .proxy-intro b,
+html[data-theme] .modal-body b,
+html[data-theme] .chip b,
+html[data-theme] .proxy-name,
+html[data-theme] .src-name,
+html[data-theme] .fa-card,
+html[data-theme] .detail-title,
+html[data-theme] .feed-head,
+html[data-theme] .feed-item-title,
+html[data-theme] .settings-row-text b { color: var(--text); }
+html[data-theme] .card-play { color: var(--bg); }
+html[data-theme] .chart-go { color: var(--bg); }
+html[data-theme] .detail-meta b { color: var(--text); }
+html[data-theme] .about-src-list span:hover { color: var(--text); }
+html[data-theme] .nav-btn.active { color: var(--text); }
+html[data-theme] .tl-row.playing .tl-title { color: var(--green); }
+html[data-theme] .queue-item.current .queue-title { color: var(--green); }
+
+/* ──────────── DARK-LEANING PALETTES ──────────── */
+
+/* ══ DEFAULT ══ */
+html[data-theme="hexdark"] {
+  --bg:#000; --bg-2:#121212; --bg-3:#181818; --bg-4:#1f1f1f; --bg-5:#242424;
+  --hover:#2a2a2a;
+  --border:rgba(255,255,255,.08); --border-2:rgba(255,255,255,.14);
+  --text:#fff; --muted:#a7a7a7; --muted-2:#6a6a6a;
+  --green:#1DB954; --green-hi:#1ed760;
+  --red:#ff5c5c; --amber:#f0b429; --violet:#7a5cff;
+}
+html[data-theme="synthwave"] {
+  --bg:#170d38; --bg-2:#1f1148; --bg-3:#261657; --bg-4:#2e1b67; --bg-5:#372177;
+  --hover:#402a87; --border:rgba(231,121,193,.16); --border-2:rgba(231,121,193,.3);
+  --text:#f8f4ff; --muted:#c0a8e8; --muted-2:#8a72b8;
+  --green:#e779c1; --green-hi:#ff92d5; --red:#ff7598; --amber:#f3cc30; --violet:#58c7f3;
+}
+html[data-theme="halloween"] {
+  --bg:#141616; --bg-2:#1b1d1d; --bg-3:#222525; --bg-4:#2a2d2d; --bg-5:#333737;
+  --hover:#3c4141; --border:rgba(242,140,24,.16); --border-2:rgba(242,140,24,.3);
+  --text:#f7f3ea; --muted:#b0a894; --muted-2:#7a7264;
+  --green:#f28c18; --green-hi:#ffa23a; --red:#ff5c5c; --amber:#6d3a9c; --violet:#51a800;
+}
+html[data-theme="forest"] {
+  --bg:#0c0a0a; --bg-2:#130f0f; --bg-3:#191515; --bg-4:#201b1b; --bg-5:#282222;
+  --hover:#312a2a; --border:rgba(30,184,84,.16); --border-2:rgba(30,184,84,.3);
+  --text:#ecfdf5; --muted:#a3b8ab; --muted-2:#6d8175;
+  --green:#1eb854; --green-hi:#22d662; --red:#ff6b6b; --amber:#d99330; --violet:#4ecdc4;
+}
+html[data-theme="aqua"] {
+  --bg:#0a1c22; --bg-2:#102830; --bg-3:#15343d; --bg-4:#1a404a; --bg-5:#204c58;
+  --hover:#275866; --border:rgba(9,236,243,.16); --border-2:rgba(9,236,243,.3);
+  --text:#e8fbff; --muted:#9ac4d0; --muted-2:#618e9c;
+  --green:#09ecf3; --green-hi:#4df3f8; --red:#ff6b8a; --amber:#ffe999; --violet:#966fb3;
+}
+html[data-theme="black"] {
+  --bg:#000; --bg-2:#0d0d0d; --bg-3:#141414; --bg-4:#1a1a1a; --bg-5:#222;
+  --hover:#2a2a2a; --border:rgba(255,255,255,.09); --border-2:rgba(255,255,255,.16);
+  --text:#ffffff; --muted:#a0a0a0; --muted-2:#666;
+  --green:#e5e5e5; --green-hi:#ffffff; --red:#ff5c5c; --amber:#d4d4d4; --violet:#a3a3a3;
+}
+html[data-theme="luxury"] {
+  --bg:#09090b; --bg-2:#0f0f12; --bg-3:#16161a; --bg-4:#1d1d22; --bg-5:#25252b;
+  --hover:#2e2e35; --border:rgba(229,192,123,.16); --border-2:rgba(229,192,123,.3);
+  --text:#fdfaf3; --muted:#b3ac9a; --muted-2:#7a7466;
+  --green:#e5c07b; --green-hi:#f4d494; --red:#c1666b; --amber:#d4a373; --violet:#8d7b68;
+}
+html[data-theme="dracula"] {
+  --bg:#21222c; --bg-2:#282a36; --bg-3:#2f3140; --bg-4:#36384a; --bg-5:#3d4054;
+  --hover:#45485e; --border:rgba(189,147,249,.16); --border-2:rgba(189,147,249,.3);
+  --text:#f8f8f2; --muted:#bcc2d6; --muted-2:#7c8399;
+  --green:#ff79c6; --green-hi:#ff9ad5; --red:#ff5555; --amber:#ffb86c; --violet:#bd93f9;
+}
+html[data-theme="business"] {
+  --bg:#171c21; --bg-2:#1e242a; --bg-3:#252c33; --bg-4:#2c343c; --bg-5:#333c45;
+  --hover:#3c4650; --border:rgba(234,105,71,.16); --border-2:rgba(234,105,71,.3);
+  --text:#e9eff5; --muted:#9dabb8; --muted-2:#6d7a87;
+  --green:#ea6947; --green-hi:#ff7f5e; --red:#e05252; --amber:#7c909a; --violet:#1c4e80;
+}
+html[data-theme="night"] {
+  --bg:#0b1220; --bg-2:#111a2c; --bg-3:#172238; --bg-4:#1d2a44; --bg-5:#243250;
+  --hover:#2c3c5d; --border:rgba(56,189,248,.16); --border-2:rgba(56,189,248,.3);
+  --text:#e2e8f0; --muted:#96a5bb; --muted-2:#64748b;
+  --green:#38bdf8; --green-hi:#60cdfa; --red:#f87171; --amber:#fbbf24; --violet:#818cf8;
+}
+html[data-theme="coffee"] {
+  --bg:#0e090e; --bg-2:#161017; --bg-3:#1d1620; --bg-4:#251c28; --bg-5:#2e2331;
+  --hover:#382b3b; --border:rgba(219,146,75,.16); --border-2:rgba(219,146,75,.3);
+  --text:#f6ede2; --muted:#bcab99; --muted-2:#8a7a6a;
+  --green:#db924b; --green-hi:#eda965; --red:#c96a5c; --amber:#10576d; --violet:#263e3f;
+}
+html[data-theme="dim"] {
+  --bg:#1b2431; --bg-2:#222c3b; --bg-3:#293445; --bg-4:#303c4f; --bg-5:#374459;
+  --hover:#3f4d63; --border:rgba(156,163,175,.16); --border-2:rgba(156,163,175,.3);
+  --text:#f3f4f6; --muted:#a2aab8; --muted-2:#6b7280;
+  --green:#9ca3af; --green-hi:#cbd5e1; --red:#ef4444; --amber:#f59e0b; --violet:#818cf8;
+}
+html[data-theme="sunset"] {
+  --bg:#160f20; --bg-2:#1e1629; --bg-3:#261d33; --bg-4:#2e243d; --bg-5:#372b47;
+  --hover:#413353; --border:rgba(255,134,91,.16); --border-2:rgba(255,134,91,.3);
+  --text:#fff1e8; --muted:#c7aebb; --muted-2:#8e7585;
+  --green:#ff865b; --green-hi:#ffa17c; --red:#fd6f9c; --amber:#ffb347; --violet:#b387fa;
+}
+html[data-theme="abyss"] {
+  --bg:#020a1a; --bg-2:#04122e; --bg-3:#061a42; --bg-4:#082256; --bg-5:#0a2a6b;
+  --hover:#0d3380; --border:rgba(0,180,216,.18); --border-2:rgba(0,180,216,.34);
+  --text:#e0f7ff; --muted:#8ab8d8; --muted-2:#4a7a9a;
+  --green:#00b4d8; --green-hi:#26d3f5; --red:#ff6b8a; --amber:#90e0ef; --violet:#0077b6;
+}
+html[data-theme="acid"] {
+  --bg:#0d0963; --bg-2:#150f7a; --bg-3:#1d1492; --bg-4:#2519aa; --bg-5:#2d1ec2;
+  --hover:#3826d8; --border:rgba(196,255,0,.2); --border-2:rgba(196,255,0,.36);
+  --text:#f4ffd6; --muted:#b8b8e0; --muted-2:#7070b0;
+  --green:#c4ff00; --green-hi:#d6ff3a; --red:#ff00ff; --amber:#ff7f00; --violet:#ff00ff;
+}
+
+/* ──────────── LIGHT-LEANING PALETTES ──────────── */
+
+html[data-theme="corporate"] {
+  --bg:#ffffff; --bg-2:#f5f7fb; --bg-3:#eef1f8; --bg-4:#e6ebf5; --bg-5:#dee5f2;
+  --hover:#d4ddee; --border:rgba(0,0,0,.09); --border-2:rgba(0,0,0,.16);
+  --text:#181a2a; --muted:#5c667c; --muted-2:#8e96ab;
+  --green:#4b6bfb; --green-hi:#6b86ff; --red:#e5484d; --amber:#e0a82e; --violet:#7b92b2;
+}
+html[data-theme="cupcake"] {
+  --bg:#faf7f5; --bg-2:#f4eeeb; --bg-3:#eee6e2; --bg-4:#e8ded9; --bg-5:#e2d6d0;
+  --hover:#dbcbc5; --border:rgba(41,19,52,.1); --border-2:rgba(41,19,52,.18);
+  --text:#291334; --muted:#6d5560; --muted-2:#9a8a92;
+  --green:#65c3c8; --green-hi:#7fd4d8; --red:#ef6f6f; --amber:#eeaf3a; --violet:#ef9fbc;
+}
+html[data-theme="bumblebee"] {
+  --bg:#ffffff; --bg-2:#fffbea; --bg-3:#fff6d4; --bg-4:#ffefbd; --bg-5:#ffe8a6;
+  --hover:#ffe090; --border:rgba(24,24,48,.1); --border-2:rgba(24,24,48,.18);
+  --text:#181830; --muted:#5d5d3d; --muted-2:#8e8e6d;
+  --green:#e0a82e; --green-hi:#f2ba3c; --red:#d9534f; --amber:#f9d72f; --violet:#7a5cff;
+}
+html[data-theme="emerald"] {
+  --bg:#ffffff; --bg-2:#f4fbf7; --bg-3:#e8f7ef; --bg-4:#dcf3e7; --bg-5:#d0efdf;
+  --hover:#c4ebd7; --border:rgba(51,60,77,.1); --border-2:rgba(51,60,77,.18);
+  --text:#333c4d; --muted:#5d6a75; --muted-2:#8e9aa2;
+  --green:#66cc8a; --green-hi:#7fd99e; --red:#ea5234; --amber:#d99330; --violet:#377cfb;
+}
+html[data-theme="retro"] {
+  --bg:#fdf6e3; --bg-2:#f7ecd0; --bg-3:#f0e2bd; --bg-4:#e9d8aa; --bg-5:#e2ce97;
+  --hover:#dbc484; --border:rgba(125,114,89,.2); --border-2:rgba(125,114,89,.34);
+  --text:#4a3f2f; --muted:#7d7259; --muted-2:#a89a80;
+  --green:#ef9995; --green-hi:#f5ada8; --red:#c0524d; --amber:#ebdc99; --violet:#a4cbb4;
+}
+html[data-theme="cyberpunk"] {
+  --bg:#fff9f0; --bg-2:#ffeef5; --bg-3:#ffe0ea; --bg-4:#ffd2df; --bg-5:#ffc4d4;
+  --hover:#ffb6c9; --border:rgba(66,63,0,.12); --border-2:rgba(66,63,0,.22);
+  --text:#3d3a00; --muted:#7c5a6a; --muted-2:#a98a96;
+  --green:#ff7598; --green-hi:#ff8fab; --red:#e8305a; --amber:#f3cc30; --violet:#c07eec;
+}
+html[data-theme="valentine"] {
+  --bg:#fff5f7; --bg-2:#ffe8ee; --bg-3:#ffdbe5; --bg-4:#ffcedc; --bg-5:#ffc1d3;
+  --hover:#ffb4ca; --border:rgba(175,70,112,.14); --border-2:rgba(175,70,112,.26);
+  --text:#4a1f2e; --muted:#8a5a6a; --muted-2:#b88a96;
+  --green:#e96d7b; --green-hi:#f08894; --red:#d64545; --amber:#e0a82e; --violet:#a991f7;
+}
+html[data-theme="garden"] {
+  --bg:#f5fbf6; --bg-2:#ecf4e7; --bg-3:#e0ede1; --bg-4:#d4e6d7; --bg-5:#c8dfcd;
+  --hover:#bcd8c3; --border:rgba(93,86,86,.12); --border-2:rgba(93,86,86,.22);
+  --text:#3a4a3e; --muted:#6d7d71; --muted-2:#9aa89e;
+  --green:#5c7f67; --green-hi:#76a081; --red:#c05c5c; --amber:#d99330; --violet:#966fb3;
+}
+html[data-theme="pastel"] {
+  --bg:#fefcfd; --bg-2:#f8f2f5; --bg-3:#f2e8ee; --bg-4:#ecdee7; --bg-5:#e6d4e0;
+  --hover:#e0cada; --border:rgba(112,172,199,.18); --border-2:rgba(112,172,199,.32);
+  --text:#3d2c3d; --muted:#7d6d7d; --muted-2:#a99aa9;
+  --green:#70acc7; --green-hi:#8fc0d8; --red:#d98a9a; --amber:#e8c07d; --violet:#d1c1d7;
+}
+html[data-theme="fantasy"] {
+  --bg:#fffaf5; --bg-2:#fdf0e8; --bg-3:#fbe6dc; --bg-4:#f9dcd0; --bg-5:#f7d2c4;
+  --hover:#f5c8b8; --border:rgba(31,41,55,.12); --border-2:rgba(31,41,55,.22);
+  --text:#1f2937; --muted:#5f4a5f; --muted-2:#8e7a8e;
+  --green:#6e0b75; --green-hi:#8e1b95; --red:#c73e3e; --amber:#f8860d; --violet:#007ebd;
+}
+html[data-theme="wireframe"] {
+  --bg:#ffffff; --bg-2:#f5f5f5; --bg-3:#ececec; --bg-4:#e3e3e3; --bg-5:#dadada;
+  --hover:#d1d1d1; --border:rgba(0,0,0,.14); --border-2:rgba(0,0,0,.24);
+  --text:#1a1a1a; --muted:#6b6b6b; --muted-2:#9a9a9a;
+  --green:#8a8a8a; --green-hi:#a6a6a6; --red:#c05050; --amber:#b08a30; --violet:#7a7a7a;
+}
+html[data-theme="cmyk"] {
+  --bg:#ffffff; --bg-2:#f5f5f5; --bg-3:#ececec; --bg-4:#e0e0e0; --bg-5:#d4d4d4;
+  --hover:#c8c8c8; --border:rgba(26,26,26,.12); --border-2:rgba(26,26,26,.22);
+  --text:#1a1a1a; --muted:#5d5d5d; --muted-2:#8e8e8e;
+  --green:#45aeee; --green-hi:#63c0f5; --red:#e8488a; --amber:#fff232; --violet:#1a1a1a;
+}
+html[data-theme="autumn"] {
+  --bg:#fdf7f3; --bg-2:#f8ebe2; --bg-3:#f3dfd1; --bg-4:#eed3c0; --bg-5:#e9c7af;
+  --hover:#e4bb9e; --border:rgba(130,106,92,.18); --border-2:rgba(130,106,92,.32);
+  --text:#3a1f1a; --muted:#7d5a4a; --muted-2:#ab8a7a;
+  --green:#8c0327; --green-hi:#ab0330; --red:#c0392b; --amber:#d59b6a; --violet:#d85251;
+}
+html[data-theme="lemonade"] {
+  --bg:#fffef5; --bg-2:#f8fad8; --bg-3:#f1f6bb; --bg-4:#eaf29e; --bg-5:#e3ee81;
+  --hover:#dcea64; --border:rgba(25,26,63,.12); --border-2:rgba(25,26,63,.22);
+  --text:#191a3f; --muted:#5d5d4a; --muted-2:#8e8e7a;
+  --green:#519903; --green-hi:#6ab305; --red:#c0392b; --amber:#e9e92e; --violet:#7a5cff;
+}
+html[data-theme="winter"] {
+  --bg:#f5f9ff; --bg-2:#e8f0fe; --bg-3:#dbe7fd; --bg-4:#cedefc; --bg-5:#c1d5fb;
+  --hover:#b4ccfa; --border:rgba(2,20,49,.1); --border-2:rgba(2,20,49,.2);
+  --text:#021431; --muted:#4d5d7d; --muted-2:#7d8dad;
+  --green:#047aff; --green-hi:#2a8fff; --red:#c148ac; --amber:#e0a82e; --violet:#463aa2;
+}
+html[data-theme="nord"] {
+  --bg:#eceff4; --bg-2:#e2e7ee; --bg-3:#d8dee9; --bg-4:#ced5e2; --bg-5:#c4ccdb;
+  --hover:#bac3d4; --border:rgba(46,52,64,.12); --border-2:rgba(46,52,64,.22);
+  --text:#2e3440; --muted:#5d6774; --muted-2:#8e98a4;
+  --green:#5e81ac; --green-hi:#7a9dc4; --red:#bf616a; --amber:#ebcb8b; --violet:#b48ead;
+}
+html[data-theme="caramellatte"] {
+  --bg:#fdf6ef; --bg-2:#f7ead9; --bg-3:#f1dec3; --bg-4:#ebd2ad; --bg-5:#e5c697;
+  --hover:#dfba81; --border:rgba(59,44,35,.14); --border-2:rgba(59,44,35,.26);
+  --text:#3b2c23; --muted:#7d5f4a; --muted-2:#ab8a72;
+  --green:#d18f50; --green-hi:#e0a366; --red:#c05c5c; --amber:#b25828; --violet:#8e6844;
+}
+html[data-theme="silk"] {
+  --bg:#fff9fb; --bg-2:#fdf0f4; --bg-3:#fbe7ed; --bg-4:#f9dee6; --bg-5:#f7d5df;
+  --hover:#f5ccd8; --border:rgba(58,42,48,.1); --border-2:rgba(58,42,48,.2);
+  --text:#3d2c33; --muted:#7d6a70; --muted-2:#ab9aa0;
+  --green:#d98ea8; --green-hi:#e8a4bb; --red:#c05c7a; --amber:#e0b57d; --violet:#b58fd1;
+}
 </style>
 </head>
 <body>
@@ -1381,16 +1861,9 @@ img { max-width: 100%; display: block; }
         <i class="fa-solid fa-radio"></i>
       </button>
 
-      <button class="icon-btn" id="btn-sources" title="Station directories" aria-label="Station directories">
-        <i class="fa-solid fa-database"></i>
-      </button>
-
-      <button class="icon-btn" id="btn-proxy" title="Relay proxies" aria-label="Relay proxies">
-        <i class="fa-solid fa-globe"></i>
-      </button>
-
-      <button class="icon-btn" id="btn-about" title="About" aria-label="About">
-        <i class="fa-solid fa-circle-info"></i>
+      <!-- ═══ SETTINGS BUTTON ═══ -->
+      <button class="icon-btn" id="btn-settings" title="Settings — Theme, Feeds, Proxies" aria-label="Settings">
+        <i class="fa-solid fa-gear"></i>
       </button>
     </div>
   </header>
@@ -1721,6 +2194,140 @@ img { max-width: 100%; display: block; }
   </div>
 </div>
 
+<!-- ══════════ SETTINGS MODAL ══════════ -->
+<div class="modal" id="settings-modal" hidden>
+  <div class="modal-backdrop" data-close-modal="settings-modal"></div>
+  <div class="modal-card settings-card">
+    <div class="modal-head">
+      <h3><i class="fa-solid fa-gear"></i> Settings</h3>
+      <button class="icon-btn" data-close-modal="settings-modal" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="settings-tabs" id="settings-tabs">
+      <button class="stab active" data-stab="theme"><i class="fa-solid fa-palette"></i> Theme</button>
+      <button class="stab" data-stab="feeds"><i class="fa-solid fa-rss"></i> RSS Feeds</button>
+      <button class="stab" data-stab="proxy"><i class="fa-solid fa-globe"></i> Relays</button>
+      <button class="stab" data-stab="about"><i class="fa-solid fa-circle-info"></i> About</button>
+    </div>
+
+    <div class="settings-body" id="settings-body">
+
+      <!-- ───── THEME PANE ───── -->
+      <div class="stab-pane" id="stab-theme">
+        <div class="settings-section-title"><i class="fa-solid fa-palette"></i> Theme gallery — 34 palettes</div>
+        <div class="theme-gallery" id="themeGallery"></div>
+
+        <div class="settings-section-title"><i class="fa-solid fa-sliders"></i> Custom colours</div>
+        <div class="color-grid">
+          <div class="color-field"><label for="customPrimary">Primary</label><input type="color" id="customPrimary" value="#1DB954"></div>
+          <div class="color-field"><label for="customSecondary">Secondary</label><input type="color" id="customSecondary" value="#1ed760"></div>
+          <div class="color-field"><label for="customAccent">Accent</label><input type="color" id="customAccent" value="#7a5cff"></div>
+          <div class="color-field"><label for="customNeutral">Neutral</label><input type="color" id="customNeutral" value="#000000"></div>
+          <div class="color-field"><label for="customBase100">Base 100</label><input type="color" id="customBase100" value="#000000"></div>
+          <div class="color-field"><label for="customBase200">Base 200</label><input type="color" id="customBase200" value="#121212"></div>
+          <div class="color-field"><label for="customBase300">Base 300</label><input type="color" id="customBase300" value="#181818"></div>
+          <div class="color-field"><label for="customBaseContent">Base content</label><input type="color" id="customBaseContent" value="#ffffff"></div>
+        </div>
+
+        <div class="settings-actions">
+          <button class="btn btn-primary btn-sm" id="btnApplyCustom">
+            <i class="fa-solid fa-check"></i> Apply custom colours
+          </button>
+          <button class="btn btn-sm" id="btnResetTheme">
+            <i class="fa-solid fa-rotate-left"></i> Reset to HEX Dark
+          </button>
+        </div>
+
+        <div style="height:14px"></div>
+
+        <div class="settings-section-title"><i class="fa-solid fa-moon"></i> Appearance</div>
+        <div class="settings-row">
+          <div class="settings-row-text">
+            <b>Forced Dark Mode <i class="fa-solid fa-lock" style="font-size:10px;color:var(--green);margin-left:6px"></i></b>
+            <span>Dark mode is permanently enforced across the entire interface for consistent readability.</span>
+          </div>
+          <label class="switch on" style="cursor:not-allowed;opacity:.85">
+            <input type="checkbox" checked disabled>
+          </label>
+        </div>
+      </div>
+
+      <!-- ───── FEEDS PANE ───── -->
+      <div class="stab-pane" id="stab-feeds" hidden>
+        <div class="settings-section-title"><i class="fa-solid fa-rss"></i> Music &amp; radio news — via free RSS relays</div>
+
+        <div class="settings-actions" style="margin-bottom:14px">
+          <button class="btn btn-primary btn-sm" id="btnFeedsRefresh">
+            <i class="fa-solid fa-rotate"></i> Refresh all feeds
+          </button>
+          <button class="btn btn-sm" id="btnFeedsAddOwn">
+            <i class="fa-solid fa-plus"></i> Add feed URL
+          </button>
+        </div>
+
+        <div class="feed-grid" id="feed-grid"></div>
+      </div>
+
+      <!-- ───── RELAYS PANE ───── -->
+      <div class="stab-pane" id="stab-proxy" hidden>
+        <div class="settings-section-title"><i class="fa-solid fa-globe"></i> Unlimited free relay pool</div>
+        <p class="proxy-intro" style="margin-bottom:14px">
+          HEX RADIO ships with <b>35 public CORS relays</b>. They are used automatically
+          whenever a direct directory request is blocked by the browser's CORS policy.
+          All relays are unlimited and cost-free. Open the dock's globe button for the
+          live test console.
+        </p>
+        <div class="proxy-stats" id="settings-proxy-stats"></div>
+        <div style="height:14px"></div>
+        <div class="settings-actions">
+          <button class="btn btn-primary btn-sm" id="btnSettingsProxyRefresh">
+            <i class="fa-solid fa-rotate"></i> Test all relays now
+          </button>
+          <button class="btn btn-sm" id="btnSettingsProxyOpen">
+            <i class="fa-solid fa-up-right-from-square"></i> Open relay console
+          </button>
+        </div>
+      </div>
+
+      <!-- ───── ABOUT PANE ───── -->
+      <div class="stab-pane" id="stab-about" hidden>
+        <div class="settings-section-title"><i class="fa-solid fa-tower-broadcast"></i> About HEX RADIO</div>
+        <p class="proxy-intro" style="margin-bottom:14px">
+          <b>HEX RADIO</b> is a single-file browser web player for chart radio stations
+          worldwide. It streams directly from the broadcasters, indexes stations through
+          the free Radio-Browser open API, pulls charts from top-charts.com, and routes
+          every blocked request through an unlimited pool of cost-free CORS relays.
+        </p>
+        <div class="fa-grid">
+          <div class="fa-card"><i class="fa-solid fa-tower-broadcast"></i> Live FM &amp; AM</div>
+          <div class="fa-card violet"><i class="fa-solid fa-globe"></i> Worldwide index</div>
+          <div class="fa-card amber"><i class="fa-solid fa-bolt"></i> Instant tuning</div>
+          <div class="fa-card"><i class="fa-solid fa-shield-halved"></i> No cookies</div>
+          <div class="fa-card violet"><i class="fa-solid fa-mobile-screen-button"></i> Mobile ready</div>
+          <div class="fa-card amber"><i class="fa-solid fa-music"></i> Top charts</div>
+          <div class="fa-card red"><i class="fa-solid fa-radio"></i> HEX Sleuth FM</div>
+          <div class="fa-card"><i class="fa-solid fa-heart"></i> Favourites</div>
+        </div>
+        <div class="about-src-title" style="margin-top:14px"><i class="fa-solid fa-database"></i> Live data sources</div>
+        <div class="about-src-list" id="settings-about-src"></div>
+        <p class="modal-fine" style="margin-top:12px">Streams are provided by the broadcasters themselves. HEX RADIO hosts no audio and stores no cookies. Everything runs locally in your browser.</p>
+      </div>
+
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn btn-ghost" data-close-modal="settings-modal">
+        <i class="fa-solid fa-xmark"></i> Close
+      </button>
+      <button class="btn btn-primary" data-close-modal="settings-modal">
+        <i class="fa-solid fa-check"></i> Done
+      </button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast" hidden></div>
 <audio id="audio" preload="none" playsinline></audio>
 
@@ -1764,7 +2371,7 @@ img { max-width: 100%; display: block; }
     { id:'internet',          name:'Internet-Radio.com',        url:'https://www.internet-radio.com/',                             icon:'fa-network-wired',    kind:'stations' },
     { id:'billboard',         name:'Billboard Hot 100',         url:'https://www.billboard.com/charts/hot-100/',                   icon:'fa-award',            kind:'chart' },
     { id:'ors',               name:'OnlineRadioStations.in',    url:'https://onlineradiostations.in/',                             icon:'fa-satellite',        kind:'stations' },
-    { id:'fmonline',          name:'FM Online India',           url:'https://www.fmonline.co.in/',                                 icon:'fa-fm',               kind:'stations' },
+    { id:'fmonline',          name:'FM Online India',           url:'https://www.fmonline.co.in/',                                 icon:'fa-tower-cell',       kind:'stations' },
     { id:'barfi',             name:'Radio Barfi',               url:'https://radiobarfi.com/',                                     icon:'fa-cake-candles',     kind:'stations' },
     { id:'nonstop',           name:'The NonStop Radio',         url:'https://thenonstopradio.com/',                                icon:'fa-infinity',         kind:'stations' },
     { id:'indian',            name:'Indian Radio',              url:'https://indianradio.in/',                                     icon:'fa-headphones',       kind:'stations' },
@@ -1853,10 +2460,25 @@ img { max-width: 100%; display: block; }
   ];
 
   /* ══════════════════════════════════════════════════════════
+     RSS FEED WIDGET SOURCES  (free, no key, via relay pool)
+     ══════════════════════════════════════════════════════════ */
+  var FEEDS = [
+    { id:'bbc-ent',   name:'BBC Entertainment', icon:'fa-newspaper',          url:'https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml' },
+    { id:'billboard', name:'Billboard',         icon:'fa-award',              url:'https://www.billboard.com/feed/' },
+    { id:'rolling',   name:'Rolling Stone',     icon:'fa-guitar',             url:'https://www.rollingstone.com/music/music-news/feed/' },
+    { id:'nme',       name:'NME Music',         icon:'fa-record-vinyl',       url:'https://www.nme.com/news/music/feed' },
+    { id:'pitchfork', name:'Pitchfork',         icon:'fa-headphones',         url:'https://pitchfork.com/rss/news/' },
+    { id:'radiotoday',name:'Radio Today',       icon:'fa-tower-broadcast',    url:'https://radiotoday.co.uk/feed/' },
+    { id:'consequence', name:'Consequence',     icon:'fa-music',              url:'https://consequence.net/feed/' },
+    { id:'stereogum', name:'Stereogum',         icon:'fa-wave-square',        url:'https://www.stereogum.com/feed/' }
+  ];
+
+  var feedState = {};
+
+  /* ══════════════════════════════════════════════════════════
      1. OFFLINE STATION LIBRARY
      ══════════════════════════════════════════════════════════ */
   var FALLBACK_RAW = [
-    /* ── Chart / Top 40 (RCAST.net + Radio.net Top Stations) ── */
     { name:'FEIERFREUND Chartparty',           url:'http://stream01.my105.ch/my105love.mp3',                  country:'Switzerland',  tags:'chart,party,pop',            codec:'MP3', bitrate:128, src:'rcast' },
     { name:"Crazy's Hit Radio",                url:'https://crazys-hit-radio.spcast.eu/stream',               country:'Germany',      tags:'hits,oldies,80s',            codec:'MP3', bitrate:128, src:'rcast' },
     { name:'breakz',                           url:'https://breakz-high.rautemusik.fm/',                      country:'Germany',      tags:'electronic,charts,pop',      codec:'MP3', bitrate:128, src:'rcast' },
@@ -1882,8 +2504,6 @@ img { max-width: 100%; display: block; }
     { name:'Radio PSR Chartbreaker',           url:'https://mdr13.duckdns.org:8443/fm9875',                   country:'Germany',      tags:'chart',                      codec:'MP3', bitrate:128, src:'rcast' },
     { name:'breakz 2012 (higher)',             url:'https://breakz-2012-high.rautemusik.fm/',                 country:'Germany',      tags:'electronic,charts',          codec:'MP3', bitrate:128, src:'rcast' },
     { name:'ANTENNE THÜRINGEN Charts AAC',     url:'http://frontend.streamonkey.net/antthue-charts/stream/aacp', country:'Germany',   tags:'charts',                     codec:'AAC', bitrate:128, src:'rcast' },
-
-    /* ── India / Bollywood (OnlineRadioFM.in + RadioIndia.in) ── */
     { name:'Radio Mirchi 98.3 FM',             url:'https://radioindia.net/radio/mirchi983fm/icecast.audio',   country:'India',        tags:'bollywood,hindi,chart',      codec:'MP3', bitrate:128, src:'orfm' },
     { name:'Vividh Bharati (AIR)',             url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio001/playlist.m3u8', country:'India', tags:'hindi,oldies,bollywood',    codec:'HLS', bitrate:96,  src:'akashvani' },
     { name:'92.7 Big FM',                      url:'https://eu10.fastcast4u.com/bigfm',                        country:'India',        tags:'bollywood,pop,hindi',        codec:'MP3', bitrate:128, src:'orfm' },
@@ -1922,20 +2542,14 @@ img { max-width: 100%; display: block; }
     { name:'AIR Telugu (Hyderabad)',           url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio020/playlist.m3u8', country:'India', tags:'telugu',                    codec:'HLS', bitrate:96,  src:'akashvani' },
     { name:'AIR Odia',                         url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio088/playlist.m3u8', country:'India', tags:'odia',                      codec:'HLS', bitrate:96,  src:'akashvani' },
     { name:'AIR Assamese',                     url:'https://air.pc.cdn.bitgravity.com/air/live/pbaudio084/playlist.m3u8', country:'India', tags:'assamese',                  codec:'HLS', bitrate:96,  src:'akashvani' },
-
-    /* ── Radio Garden regional favourites ── */
     { name:'KTR Radio 93.2 FM (Katihar)',      url:'https://stream.zeno.fm/vp4n1ts3xv8uv',                     country:'India',        tags:'bihar,hindi',                codec:'MP3', bitrate:128, src:'garden' },
     { name:'Radio Mahananda 98.8 FM',          url:'https://stream.zeno.fm/1h31mzkqxv8uv',                     country:'Bangladesh',   tags:'bengali',                    codec:'MP3', bitrate:128, src:'garden' },
     { name:'Radio Padma 99.2',                 url:'https://stream.zeno.fm/wyfv2n6mxv8uv',                     country:'Bangladesh',   tags:'bengali',                    codec:'MP3', bitrate:128, src:'garden' },
     { name:'Vaigai FM',                        url:'https://stream.zeno.fm/y5n3r6avtv8uv',                     country:'India',        tags:'tamil',                      codec:'MP3', bitrate:128, src:'garden' },
-
-    /* ── The Current / public radio ── */
     { name:'The Current (KCMP)',               url:'https://current.stream.publicradio.org/kcmp.mp3',          country:'USA',          tags:'indie,pop',                  codec:'MP3', bitrate:128, src:'current' },
     { name:'KEXP 90.3 FM',                     url:'https://kexp-mp3-128.streamguys1.com/kexp128.mp3',         country:'USA',          tags:'indie,rock',                 codec:'MP3', bitrate:128, src:'internet' },
     { name:'Radio Paradise',                   url:'https://stream.radioparadise.com/mp3-192',                 country:'USA',          tags:'eclectic,rock',              codec:'MP3', bitrate:192, src:'internet' },
     { name:'FIP (Radio France)',               url:'https://icecast.radiofrance.fr/fip-midfi.mp3',             country:'France',       tags:'jazz,eclectic',              codec:'MP3', bitrate:128, src:'internet' },
-
-    /* ── SomaFM ── */
     { name:'SomaFM Groove Salad',              url:'https://ice1.somafm.com/groovesalad-128-mp3',              country:'USA',          tags:'chill,ambient',              codec:'MP3', bitrate:128, src:'internet' },
     { name:'SomaFM Lush',                      url:'https://ice1.somafm.com/lush-128-mp3',                     country:'USA',          tags:'chill,vocal',                codec:'MP3', bitrate:128, src:'internet' },
     { name:'SomaFM Beat Blender',              url:'https://ice1.somafm.com/beatblender-128-mp3',              country:'USA',          tags:'dance,deep',                 codec:'MP3', bitrate:128, src:'internet' },
@@ -1995,9 +2609,6 @@ img { max-width: 100%; display: block; }
     return Math.abs(h).toString(36);
   }
 
-  /* ── NEW: guaranteed-to-render round profile picture generator ──
-     Builds an inline SVG data-URI avatar (initials on a colour derived
-     from the name). Never hits the network, so it can never 404.     */
   function avatarDataUri(name) {
     var n = String(name == null ? '' : name).trim() || '?';
     var parts = n.split(/\s+/).filter(Boolean);
@@ -2109,7 +2720,9 @@ img { max-width: 100%; display: block; }
     { id:'api-cors-io-2',   name:'api.cors.lol (2)',  build:function (u) { return 'https://api.cors.lol/?url=' + encodeURIComponent(u); } },
     { id:'yacdn-2',         name:'Yacdn Proxy (2)',   build:function (u) { return 'https://yacdn.org/proxy/' + u; } },
     { id:'isomorphic-2',    name:'Isomorphic (2)',    build:function (u) { return 'https://cors.isomorphic-git.org/' + u; } },
-    { id:'workers-dev-2',   name:'CORS Workers (2)',  build:function (u) { return 'https://test.cors.workers.dev/?' + u; } }
+    { id:'workers-dev-2',   name:'CORS Workers (2)',  build:function (u) { return 'https://test.cors.workers.dev/?' + u; } },
+    { id:'rss2json',        name:'rss2json',          build:function (u) { return 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(u); },
+      unwrap:function (d) { return d; } }
   ];
 
   var proxyState = {
@@ -2173,6 +2786,7 @@ img { max-width: 100%; display: block; }
         return 0;
       });
       renderProxyPanel();
+      renderSettingsProxyStats();
       updateNetPill();
       if (!silent) {
         var on = proxyState.list.filter(function (p) { return p.ok; }).length;
@@ -2360,7 +2974,6 @@ img { max-width: 100%; display: block; }
       });
   }
 
-  /* ── stream URL detection ── */
   var STREAM_EXT_RE = /\.(mp3|m3u8|aac|aacp|ogg|oga|opus|pls|m3u|flac|mp4|webm)(\?|#|$)/i;
 
   function looksLikeStream(u) {
@@ -2404,7 +3017,6 @@ img { max-width: 100%; display: block; }
       out.push(makeStation(name, url, sourceId));
     }
 
-    /* 1 — anchors */
     var anchors = doc.querySelectorAll('a[href]');
     Array.prototype.forEach.call(anchors, function (a) {
       var href = a.getAttribute('href') || '';
@@ -2415,7 +3027,6 @@ img { max-width: 100%; display: block; }
       add(label || title, abs);
     });
 
-    /* 2 — media / data attributes */
     var media = doc.querySelectorAll('audio[src],video[src],source[src],[data-src],[data-url],[data-stream],[data-href]');
     Array.prototype.forEach.call(media, function (el) {
       var raw = el.getAttribute('src') || el.getAttribute('data-src') ||
@@ -2426,7 +3037,6 @@ img { max-width: 100%; display: block; }
       add(label, abs);
     });
 
-    /* 3 — raw text scan (JS-embedded streams, JSON blobs, etc.) */
     var re = /https?:\/\/[^\s"'`<>\\{}|\u0000-\u001f]+/g, m;
     while ((m = re.exec(html))) {
       var u = m[0].replace(/[),.;'"]+$/, '');
@@ -2434,7 +3044,6 @@ img { max-width: 100%; display: block; }
       add('', u);
     }
 
-    /* 4 — protocol-relative + relative stream paths */
     var rel = /["'](\/[^"'\s<>]*\.(?:mp3|m3u8|aac|ogg|pls|m3u))["']/gi;
     while ((m = rel.exec(html))) {
       add('', absUrl(m[1], pageUrl));
@@ -2465,21 +3074,42 @@ img { max-width: 100%; display: block; }
   ];
 
   var STATIC_CHART_ARTISTS = [
-    { rank:1, title:'Taylor Swift',   artist:'Pop · US' },
-    { rank:2, title:'Drake',          artist:'Hip-Hop · CA' },
-    { rank:3, title:'The Weeknd',     artist:'R&B · CA' },
-    { rank:4, title:'Billie Eilish',  artist:'Alt · US' },
-    { rank:5, title:'Ed Sheeran',     artist:'Pop · UK' },
-    { rank:6, title:'Ariana Grande',  artist:'Pop · US' },
-    { rank:7, title:'Bruno Mars',     artist:'Pop · US' },
-    { rank:8, title:'Bad Bunny',      artist:'Latin · PR' },
-    { rank:9, title:'Coldplay',       artist:'Rock · UK' },
-    { rank:10,title:'Arijit Singh',   artist:'Playback · IN' },
-    { rank:11,title:'Shreya Ghoshal', artist:'Playback · IN' },
-    { rank:12,title:'Diljit Dosanjh', artist:'Punjabi · IN' },
-    { rank:13,title:'A. R. Rahman',   artist:'Composer · IN' },
-    { rank:14,title:'Neha Kakkar',    artist:'Playback · IN' },
-    { rank:15,title:'Pritam',         artist:'Composer · IN' }
+    { rank:1,  title:'Bad Bunny',               artist:'Latin · PR' },
+    { rank:2,  title:'Morgan Wallen',           artist:'Country · US' },
+    { rank:3,  title:'Ella Langley',            artist:'Country · US' },
+    { rank:4,  title:'Drake',                   artist:'Hip-Hop · CA' },
+    { rank:5,  title:'The Weeknd',              artist:'R&B · CA' },
+    { rank:6,  title:'Olivia Rodrigo',          artist:'Pop · US' },
+    { rank:7,  title:'Tame Impala',             artist:'Psych · AU' },
+    { rank:8,  title:'Olivia Dean',             artist:'Soul · UK' },
+    { rank:9,  title:'Calvin Harris',           artist:'Dance · UK' },
+    { rank:10, title:'Frank Sinatra',           artist:'Jazz · US' },
+    { rank:11, title:'Shubha Joshi',            artist:'Playback · IN' },
+    { rank:12, title:'Bob Marley',              artist:'Reggae · JM' },
+    { rank:13, title:'Lil Baby',                artist:'Hip-Hop · US' },
+    { rank:14, title:'Bob Marley & The Wailers',artist:'Reggae · JM' },
+    { rank:15, title:'Post Malone',             artist:'Pop · US' },
+    { rank:16, title:'Michael Jackson',         artist:'Pop · US' },
+    { rank:17, title:'10stack',                 artist:'Hip-Hop · US' },
+    { rank:18, title:'Ludovico Einaudi',        artist:'Classical · IT' },
+    { rank:19, title:'David Guetta',            artist:'Dance · FR' },
+    { rank:20, title:'Future',                  artist:'Hip-Hop · US' },
+    { rank:21, title:'Dolly Parton',            artist:'Country · US' },
+    { rank:22, title:'Taylor Swift',            artist:'Pop · US' },
+    { rank:23, title:'antartica',               artist:'Alternative' },
+    { rank:24, title:'Lenin Ramírez',           artist:'Regional · MX' },
+    { rank:25, title:'Billie Eilish',           artist:'Alt · US' },
+    { rank:26, title:'Elevation Worship',       artist:'Worship · US' },
+    { rank:27, title:'Laufey',                  artist:'Jazz Pop · IS' },
+    { rank:28, title:'Fleetwood Mac',           artist:'Rock · UK' },
+    { rank:29, title:'Etta James',              artist:'Soul · US' },
+    { rank:30, title:'Fuerza Regida',           artist:'Regional · MX' },
+    { rank:31, title:'Omar Courtz',             artist:'Latin · PR' },
+    { rank:32, title:'Mrs. GREEN APPLE',        artist:'Rock · JP' },
+    { rank:33, title:'Eddie Dalton',            artist:'Country · US' },
+    { rank:34, title:'Shakira',                 artist:'Latin · CO' },
+    { rank:35, title:'Coldplay',                artist:'Rock · UK' },
+    { rank:36, title:'Noah Kahan',              artist:'Folk · US' }
   ];
 
   function parseTopCharts(html, kind) {
@@ -2488,7 +3118,6 @@ img { max-width: 100%; display: block; }
 
     var out = [];
 
-    /* 1 — tabular rows */
     var trs = doc.querySelectorAll('table tr');
     Array.prototype.forEach.call(trs, function (tr) {
       var cells = [];
@@ -2512,7 +3141,6 @@ img { max-width: 100%; display: block; }
       }
     });
 
-    /* 2 — anchor fallback */
     if (out.length < 5) {
       var sel = (kind === 'artists') ? 'a[href*="/artists/"]' : 'a[href*="/songs/"]';
       var seen = {};
@@ -2524,7 +3152,6 @@ img { max-width: 100%; display: block; }
       });
     }
 
-    /* 3 — generic repeated blocks */
     if (out.length < 5) {
       var blocks = doc.querySelectorAll('[class*="chart"],[class*="ranking"],[class*="top"]');
       var seenB = {};
@@ -2621,8 +3248,6 @@ img { max-width: 100%; display: block; }
   /* ══════════════════════════════════════════════════════════
      10. RENDERING — HOME
      ══════════════════════════════════════════════════════════ */
-
-  /* ── UPDATED: genre tabs + Top Charts / Browse / HEX FM / Sources actions ── */
   function renderTabs() {
     var html = GENRES.map(function (g) {
       return '<button class="tab' + (g.id === state.genre ? ' active' : '') +
@@ -2639,11 +3264,12 @@ img { max-width: 100%; display: block; }
               '<i class="fa-solid fa-radio"></i> HEX FM</button>';
     html += '<button class="tab tab-action" data-action="sources">' +
               '<i class="fa-solid fa-database"></i> Sources</button>';
+    html += '<button class="tab tab-action" data-action="settings">' +
+              '<i class="fa-solid fa-gear"></i> Settings</button>';
 
     $('#tabs').innerHTML = html;
   }
 
-  /* ── NEW: shared action dispatcher for the menu-bar action tabs ── */
   function handleAction(kind) {
     if (kind === 'charts') {
       showView('charts');
@@ -2666,6 +3292,10 @@ img { max-width: 100%; display: block; }
       $('#queue-panel').hidden = true;
       $('#proxy-panel').hidden = true;
       renderSources();
+      return;
+    }
+    if (kind === 'settings') {
+      openSettings('theme');
       return;
     }
   }
@@ -2876,7 +3506,6 @@ img { max-width: 100%; display: block; }
     in:      'India — Songs'
   };
 
-  /* ── UPDATED: round profile pictures for the Artists chart ── */
   function renderChartList(rows) {
     var el = $('#chart-list');
     if (!rows || !rows.length) {
@@ -3154,18 +3783,20 @@ img { max-width: 100%; display: block; }
      ══════════════════════════════════════════════════════════ */
   function renderProxyPanel() {
     var list = $('#proxy-list');
-    list.innerHTML = proxyState.list.map(function (p) {
-      var dotCls = p.ok === true ? 'ok' : (p.ok === false ? 'bad' : 'busy');
-      var lat = p.ok ? p.latency + ' ms' : (p.ok === false ? 'offline' : '…');
-      return '<div class="proxy-row' + (p.enabled ? '' : ' off') +
-             (proxyState.activeId === p.id ? ' active' : '') +
-             '" data-pid="' + esc(p.id) + '">' +
-        '<span class="proxy-dot ' + dotCls + '"></span>' +
-        '<span class="proxy-name">' + esc(p.name) + (p.custom ? '<i class="proxy-tag">custom</i>' : '') + '</span>' +
-        '<span class="proxy-lat">' + esc(lat) + '</span>' +
-        '<span class="proxy-switch"></span>' +
-      '</div>';
-    }).join('');
+    if (list) {
+      list.innerHTML = proxyState.list.map(function (p) {
+        var dotCls = p.ok === true ? 'ok' : (p.ok === false ? 'bad' : 'busy');
+        var lat = p.ok ? p.latency + ' ms' : (p.ok === false ? 'offline' : '…');
+        return '<div class="proxy-row' + (p.enabled ? '' : ' off') +
+               (proxyState.activeId === p.id ? ' active' : '') +
+               '" data-pid="' + esc(p.id) + '">' +
+          '<span class="proxy-dot ' + dotCls + '"></span>' +
+          '<span class="proxy-name">' + esc(p.name) + (p.custom ? '<i class="proxy-tag">custom</i>' : '') + '</span>' +
+          '<span class="proxy-lat">' + esc(lat) + '</span>' +
+          '<span class="proxy-switch"></span>' +
+        '</div>';
+      }).join('');
+    }
 
     var total = proxyState.list.length;
     var on = proxyState.list.filter(function (p) { return p.ok; }).length;
@@ -3175,11 +3806,31 @@ img { max-width: 100%; display: block; }
       if (p.ok && (!fastest || p.latency < fastest.latency)) fastest = p;
     });
 
-    $('#proxy-stats').innerHTML =
-      '<span class="chip">Total <b>' + total + '</b></span>' +
+    var statsEl = $('#proxy-stats');
+    if (statsEl) {
+      statsEl.innerHTML =
+        '<span class="chip">Total <b>' + total + '</b></span>' +
+        '<span class="chip">Online <b>' + on + '</b></span>' +
+        '<span class="chip">Offline <b>' + off + '</b></span>' +
+        '<span class="chip">Fastest <b>' + (fastest ? fastest.latency + ' ms' : '—') + '</b></span>';
+    }
+
+    renderSettingsProxyStats();
+  }
+
+  function renderSettingsProxyStats() {
+    var el = $('#settings-proxy-stats');
+    if (!el) return;
+    var total = proxyState.list.length;
+    var on = proxyState.list.filter(function (p) { return p.ok; }).length;
+    var pending = proxyState.list.filter(function (p) { return p.ok === null; }).length;
+    var off = proxyState.list.filter(function (p) { return p.ok === false; }).length;
+    el.innerHTML =
+      '<span class="chip">Relays <b>' + total + '</b></span>' +
       '<span class="chip">Online <b>' + on + '</b></span>' +
+      '<span class="chip">Testing <b>' + pending + '</b></span>' +
       '<span class="chip">Offline <b>' + off + '</b></span>' +
-      '<span class="chip">Fastest <b>' + (fastest ? fastest.latency + ' ms' : '—') + '</b></span>';
+      '<span class="chip">Auto <b>' + (proxyState.auto ? 'ON' : 'OFF') + '</b></span>';
   }
 
   /* ══════════════════════════════════════════════════════════
@@ -3394,7 +4045,6 @@ img { max-width: 100%; display: block; }
     setStatus('', 'Ready');
   }
 
-  /* ── NEW: live directory fallback used when the HEX page is unreachable ── */
   function hexLiveDirectory() {
     radioLog('Probing live chart directory…', 'busy');
     return rbFetch(rbSearchPath({ tag: 'chart' }, 60))
@@ -3409,7 +4059,6 @@ img { max-width: 100%; display: block; }
       });
   }
 
-  /* ── NEW: staged fetch that can never dead-end ── */
   function fetchHexStreams() {
     return htmlFetch(HEX_URL, function (msg, kind) {
       if (radioActive) radioLog(msg, kind);
@@ -3437,7 +4086,6 @@ img { max-width: 100%; display: block; }
       });
   }
 
-  /* ── NEW: always delivers a working, playable station list ── */
   function finalizeHex(list) {
     list = (list && list.length) ? list : shuffle(FALLBACK).slice(0, 40);
 
@@ -3457,7 +4105,6 @@ img { max-width: 100%; display: block; }
     setStatus('', 'Ready');
     toast(list.length + ' stations loaded from HEX Sleuth FM Radio');
 
-    /* Auto-tune the first station — the click on "Fetch & Tune" is the gesture. */
     playStation(list[0], list);
     radioLog('Now playing: ' + list[0].name, 'ok');
   }
@@ -3494,15 +4141,416 @@ img { max-width: 100%; display: block; }
      21. ABOUT MODAL SOURCE CHIPS
      ══════════════════════════════════════════════════════════ */
   function renderAboutSources() {
-    var el = $('#about-src-list');
-    if (!el) return;
-    el.innerHTML = SOURCES.map(function (s) {
+    var html = SOURCES.map(function (s) {
       return '<span title="' + esc(s.url) + '">' + esc(s.name) + '</span>';
     }).join('') + '<span>Radio-Browser API</span>' + '<span>HEX Sleuth FM Radio</span>';
+
+    var el = $('#about-src-list');
+    if (el) el.innerHTML = html;
+
+    var el2 = $('#settings-about-src');
+    if (el2) el2.innerHTML = html;
   }
 
   /* ══════════════════════════════════════════════════════════
-     22. EVENT BINDINGS
+     22. THEME SYSTEM  (34 palettes + custom colours + forced dark)
+     ══════════════════════════════════════════════════════════ */
+  var THEMES = [
+    'hexdark',
+    'corporate', 'cupcake', 'bumblebee', 'emerald', 'synthwave',
+    'retro', 'cyberpunk', 'valentine', 'halloween', 'garden',
+    'forest', 'aqua', 'lofi', 'pastel', 'fantasy',
+    'wireframe', 'black', 'luxury', 'dracula', 'cmyk',
+    'autumn', 'business', 'acid', 'lemonade', 'night',
+    'coffee', 'winter', 'dim', 'nord', 'sunset',
+    'caramellatte', 'abyss', 'silk'
+  ];
+
+  var currentTheme = 'hexdark';
+  var customColors = {};
+
+  var THEME_SWATCHES = {
+    hexdark:      ['#1DB954', '#1ed760', '#7a5cff', '#000000'],
+    corporate:    ['#4b6bfb', '#7b92b2', '#67cba0', '#181a2a'],
+    cupcake:      ['#65c3c8', '#ef9fbc', '#eeaf3a', '#291334'],
+    bumblebee:    ['#e0a82e', '#f9d72f', '#181830', '#181830'],
+    emerald:      ['#66cc8a', '#377cfb', '#ea5234', '#333c4d'],
+    synthwave:    ['#e779c1', '#58c7f3', '#f3cc30', '#20134e'],
+    retro:        ['#ef9995', '#a4cbb4', '#ebdc99', '#7d7259'],
+    cyberpunk:    ['#ff7598', '#75d1f0', '#c07eec', '#423f00'],
+    valentine:    ['#e96d7b', '#a991f7', '#88dbdd', '#af4670'],
+    halloween:    ['#f28c18', '#6d3a9c', '#51a800', '#1b1d1d'],
+    garden:       ['#5c7f67', '#ecf4e7', '#fae5e5', '#5d5656'],
+    forest:       ['#1eb854', '#1fd65f', '#d99330', '#110e0e'],
+    aqua:         ['#09ecf3', '#966fb3', '#ffe999', '#3b8ea5'],
+    lofi:         ['#808080', '#4d4d4d', '#1a1a1a', '#000000'],
+    pastel:       ['#d1c1d7', '#f6cbd1', '#b4e9d6', '#70acc7'],
+    fantasy:      ['#6e0b75', '#007ebd', '#f8860d', '#1f2937'],
+    wireframe:    ['#b8b8b8', '#b8b8b8', '#b8b8b8', '#ebebeb'],
+    black:        ['#333333', '#333333', '#333333', '#141414'],
+    luxury:       ['#ffffff', '#152747', '#513448', '#331800'],
+    dracula:      ['#ff79c6', '#bd93f9', '#ffb86c', '#414558'],
+    cmyk:         ['#45aeee', '#e8488a', '#fff232', '#1a1a1a'],
+    autumn:       ['#8c0327', '#d85251', '#d59b6a', '#826a5c'],
+    business:     ['#1c4e80', '#7c909a', '#ea6947', '#23282e'],
+    acid:         ['#ff00ff', '#ff7f00', '#c4ff00', '#150f82'],
+    lemonade:     ['#519903', '#e9e92e', '#f7f9ca', '#191a3f'],
+    night:        ['#38bdf8', '#818cf8', '#f472b6', '#1e293b'],
+    coffee:       ['#db924b', '#263e3f', '#10576d', '#120c12'],
+    winter:       ['#047aff', '#463aa2', '#c148ac', '#021431'],
+    dim:          ['#9ca3af', '#6b7280', '#4b5563', '#374151'],
+    nord:         ['#5e81ac', '#81a1c1', '#88c0d0', '#4c566a'],
+    sunset:       ['#ff865b', '#fd6f9c', '#b387fa', '#1b1626'],
+    caramellatte: ['#d18f50', '#8e6844', '#b25828', '#3b2c23'],
+    abyss:        ['#0077b6', '#00b4d8', '#90e0ef', '#03045e'],
+    silk:         ['#ffc2d4', '#ffb5a7', '#fcd5ce', '#e8e8e4']
+  };
+
+  var CUSTOM_KEYS = ['primary', 'secondary', 'accent', 'neutral', 'base-100', 'base-200', 'base-300', 'base-content'];
+
+  function applySystemTheme(theme) {
+    currentTheme = theme;
+    document.documentElement.setAttribute('data-theme', theme);
+    document.querySelectorAll('.theme-card').forEach(function (card) {
+      card.classList.toggle('active', card.dataset.theme === theme);
+    });
+    try { localStorage.setItem('neon-theme', theme); } catch (_) {}
+
+    var c = THEME_SWATCHES[theme] || ['#1DB954', '#1ed760', '#7a5cff', '#000000'];
+    var el;
+    el = document.getElementById('customPrimary');   if (el) el.value = c[0] || '#1DB954';
+    el = document.getElementById('customSecondary'); if (el) el.value = c[1] || '#1ed760';
+    el = document.getElementById('customAccent');    if (el) el.value = c[2] || '#7a5cff';
+    el = document.getElementById('customNeutral');   if (el) el.value = c[3] || '#000000';
+    el = document.getElementById('customBase100');   if (el) el.value = '#000000';
+    el = document.getElementById('customBase200');   if (el) el.value = '#121212';
+    el = document.getElementById('customBase300');   if (el) el.value = '#181818';
+    el = document.getElementById('customBaseContent'); if (el) el.value = '#ffffff';
+
+    customColors = {};
+    var root = document.documentElement;
+    CUSTOM_KEYS.forEach(function (p) { root.style.removeProperty('--' + p); });
+    try { localStorage.removeItem('neon-custom-colors'); } catch (_) {}
+  }
+
+  function applyCustomColors(colors) {
+    customColors = colors;
+    var root = document.documentElement;
+    for (var i = 0; i < CUSTOM_KEYS.length; i++) {
+      var key = CUSTOM_KEYS[i];
+      if (colors[key]) root.style.setProperty('--' + key, colors[key]);
+    }
+    try { localStorage.setItem('neon-custom-colors', JSON.stringify(colors)); } catch (_) {}
+  }
+
+  function resetSystemTheme() {
+    customColors = {};
+    var root = document.documentElement;
+    CUSTOM_KEYS.forEach(function (p) { root.style.removeProperty('--' + p); });
+    try { localStorage.removeItem('neon-custom-colors'); } catch (_) {}
+
+    var c = THEME_SWATCHES.hexdark || ['#1DB954', '#1ed760', '#7a5cff', '#000000'];
+    var el;
+    el = document.getElementById('customPrimary');   if (el) el.value = c[0] || '#1DB954';
+    el = document.getElementById('customSecondary'); if (el) el.value = c[1] || '#1ed760';
+    el = document.getElementById('customAccent');    if (el) el.value = c[2] || '#7a5cff';
+    el = document.getElementById('customNeutral');   if (el) el.value = c[3] || '#000000';
+    el = document.getElementById('customBase100');   if (el) el.value = '#000000';
+    el = document.getElementById('customBase200');   if (el) el.value = '#121212';
+    el = document.getElementById('customBase300');   if (el) el.value = '#181818';
+    el = document.getElementById('customBaseContent'); if (el) el.value = '#ffffff';
+
+    applySystemTheme('hexdark');
+  }
+
+  function buildThemeGallery() {
+    var container = document.getElementById('themeGallery');
+    if (!container) return;
+    container.innerHTML = '';
+
+    THEMES.forEach(function (theme) {
+      var colors = THEME_SWATCHES[theme] || ['#1DB954', '#1ed760', '#7a5cff', '#000000'];
+      var card = document.createElement('div');
+      card.className = 'theme-card' + (theme === currentTheme ? ' active' : '');
+      card.dataset.theme = theme;
+
+      var strip = document.createElement('div');
+      strip.className = 'swatch-strip';
+      colors.forEach(function (c) {
+        var span = document.createElement('span');
+        span.style.background = c;
+        strip.appendChild(span);
+      });
+      card.appendChild(strip);
+
+      var label = document.createElement('span');
+      label.className = 'theme-label';
+      label.textContent = theme;
+
+      var check = document.createElement('span');
+      check.className = 'check';
+      check.textContent = ' ✓';
+      label.appendChild(check);
+
+      card.appendChild(label);
+      card.addEventListener('click', function () { applySystemTheme(theme); });
+      container.appendChild(card);
+    });
+  }
+
+  /* ═══ FORCED DARK MODE — always on, cannot be toggled off ═══ */
+  function applyDarkMode() {
+    document.documentElement.classList.add('dark');
+    var cb = document.getElementById('darkModeToggle');
+    if (cb) cb.checked = true;
+    var sw = document.getElementById('darkSwitch');
+    if (sw) sw.classList.add('on');
+    try { localStorage.setItem('dark', 'true'); } catch (_) {}
+  }
+
+  function loadSavedTheme() {
+    try {
+      var saved = localStorage.getItem('neon-theme');
+      if (saved && THEMES.indexOf(saved) !== -1) {
+        applySystemTheme(saved);
+        return;
+      }
+    } catch (_) {}
+
+    try {
+      var custom = localStorage.getItem('neon-custom-colors');
+      if (custom) {
+        var colors = JSON.parse(custom);
+        applyCustomColors(colors);
+        return;
+      }
+    } catch (_) {}
+
+    applySystemTheme('hexdark');
+  }
+
+  function loadSettings() {
+    /* Dark mode is permanently forced — ignore any saved preference. */
+    applyDarkMode();
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     23. RSS FEED WIDGETS
+     ══════════════════════════════════════════════════════════ */
+  function feedProxies() {
+    var good = proxyState.list.filter(function (p) { return p.enabled && p.ok === true; });
+    var unknown = proxyState.list.filter(function (p) { return p.enabled && p.ok === null; });
+    var dead = proxyState.list.filter(function (p) { return p.enabled && p.ok === false; });
+    var pool = good.concat(unknown, dead);
+    return pool.length ? pool : proxyState.list.slice();
+  }
+
+  function parseRssItems(xmlText) {
+    var doc;
+    try {
+      doc = new DOMParser().parseFromString(xmlText, 'application/xml');
+    } catch (e) { return []; }
+
+    if (doc.querySelector('parsererror')) return [];
+
+    var out = [];
+
+    var items = doc.querySelectorAll('item');
+    Array.prototype.forEach.call(items, function (it) {
+      var t = it.querySelector('title');
+      var l = it.querySelector('link');
+      var d = it.querySelector('pubDate') || it.querySelector('date');
+      out.push({
+        title: t ? (t.textContent || '').trim() : '',
+        link: l ? (l.textContent || '').trim() : '',
+        date: d ? (d.textContent || '').trim() : ''
+      });
+    });
+
+    if (!out.length) {
+      var entries = doc.querySelectorAll('entry');
+      Array.prototype.forEach.call(entries, function (en) {
+        var t = en.querySelector('title');
+        var l = en.querySelector('link');
+        var href = l ? (l.getAttribute('href') || l.textContent || '') : '';
+        var d = en.querySelector('updated') || en.querySelector('published');
+        out.push({
+          title: t ? (t.textContent || '').trim() : '',
+          link: (href || '').trim(),
+          date: d ? (d.textContent || '').trim() : ''
+        });
+      });
+    }
+
+    return out.filter(function (i) { return i.title; }).slice(0, 20);
+  }
+
+  function fmtFeedDate(s) {
+    if (!s) return '';
+    var d = new Date(s);
+    if (isNaN(d.getTime())) return String(s).slice(0, 22);
+    try {
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) +
+             ' · ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    } catch (e) { return d.toDateString(); }
+  }
+
+  function renderFeedCard(feed) {
+    var st = feedState[feed.id] || { status: 'idle', items: [] };
+
+    var bodyHTML;
+    if (st.status === 'loading') {
+      bodyHTML = '<div class="feed-loading"><i class="fa-solid fa-circle-notch fa-spin"></i>Loading…</div>';
+    } else if (st.status === 'error' || !st.items.length) {
+      bodyHTML = '<div class="feed-empty">' +
+        (st.status === 'error' ? 'Feed unreachable through relays.' : 'No items available.') +
+        '<br>Tap ↻ to retry.</div>';
+    } else {
+      bodyHTML = st.items.map(function (item) {
+        var link = item.link || '#';
+        return '<a class="feed-item" href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' +
+          '<div class="feed-item-title">' + esc(item.title) + '</div>' +
+          (item.date ? '<div class="feed-item-date">' + esc(fmtFeedDate(item.date)) + '</div>' : '') +
+        '</a>';
+      }).join('');
+    }
+
+    return '<div class="feed-card" data-feed="' + esc(feed.id) + '">' +
+      '<div class="feed-head">' +
+        '<i class="fa-solid ' + feed.icon + '"></i>' +
+        '<span title="' + esc(feed.url) + '">' + esc(feed.name) + '</span>' +
+        '<button class="feed-refresh" data-feed-refresh="' + esc(feed.id) + '" title="Refresh feed">' +
+          '<i class="fa-solid fa-rotate"></i>' +
+        '</button>' +
+      '</div>' +
+      '<div class="feed-body">' + bodyHTML + '</div>' +
+    '</div>';
+  }
+
+  function renderFeeds() {
+    var grid = $('#feed-grid');
+    if (!grid) return;
+
+    if (!FEEDS.length) {
+      grid.innerHTML = '<div class="feed-empty">No feeds configured.</div>';
+      return;
+    }
+
+    grid.innerHTML = FEEDS.map(renderFeedCard).join('');
+  }
+
+  function loadFeed(feed) {
+    feedState[feed.id] = { status: 'loading', items: [] };
+    renderFeeds();
+
+    var pool = feedProxies();
+    var idx = 0;
+
+    function attempt() {
+      if (idx >= pool.length) {
+        feedState[feed.id] = { status: 'error', items: [] };
+        renderFeeds();
+        return;
+      }
+      var px = pool[idx++];
+      var url = px.build(feed.url);
+
+      fetchTimeout(url, 12000)
+        .then(function (r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.text();
+        })
+        .then(function (txt) {
+          var items = [];
+
+          items = parseRssItems(txt);
+
+          if (!items.length && px.unwrap) {
+            try {
+              var j = JSON.parse(txt);
+              var unwrapped = px.unwrap(j);
+              if (unwrapped && unwrapped.items && unwrapped.items.length) {
+                items = unwrapped.items.map(function (it) {
+                  return { title: it.title || '', link: it.link || '', date: it.pubDate || '' };
+                }).slice(0, 20);
+              }
+            } catch (e) { /* ignore */ }
+          }
+
+          if (!items.length && txt.indexOf('<title') !== -1) {
+            var re = /<title[^>]*>([\s\S]*?)<\/title>/gi, m, n = 0;
+            while ((m = re.exec(txt)) && n < 20) {
+              var t = m[1].replace(/<!\[CDATA\[|\]\]>/g, '').replace(/<[^>]+>/g, '').trim();
+              if (t && t.length > 4) { items.push({ title: t, link: '', date: '' }); n++; }
+            }
+          }
+
+          if (!items.length) throw new Error('no-items');
+
+          px.ok = true;
+          feedState[feed.id] = { status: 'ok', items: items };
+          renderFeeds();
+        })
+        .catch(function () {
+          px.ok = false;
+          attempt();
+        });
+    }
+
+    attempt();
+  }
+
+  function loadAllFeeds() {
+    FEEDS.forEach(function (f) { loadFeed(f); });
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     24. SETTINGS MODAL CONTROLLER
+     ══════════════════════════════════════════════════════════ */
+  function openSettings(pane) {
+    var modal = $('#settings-modal');
+    if (!modal) return;
+    modal.hidden = false;
+
+    buildThemeGallery();
+
+    if (pane) switchSettingsPane(pane);
+
+    var active = $('#settings-tabs .stab.active');
+    if (active && active.getAttribute('data-stab') === 'feeds') {
+      var anyLoaded = FEEDS.some(function (f) {
+        return feedState[f.id] && feedState[f.id].status !== 'idle';
+      });
+      if (!anyLoaded) loadAllFeeds();
+    }
+
+    renderSettingsProxyStats();
+    renderAboutSources();
+  }
+
+  function switchSettingsPane(name) {
+    $$('#settings-tabs .stab').forEach(function (b) {
+      b.classList.toggle('active', b.getAttribute('data-stab') === name);
+    });
+    $$('.stab-pane').forEach(function (p) {
+      p.hidden = p.id !== 'stab-' + name;
+    });
+
+    if (name === 'feeds') {
+      var anyLoaded = FEEDS.some(function (f) {
+        return feedState[f.id] && feedState[f.id].status !== 'idle';
+      });
+      if (!anyLoaded) loadAllFeeds();
+      else renderFeeds();
+    }
+
+    if (name === 'proxy') renderSettingsProxyStats();
+    if (name === 'theme') buildThemeGallery();
+    if (name === 'about') renderAboutSources();
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     25. EVENT BINDINGS
      ══════════════════════════════════════════════════════════ */
   function bindEvents() {
 
@@ -3728,24 +4776,6 @@ img { max-width: 100%; display: block; }
       $('#sources-panel').hidden = true;
     });
 
-    $('#btn-proxy').addEventListener('click', function (e) {
-      e.stopPropagation();
-      var p = $('#proxy-panel');
-      p.hidden = !p.hidden;
-      $('#queue-panel').hidden = true;
-      $('#sources-panel').hidden = true;
-      if (!p.hidden) renderProxyPanel();
-    });
-
-    $('#btn-sources').addEventListener('click', function (e) {
-      e.stopPropagation();
-      var p = $('#sources-panel');
-      p.hidden = !p.hidden;
-      $('#queue-panel').hidden = true;
-      $('#proxy-panel').hidden = true;
-      if (!p.hidden) renderSources();
-    });
-
     $$('[data-close]').forEach(function (b) {
       b.addEventListener('click', function () {
         $('#' + b.getAttribute('data-close')).hidden = true;
@@ -3771,16 +4801,178 @@ img { max-width: 100%; display: block; }
       window.open(HEX_URL, '_blank', 'noopener,noreferrer');
     });
 
-    /* ---- about modal ---- */
-    $('#btn-about').addEventListener('click', function () {
-      $('#about-modal').hidden = false;
-      renderAboutSources();
-    });
-
     $$('[data-close-modal]').forEach(function (b) {
       b.addEventListener('click', function () {
         $('#' + b.getAttribute('data-close-modal')).hidden = true;
       });
+    });
+
+    /* ---- ══════ SETTINGS MODAL ══════ ---- */
+    $('#btn-settings').addEventListener('click', function (e) {
+      e.stopPropagation();
+      openSettings('theme');
+    });
+
+    $('#settings-tabs').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-stab]');
+      if (!b) return;
+      switchSettingsPane(b.getAttribute('data-stab'));
+    });
+
+    /* ---- custom colours ---- */
+    var btnApply = $('#btnApplyCustom');
+    if (btnApply) btnApply.addEventListener('click', function () {
+      var colors = {
+        'primary':      $('#customPrimary') ? $('#customPrimary').value : null,
+        'secondary':    $('#customSecondary') ? $('#customSecondary').value : null,
+        'accent':       $('#customAccent') ? $('#customAccent').value : null,
+        'neutral':      $('#customNeutral') ? $('#customNeutral').value : null,
+        'base-100':     $('#customBase100') ? $('#customBase100').value : null,
+        'base-200':     $('#customBase200') ? $('#customBase200').value : null,
+        'base-300':     $('#customBase300') ? $('#customBase300').value : null,
+        'base-content': $('#customBaseContent') ? $('#customBaseContent').value : null
+      };
+
+      var root = document.documentElement;
+      if (colors['primary']) root.style.setProperty('--green', colors['primary']);
+      if (colors['primary']) root.style.setProperty('--green-hi', colors['primary']);
+      if (colors['accent']) root.style.setProperty('--violet', colors['accent']);
+      if (colors['secondary']) root.style.setProperty('--muted', colors['secondary']);
+
+      applyCustomColors(colors);
+      toast('Custom colours applied');
+    });
+
+    var btnReset = $('#btnResetTheme');
+    if (btnReset) btnReset.addEventListener('click', function () {
+      resetSystemTheme();
+      toast('Theme reset to HEX Dark');
+    });
+
+    /* ---- feeds ---- */
+    var btnFR = $('#btnFeedsRefresh');
+    if (btnFR) btnFR.addEventListener('click', function () {
+      toast('Refreshing all RSS feeds…', 1600);
+      loadAllFeeds();
+    });
+
+    var btnFA = $('#btnFeedsAddOwn');
+    if (btnFA) btnFA.addEventListener('click', function () {
+      var url = prompt('Enter RSS / Atom feed URL:');
+      if (!url || !/^https?:\/\//i.test(url)) { toast('Invalid feed URL'); return; }
+      var id = 'feed-' + Date.now();
+      FEEDS.push({
+        id: id,
+        name: (function () { try { return new URL(url).hostname.replace(/^www\./, ''); } catch (e) { return 'Custom feed'; } })(),
+        icon: 'fa-rss',
+        url: url
+      });
+      renderFeeds();
+      loadFeed(FEEDS[FEEDS.length - 1]);
+      toast('Custom feed added');
+    });
+
+    var fg = $('#feed-grid');
+    if (fg) fg.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-feed-refresh]');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var id = btn.getAttribute('data-feed-refresh');
+      var f = FEEDS.filter(function (x) { return x.id === id; })[0];
+      if (f) loadFeed(f);
+    });
+
+    /* ---- relay shortcuts inside settings ---- */
+    var spr = $('#btnSettingsProxyRefresh');
+    if (spr) spr.addEventListener('click', function () { refreshProxies(false); });
+
+    var spo = $('#btnSettingsProxyOpen');
+    if (spo) spo.addEventListener('click', function () {
+      $('#settings-modal').hidden = true;
+      $('#proxy-panel').hidden = false;
+      renderProxyPanel();
+    });
+
+    /* ---- proxy panel controls (still present in DOM, reachable via settings) ---- */
+    var bpr = $('#btn-proxy-refresh');
+    if (bpr) bpr.addEventListener('click', function () { refreshProxies(false); });
+
+    var bpa = $('#btn-proxy-auto');
+    if (bpa) bpa.addEventListener('click', function () {
+      proxyState.auto = !proxyState.auto;
+      this.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Auto: ' + (proxyState.auto ? 'ON' : 'OFF');
+      this.classList.toggle('btn-primary', proxyState.auto);
+      renderSettingsProxyStats();
+      toast('Auto fallback ' + (proxyState.auto ? 'enabled' : 'disabled'), 1500);
+    });
+
+    var bpd = $('#btn-proxy-direct');
+    if (bpd) bpd.addEventListener('click', function () {
+      proxyState.activeId = null;
+      proxyState.lastUsed = null;
+      setNet('direct');
+      renderProxyPanel();
+      toast('Using direct connection', 1500);
+    });
+
+    var pl = $('#proxy-list');
+    if (pl) pl.addEventListener('click', function (e) {
+      var sw = e.target.closest('.proxy-switch');
+      var row = e.target.closest('[data-pid]');
+      if (!row) return;
+      var id = row.getAttribute('data-pid');
+      var p = proxyState.list.filter(function (x) { return x.id === id; })[0];
+      if (!p) return;
+
+      if (sw) {
+        p.enabled = !p.enabled;
+        if (!p.enabled && proxyState.activeId === p.id) proxyState.activeId = null;
+        renderProxyPanel();
+        return;
+      }
+      proxyState.activeId = (proxyState.activeId === p.id) ? null : p.id;
+      proxyState.lastUsed = proxyState.activeId;
+      renderProxyPanel();
+      updateNetPill();
+      toast(proxyState.activeId ? 'Pinned: ' + p.name : 'Relay unpinned', 1500);
+    });
+
+    var bpad = $('#btn-proxy-add');
+    if (bpad) bpad.addEventListener('click', function () {
+      var input = $('#proxy-custom');
+      var v = input.value.trim();
+      if (!/^https?:\/\//.test(v)) { toast('Enter a valid relay URL'); return; }
+      var base = v.indexOf('{url}') !== -1 ? v
+               : (v.indexOf('?') !== -1 || v.slice(-1) === '=' ? v : v + '?url=');
+      var id = 'custom-' + Date.now();
+      var newProxy = {
+        id: id,
+        name: 'Custom relay ' + (proxyState.list.filter(function (p) { return p.custom; }).length + 1),
+        build: function (u) {
+          return base.indexOf('{url}') !== -1
+            ? base.replace('{url}', encodeURIComponent(u))
+            : base + encodeURIComponent(u);
+        },
+        unwrap: null,
+        ok: null,
+        latency: 0,
+        enabled: true,
+        custom: true
+      };
+      proxyState.list.push(newProxy);
+      input.value = '';
+      renderProxyPanel();
+      toast('Relay added — testing…');
+      proxyHealth(newProxy).then(function () { renderProxyPanel(); });
+    });
+
+    /* ---- sources panel ---- */
+    var sl = $('#sources-list');
+    if (sl) sl.addEventListener('click', function (e) {
+      var row = e.target.closest('[data-sid]');
+      if (!row) return;
+      fetchSource(row.getAttribute('data-sid'));
     });
 
     document.addEventListener('keydown', function (e) {
@@ -3790,6 +4982,7 @@ img { max-width: 100%; display: block; }
         $('#queue-panel').hidden = true;
         $('#proxy-panel').hidden = true;
         $('#sources-panel').hidden = true;
+        $('#settings-modal').hidden = true;
       }
       if (e.code === 'Space' && e.target === document.body) { e.preventDefault(); togglePlay(); }
       if (e.code === 'ArrowRight' && e.shiftKey) nextStation(1);
@@ -3863,89 +5056,6 @@ img { max-width: 100%; display: block; }
       }
     });
 
-    /* ---- proxy panel actions ---- */
-    $('#btn-proxy-refresh').addEventListener('click', function () { refreshProxies(false); });
-
-    $('#btn-proxy-auto').addEventListener('click', function () {
-      proxyState.auto = !proxyState.auto;
-      this.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Auto: ' + (proxyState.auto ? 'ON' : 'OFF');
-      this.classList.toggle('btn-primary', proxyState.auto);
-      toast('Auto fallback ' + (proxyState.auto ? 'enabled' : 'disabled'), 1500);
-    });
-
-    $('#btn-proxy-direct').addEventListener('click', function () {
-      proxyState.activeId = null;
-      proxyState.lastUsed = null;
-      setNet('direct');
-      renderProxyPanel();
-      toast('Using direct connection', 1500);
-    });
-
-    $('#proxy-list').addEventListener('click', function (e) {
-      var sw = e.target.closest('.proxy-switch');
-      var row = e.target.closest('[data-pid]');
-      if (!row) return;
-      var id = row.getAttribute('data-pid');
-      var p = proxyState.list.filter(function (x) { return x.id === id; })[0];
-      if (!p) return;
-
-      if (sw) {
-        p.enabled = !p.enabled;
-        if (!p.enabled && proxyState.activeId === p.id) proxyState.activeId = null;
-        renderProxyPanel();
-        return;
-      }
-      proxyState.activeId = (proxyState.activeId === p.id) ? null : p.id;
-      proxyState.lastUsed = proxyState.activeId;
-      renderProxyPanel();
-      updateNetPill();
-      toast(proxyState.activeId ? 'Pinned: ' + p.name : 'Relay unpinned', 1500);
-    });
-
-    $('#btn-proxy-add').addEventListener('click', function () {
-      var input = $('#proxy-custom');
-      var v = input.value.trim();
-      if (!/^https?:\/\//.test(v)) { toast('Enter a valid relay URL'); return; }
-      var base = v.indexOf('{url}') !== -1 ? v
-               : (v.indexOf('?') !== -1 || v.slice(-1) === '=' ? v : v + '?url=');
-      var id = 'custom-' + Date.now();
-      var newProxy = {
-        id: id,
-        name: 'Custom relay ' + (proxyState.list.filter(function (p) { return p.custom; }).length + 1),
-        build: function (u) {
-          return base.indexOf('{url}') !== -1
-            ? base.replace('{url}', encodeURIComponent(u))
-            : base + encodeURIComponent(u);
-        },
-        unwrap: null,
-        ok: null,
-        latency: 0,
-        enabled: true,
-        custom: true
-      };
-      proxyState.list.push(newProxy);
-      input.value = '';
-      renderProxyPanel();
-      toast('Relay added — testing…');
-      proxyHealth(newProxy).then(function () { renderProxyPanel(); });
-    });
-
-    /* ---- sources panel ---- */
-    $('#sources-list').addEventListener('click', function (e) {
-      var row = e.target.closest('[data-sid]');
-      if (!row) return;
-      fetchSource(row.getAttribute('data-sid'));
-    });
-
-    /* ---- close panels when clicking outside ---- */
-    document.addEventListener('click', function (e) {
-      var qp = $('#queue-panel'), pp = $('#proxy-panel'), sp = $('#sources-panel');
-      if (!qp.hidden && !qp.contains(e.target) && !e.target.closest('#btn-queue')) qp.hidden = true;
-      if (!pp.hidden && !pp.contains(e.target) && !e.target.closest('#btn-proxy')) pp.hidden = true;
-      if (!sp.hidden && !sp.contains(e.target) && !e.target.closest('#btn-sources') &&
-          !e.target.closest('[data-action="sources"]')) sp.hidden = true;
-    });
-
     /* ---- responsive recalculation ---- */
     var rt = null;
     window.addEventListener('resize', function () {
@@ -3964,7 +5074,7 @@ img { max-width: 100%; display: block; }
   }
 
   /* ══════════════════════════════════════════════════════════
-     23. GREETING
+     26. GREETING
      ══════════════════════════════════════════════════════════ */
   function setGreeting() {
     var h = new Date().getHours();
@@ -3976,13 +5086,21 @@ img { max-width: 100%; display: block; }
   }
 
   /* ══════════════════════════════════════════════════════════
-     24. INIT
+     27. INIT
      ══════════════════════════════════════════════════════════ */
   function init() {
+    /* ═══ FORCE DARK MODE — always on, from the very first paint ═══ */
+    document.documentElement.classList.add('dark');
+
     $('#brand-logo').src = ART;
     $('#dock-art-img').src = ART;
 
     proxyState.list = buildProxies();
+
+    /* Theme + dark mode first, so the shell paints correctly. */
+    loadSettings();
+    loadSavedTheme();
+    buildThemeGallery();
 
     renderTabs();
     renderFilterGroups();
@@ -3991,6 +5109,7 @@ img { max-width: 100%; display: block; }
     renderQueue();
     renderAboutSources();
     renderBrowseGrid([]);
+    renderFeeds();
     updateDock();
     updatePlayBtn();
     setGreeting();
@@ -4002,10 +5121,8 @@ img { max-width: 100%; display: block; }
 
     bindEvents();
 
-    /* Load chart stations immediately */
     loadGenre('chart');
 
-    /* Quietly test the full proxy pool in the background */
     setTimeout(function () { refreshProxies(true); }, 1500);
   }
 
@@ -4026,13 +5143,12 @@ function ctrlShiftKey(e, keyCode) {
 }
 
 document.onkeydown = (e) => {
-  // Disable F12, Ctrl + Shift + I, Ctrl + Shift + J, Ctrl + U
   if (
     event.keyCode === 123 ||
     ctrlShiftKey(e, 'I') ||
     ctrlShiftKey(e, 'J') ||
     ctrlShiftKey(e, 'C') ||
-    (e.ctrlKey && e.keyCode === 'U'.charCodeAt(0))
+    (e.ctrlKey && event.keyCode === 'U'.charCodeAt(0))
   )
     return false;
 };
