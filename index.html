@@ -1542,8 +1542,6 @@ img { max-width: 100%; display: block; }
 
 /* ═══════════════════════════════════════════════════════════════════
    THEME SYSTEM — 34 PALETTES (incl. default hexdark)
-   (Dark base override first, then every theme palette. Themes are
-    defined AFTER `html.dark` so a selected theme always wins.)
    ═══════════════════════════════════════════════════════════════════ */
 
 html.dark {
@@ -2338,6 +2336,18 @@ html[data-theme="silk"] {
 
   var HEX_URL = 'https://hexsleuth.github.io/FM-Radio/';
 
+  /* ══ GIF ALBUM ARTWORK POOL — animated GIFs for the OS audio panel ══ */
+  var GIF_ALBUMS = [
+    ART,
+    'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi07HxFegxoRFUOacOJp6PEFwKoYnPffV3fE1v5zR6RtQsDRlXE3E-CDdhIV8JXyLYOkTTi8UiFknjQPWtc41OKyTkzPH-wEQovybqC2ceFqt7l_pzIqxoM65W3uxJVux8RmU-r7AujOujkP2mU2BihP7m9JAIK41nmEkuz4mMh6sPVkcGIceCdI-f2RYg9/s1600/1000221428.gif'
+  ];
+
+  /* ══ System-notification / media-panel fallback icon ══ */
+  var NOTIF_ICON =
+    'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">' +
+    '<circle cx="50" cy="50" r="45" fill="%234b6bfb"/>' +
+    '<text x="50" y="60" text-anchor="middle" font-size="50" fill="white">🎵</text></svg>';
+
   /* Multiple mirrors of the free Radio-Browser open API */
   var RB_BASES = [
     'https://de1.api.radio-browser.info',
@@ -2359,6 +2369,9 @@ html[data-theme="silk"] {
     { id:'rcast',             name:'RCAST.net — Chart',         url:'https://www.rcast.net/dir?p=4&q=chart&s=2',                   icon:'fa-chart-simple',     kind:'stations' },
     { id:'garden',            name:'Radio Garden — Katihar',    url:'https://radio.garden/visit/katihar/VWAytgvf',                 icon:'fa-earth-asia',       kind:'stations' },
     { id:'radioindia',        name:'Radio India',               url:'https://www.radioindia.in/',                                  icon:'fa-flag',             kind:'stations' },
+    { id:'radioindia-widget', name:'Radio India — Live FM Widget', url:'https://www.radioindia.in/',                               icon:'fa-tower-broadcast',  kind:'widget' },
+    { id:'mytuner',           name:'myTuner Radio — Directory', url:'https://mytuner-radio.com/',                                  icon:'fa-signal',           kind:'stations' },
+    { id:'podcasts-online',   name:'Podcasts Online',           url:'https://www.podcasts-online.org/',                            icon:'fa-podcast',          kind:'stations' },
     { id:'akashvani',         name:'Akashvani (All India Radio)',url:'https://akashvani.gov.in/radio/live.php',                    icon:'fa-tower-broadcast',  kind:'stations' },
     { id:'liveradios',        name:'Live Radios',               url:'https://liveradios.in/',                                      icon:'fa-signal',           kind:'stations' },
     { id:'orb',               name:'OnlineRadioBox India',      url:'https://onlineradiobox.com/in/',                              icon:'fa-cube',             kind:'stations' },
@@ -2459,14 +2472,18 @@ html[data-theme="silk"] {
      RSS FEED WIDGET SOURCES  (free, no key, via relay pool)
      ══════════════════════════════════════════════════════════ */
   var FEEDS = [
-    { id:'bbc-ent',   name:'BBC Entertainment', icon:'fa-newspaper',          url:'https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml' },
-    { id:'billboard', name:'Billboard',         icon:'fa-award',              url:'https://www.billboard.com/feed/' },
-    { id:'rolling',   name:'Rolling Stone',     icon:'fa-guitar',             url:'https://www.rollingstone.com/music/music-news/feed/' },
-    { id:'nme',       name:'NME Music',         icon:'fa-record-vinyl',       url:'https://www.nme.com/news/music/feed' },
-    { id:'pitchfork', name:'Pitchfork',         icon:'fa-headphones',         url:'https://pitchfork.com/rss/news/' },
-    { id:'radiotoday',name:'Radio Today',       icon:'fa-tower-broadcast',    url:'https://radiotoday.co.uk/feed/' },
-    { id:'consequence', name:'Consequence',     icon:'fa-music',              url:'https://consequence.net/feed/' },
-    { id:'stereogum', name:'Stereogum',         icon:'fa-wave-square',        url:'https://www.stereogum.com/feed/' }
+    { id:'bbc-ent',     name:'BBC Entertainment', icon:'fa-newspaper',       url:'https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml' },
+    { id:'billboard',   name:'Billboard',         icon:'fa-award',           url:'https://www.billboard.com/feed/' },
+    { id:'rolling',     name:'Rolling Stone',     icon:'fa-guitar',          url:'https://www.rollingstone.com/music/music-news/feed/' },
+    { id:'nme',         name:'NME Music',         icon:'fa-record-vinyl',    url:'https://www.nme.com/news/music/feed' },
+    { id:'pitchfork',   name:'Pitchfork',         icon:'fa-headphones',      url:'https://pitchfork.com/rss/news/' },
+    { id:'radiotoday',  name:'Radio Today',       icon:'fa-tower-broadcast', url:'https://radiotoday.co.uk/feed/' },
+    { id:'consequence', name:'Consequence',       icon:'fa-music',           url:'https://consequence.net/feed/' },
+    { id:'stereogum',   name:'Stereogum',         icon:'fa-wave-square',     url:'https://www.stereogum.com/feed/' },
+    { id:'nprmusic',    name:'NPR Music',         icon:'fa-podcast',         url:'https://www.npr.org/rss/podcast.php?id=510289' },
+    { id:'podonline',   name:'Podcasts Online',   icon:'fa-microphone-lines',url:'https://www.podcasts-online.org/feed' },
+    { id:'radioindia',  name:'Radio India',       icon:'fa-flag',            url:'https://www.radioindia.in/feed' },
+    { id:'mytuner',     name:'myTuner Radio',     icon:'fa-signal',          url:'https://mytuner-radio.com/feed' }
   ];
 
   var feedState = {};
@@ -2674,6 +2691,61 @@ html[data-theme="silk"] {
     if (!href) return '';
     if (/^(mailto:|javascript:|tel:|#|data:|blob:)/i.test(href)) return '';
     try { return new URL(href, base).href; } catch (e) { return ''; }
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     2b. GIF ALBUM ARTWORK HELPERS
+     ══════════════════════════════════════════════════════════ */
+  function isGifUrl(u) {
+    return /\.gif(\?|#|$)/i.test(String(u || ''));
+  }
+
+  function gifFor(track) {
+    if (!track) return ART;
+    if (track.gif && isGifUrl(track.gif)) return track.gif;
+    if (isGifUrl(track.art)) return track.art;
+
+    var seed = String(track.id || track.name || 'hex');
+    var h = 0, i;
+    for (i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+
+    if (!GIF_ALBUMS.length) return ART;
+    return GIF_ALBUMS[h % GIF_ALBUMS.length];
+  }
+
+  function svgArtwork96() {
+    return 'data:image/svg+xml,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">' +
+      '<circle cx="48" cy="48" r="44" fill="#1DB954"/>' +
+      '<text x="48" y="62" text-anchor="middle" font-size="44" fill="#000">♪</text></svg>');
+  }
+
+  function buildArtworkList(track) {
+    var out = [];
+    var gif = gifFor(track);
+
+    if (gif) {
+      out.push({ src: gif, sizes: '512x512', type: 'image/gif' });
+      out.push({ src: gif, sizes: '256x256', type: 'image/gif' });
+      out.push({ src: gif, sizes: '128x128', type: 'image/gif' });
+    }
+
+    if (track && track.art && track.art !== gif && /^https?:\/\//.test(track.art)) {
+      out.push({ src: track.art, sizes: '256x256' });
+      out.push({ src: track.art, sizes: '128x128' });
+    }
+
+    out.push({ src: svgArtwork96(), sizes: '96x96', type: 'image/svg+xml' });
+
+    return out;
+  }
+
+  function formatDescFor(track) {
+    if (!track) return 'Live Radio';
+    var bits = [];
+    if (track.codec) bits.push(track.codec);
+    if (track.bitrate) bits.push(track.bitrate + ' kbps');
+    return bits.length ? bits.join(' · ') : 'Live Radio';
   }
 
   /* ══════════════════════════════════════════════════════════
@@ -3049,6 +3121,51 @@ html[data-theme="silk"] {
   }
 
   /* ══════════════════════════════════════════════════════════
+     6b. myTUNER WIDGET PARSER (radioindia.in live widget)
+     ══════════════════════════════════════════════════════════ */
+  function extractMytunerWidgetStations(html, pageUrl, sourceId) {
+    var doc;
+    try { doc = new DOMParser().parseFromString(html, 'text/html'); } catch (e) { return []; }
+
+    var out = [];
+    var seen = {};
+
+    function push(name, url) {
+      url = String(url || '').trim();
+      if (!/^https?:\/\//i.test(url)) return;
+      if (seen[url]) return;
+      seen[url] = 1;
+      out.push(makeStation(name, url, sourceId));
+    }
+
+    /* 1. Widget container / playlist items */
+    var nodes = doc.querySelectorAll(
+      '.mytuner-widget li, .mytuner-widget [data-url], .mytuner-widget [data-stream], ' +
+      '[id^="mt-widget-"] li, [id^="mt-widget-"] [data-url], [id^="mt-widget-"] [data-stream]'
+    );
+    Array.prototype.forEach.call(nodes, function (el) {
+      var u = el.getAttribute('data-url') || el.getAttribute('data-stream') ||
+              el.getAttribute('data-href') || el.getAttribute('data-src') || '';
+      var n = el.getAttribute('data-name') || el.getAttribute('title') ||
+              (el.textContent || '').replace(/\s+/g, ' ').trim();
+      push(n, absUrl(u, pageUrl) || u);
+    });
+
+    /* 2. any mytuner CDN stream reference inside the markup */
+    var re = /https?:\/\/[^\s"'`<>\\]*(?:mytuner|app-mind|streamonkey|zeno\.fm|icecast|listenon)[^\s"'`<>\\]*/gi, m;
+    while ((m = re.exec(html))) {
+      push('', m[0].replace(/[),.;'"]+$/, ''));
+    }
+
+    /* 3. classic extraction as the final fallback */
+    if (!out.length) {
+      return extractStationsFromHtml(html, pageUrl, sourceId);
+    }
+
+    return out;
+  }
+
+  /* ══════════════════════════════════════════════════════════
      7. TOP-CHARTS.COM PARSER
      ══════════════════════════════════════════════════════════ */
   var STATIC_CHART_SONGS = [
@@ -3181,7 +3298,8 @@ html[data-theme="silk"] {
     view: 'home',
     busy: false,
     chartKind: 'songs',
-    chartRows: []
+    chartRows: [],
+    lastNotifiedId: null
   };
 
   try {
@@ -3307,7 +3425,7 @@ html[data-theme="silk"] {
   function cardHTML(s) {
     return '<article class="card" data-id="' + esc(s.id) + '" role="button" tabindex="0">' +
       '<div class="card-art">' +
-        '<img src="' + esc(s.art || ART) + '" alt="" loading="lazy" decoding="async">' +
+        '<img src="' + esc(s.art || gifFor(s) || ART) + '" alt="" loading="lazy" decoding="async">' +
         '<span class="card-play"><i class="fa-solid fa-play"></i></span>' +
       '</div>' +
       '<h3 class="card-title" title="' + esc(s.name) + '">' + esc(s.name) + '</h3>' +
@@ -3610,7 +3728,13 @@ html[data-theme="silk"] {
           return;
         }
 
-        var list = extractStationsFromHtml(html, s.url, id);
+        var list;
+        if (s.kind === 'widget') {
+          list = extractMytunerWidgetStations(html, s.url, id);
+        } else {
+          list = extractStationsFromHtml(html, s.url, id);
+        }
+
         sourceState[id] = { status: list.length ? 'ok' : 'err', count: list.length };
         renderSources();
 
@@ -3632,6 +3756,163 @@ html[data-theme="silk"] {
         setStatus('err', 'Failed');
         toast('Could not reach ' + s.name);
       });
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     14b. SYSTEM AUDIO PANEL (Media Session) + GIF ALBUM SUPPORT
+     ══════════════════════════════════════════════════════════ */
+  var mediaSessionReady = false;
+
+  function initMediaSession() {
+    if (!('mediaSession' in navigator)) return;
+    if (mediaSessionReady) return;
+    mediaSessionReady = true;
+
+    try {
+      navigator.mediaSession.setActionHandler('play', function () {
+        audio.play().catch(function () {});
+      });
+      navigator.mediaSession.setActionHandler('pause', function () {
+        audio.pause();
+      });
+      navigator.mediaSession.setActionHandler('stop', function () {
+        audio.pause();
+        try { navigator.mediaSession.playbackState = 'none'; } catch (e) {}
+      });
+      navigator.mediaSession.setActionHandler('previoustrack', function () {
+        nextStation(-1);
+      });
+      navigator.mediaSession.setActionHandler('nexttrack', function () {
+        nextStation(1);
+      });
+      navigator.mediaSession.setActionHandler('seekbackward', function (d) {
+        var live = !isFinite(audio.duration) || isNaN(audio.duration);
+        if (live) return;
+        try { audio.currentTime = Math.max(0, audio.currentTime - ((d && d.seekOffset) || 10)); } catch (e) {}
+      });
+      navigator.mediaSession.setActionHandler('seekforward', function (d) {
+        var live = !isFinite(audio.duration) || isNaN(audio.duration);
+        if (live) return;
+        try {
+          audio.currentTime = Math.min(audio.duration, audio.currentTime + ((d && d.seekOffset) || 10));
+        } catch (e) {}
+      });
+      navigator.mediaSession.setActionHandler('seekto', function (d) {
+        if (d && d.seekTime != null) {
+          try { audio.currentTime = d.seekTime; } catch (e) {}
+        }
+      });
+    } catch (e) { /* some handlers unsupported */ }
+  }
+
+  function updateMediaSession(track) {
+    if (!('mediaSession' in navigator)) return;
+    if (!track) return;
+
+    try {
+      initMediaSession();
+
+      var artwork = buildArtworkList(track);
+
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: track.name || 'HEX RADIO',
+        artist: track.country ? (track.country + ' · HEX RADIO') : 'HEX RADIO',
+        album: formatDescFor(track),
+        artwork: artwork
+      });
+
+      try { navigator.mediaSession.playbackState = state.playing ? 'playing' : 'paused'; } catch (e) {}
+
+      var live = !isFinite(audio.duration) || isNaN(audio.duration) || audio.duration === 0;
+      if (!live && audio.duration > 0 && typeof navigator.mediaSession.setPositionState === 'function') {
+        try {
+          navigator.mediaSession.setPositionState({
+            duration: audio.duration,
+            playbackRate: audio.playbackRate || 1,
+            position: Math.min(audio.currentTime || 0, audio.duration)
+          });
+        } catch (e) {}
+      }
+    } catch (e) {
+      console.warn('MediaSession error:', e);
+    }
+  }
+
+  function setMediaSessionPlaybackState(s) {
+    if (!('mediaSession' in navigator)) return;
+    try { navigator.mediaSession.playbackState = s; } catch (e) {}
+  }
+
+  /* ── Show Music Note Notification ── */
+  function showMusicNotification(track) {
+    try {
+      if (!('Notification' in window)) {
+        console.warn('Notifications API not supported');
+        return;
+      }
+      if (Notification.permission === 'denied') {
+        console.warn('Notification permission denied');
+        return;
+      }
+      if (Notification.permission === 'granted') {
+        const title = track.name || 'Now Playing';
+
+        /* GIF album artwork — animated GIF wins when available */
+        const gifArt = gifFor(track);
+
+        const options = {
+          body: `🎵 ${track.formatDesc || formatDescFor(track)} · ${track.format ? track.format.toUpperCase() : (track.codec || 'LIVE')}`,
+          icon: gifArt || NOTIF_ICON,
+          badge: NOTIF_ICON,
+          image: gifArt || undefined,
+          tag: 'hex-music-playing',
+          renotify: true,
+          silent: false,
+          vibrate: [200, 100, 200],
+          requireInteraction: false,
+          data: {
+            trackId: track.id,
+            trackName: track.name,
+            gif: gifArt,
+            stream: track.url
+          }
+        };
+
+        const notification = new Notification(title, options);
+
+        notification.onclick = function () {
+          try { window.focus(); } catch (e) {}
+          try { notification.close(); } catch (e) {}
+        };
+
+        setTimeout(() => {
+          try { notification.close(); } catch (e) {}
+        }, 6000);
+
+      } else if (Notification.permission === 'default') {
+        Notification.requestPermission().then(perm => {
+          if (perm === 'granted') {
+            showMusicNotification(track);
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('Notification error:', e);
+    }
+  }
+
+  /* Fire the full "now playing" pipeline once per station */
+  function publishNowPlaying(track) {
+    if (!track) return;
+
+    updateMediaSession(track);
+
+    if (state.lastNotifiedId !== track.id) {
+      state.lastNotifiedId = track.id;
+      showMusicNotification(track);
+    }
+
+    try { document.title = '▶ ' + track.name + ' — HEX RADIO'; } catch (e) {}
   }
 
   /* ══════════════════════════════════════════════════════════
@@ -3667,6 +3948,9 @@ html[data-theme="silk"] {
 
     audio.src = st.url;
     audio.volume = state.muted ? 0 : state.volume;
+
+    /* Immediately publish metadata so the OS audio panel shows the GIF album */
+    publishNowPlaying(st);
 
     if (autoplay) {
       var pr = audio.play();
@@ -3704,6 +3988,7 @@ html[data-theme="silk"] {
       i = (state.index + (dir || 1) + n) % n;
     }
     state.index = i;
+    state.lastNotifiedId = null;
     loadCurrent(true);
   }
 
@@ -3725,7 +4010,7 @@ html[data-theme="silk"] {
     var st = current();
     var img = $('#dock-art-img');
     if (st) {
-      img.src = st.art || ART;
+      img.src = st.art || gifFor(st) || ART;
       $('#dock-title').textContent = st.name;
       $('#dock-artist').textContent = st.country || 'Live radio';
       $('#dock-like').classList.toggle('on', liked(st.id));
@@ -3765,7 +4050,7 @@ html[data-theme="silk"] {
     }
     body.innerHTML = state.queue.map(function (s, i) {
       return '<div class="queue-item' + (i === state.index ? ' current' : '') + '" data-qidx="' + i + '">' +
-        '<div class="queue-art"><img src="' + esc(s.art || ART) + '" alt="" loading="lazy"></div>' +
+        '<div class="queue-art"><img src="' + esc(s.art || gifFor(s) || ART) + '" alt="" loading="lazy"></div>' +
         '<div class="queue-meta">' +
           '<div class="queue-title">' + esc(s.name) + '</div>' +
           '<div class="queue-sub">' + esc(s.country || 'Live radio') + (s.bitrate ? ' · ' + s.bitrate + ' kbps' : '') + '</div>' +
@@ -3834,7 +4119,7 @@ html[data-theme="silk"] {
      ══════════════════════════════════════════════════════════ */
   function openStation(st) {
     if (!st) return;
-    $('#st-art').src = st.art || ART;
+    $('#st-art').src = st.art || gifFor(st) || ART;
     $('#st-title').textContent = st.name;
 
     var meta = [];
@@ -3860,7 +4145,7 @@ html[data-theme="silk"] {
       return '<div class="tl-row' + (i === state.index ? ' playing' : '') + '" data-tlidx="' + i + '">' +
         '<div class="tl-num"><span>' + (i + 1) + '</span><span class="tl-eq"><i></i><i></i><i></i><i></i></span></div>' +
         '<div class="tl-main">' +
-          '<div class="tl-art"><img src="' + esc(s.art || ART) + '" alt="" loading="lazy"></div>' +
+          '<div class="tl-art"><img src="' + esc(s.art || gifFor(s) || ART) + '" alt="" loading="lazy"></div>' +
           '<div class="tl-info">' +
             '<div class="tl-title">' + esc(s.name) + '</div>' +
             '<div class="tl-artist">' + esc(s.country || 'Live radio') + '</div>' +
@@ -3903,12 +4188,17 @@ html[data-theme="silk"] {
     updatePlayBtn();
     updateDock();
     renderQueue();
+
+    /* ══ System Audio Panel + GIF notification ══ */
+    setMediaSessionPlaybackState('playing');
+    publishNowPlaying(current());
   });
 
   audio.addEventListener('pause', function () {
     state.playing = false;
     updatePlayBtn();
     if (!state.busy) setStatus('', 'Paused');
+    setMediaSessionPlaybackState('paused');
   });
 
   audio.addEventListener('waiting', function () { setStatus('busy', 'Buffering'); });
@@ -3919,6 +4209,7 @@ html[data-theme="silk"] {
     state.busy = false;
     updatePlayBtn();
     setStatus('err', 'Unavailable');
+    setMediaSessionPlaybackState('none');
     toast('Stream unavailable — try another station');
   });
 
@@ -3933,6 +4224,16 @@ html[data-theme="silk"] {
       $('#progress-fill').style.width = pct + '%';
       $('#progress-knob').style.left = pct + '%';
       $('#t-dur').textContent = fmtTime(audio.duration);
+
+      if ('mediaSession' in navigator && typeof navigator.mediaSession.setPositionState === 'function') {
+        try {
+          navigator.mediaSession.setPositionState({
+            duration: audio.duration,
+            playbackRate: audio.playbackRate || 1,
+            position: Math.min(t, audio.duration)
+          });
+        } catch (e) {}
+      }
     } else {
       $('#t-dur').textContent = 'LIVE';
     }
@@ -4101,6 +4402,7 @@ html[data-theme="silk"] {
     setStatus('', 'Ready');
     toast(list.length + ' stations loaded from HEX Sleuth FM Radio');
 
+    state.lastNotifiedId = null;
     playStation(list[0], list);
     radioLog('Now playing: ' + list[0].name, 'ok');
   }
@@ -4890,7 +5192,7 @@ html[data-theme="silk"] {
       renderProxyPanel();
     });
 
-    /* ---- proxy panel controls (still present in DOM, reachable via settings) ---- */
+    /* ---- proxy panel controls ---- */
     var bpr = $('#btn-proxy-refresh');
     if (bpr) bpr.addEventListener('click', function () { refreshProxies(false); });
 
@@ -4992,6 +5294,7 @@ html[data-theme="silk"] {
       var i = parseInt(row.getAttribute('data-qidx'), 10);
       if (isNaN(i)) return;
       state.index = i;
+      state.lastNotifiedId = null;
       loadCurrent(true);
     });
 
@@ -5008,6 +5311,7 @@ html[data-theme="silk"] {
       var i = parseInt(row.getAttribute('data-tlidx'), 10);
       if (isNaN(i)) return;
       state.index = i;
+      state.lastNotifiedId = null;
       loadCurrent(true);
       openStation(current());
     });
@@ -5098,6 +5402,9 @@ html[data-theme="silk"] {
     loadSavedTheme();
     buildThemeGallery();
 
+    /* System Audio Panel (Media Session) */
+    initMediaSession();
+
     renderTabs();
     renderFilterGroups();
     renderProxyPanel();
@@ -5120,6 +5427,15 @@ html[data-theme="silk"] {
     loadGenre('chart');
 
     setTimeout(function () { refreshProxies(true); }, 1500);
+
+    /* Ask for notification permission once, quietly — enables GIF album notifications */
+    setTimeout(function () {
+      try {
+        if ('Notification' in window && Notification.permission === 'default') {
+          Notification.requestPermission().catch(function () {});
+        }
+      } catch (e) { /* noop */ }
+    }, 4000);
   }
 
   if (document.readyState === 'loading') {
@@ -5224,7 +5540,7 @@ if (document.addEventListener) {
     }, false);
 }else{
     document.attachEvent('oncontextmenu', function() {
-    window.event.returnValue = false;
+    window.returnValue = false;
     });
 }
 </script>
