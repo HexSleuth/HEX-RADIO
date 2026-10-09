@@ -704,6 +704,123 @@ img { max-width: 100%; display: block; }
 .volume-fill { position: absolute; left: 0; top: 0; bottom: 0; background: #fff; border-radius: 99px; transition: background .15s; width: 90%; }
 .volume:hover .volume-fill { background: var(--green); }
 
+/* ═══════════════════════════════════════════════════════════════════
+   VERTICAL VOLUME POPUP  (upgrade — appears on volume icon click)
+   ═══════════════════════════════════════════════════════════════════ */
+.volume-popup {
+  position: fixed;
+  right: 14px;
+  bottom: calc(var(--dock-h) + 14px);
+  width: 60px;
+  padding: 12px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,.02) inset;
+  z-index: 65;
+  opacity: 0;
+  transform: translateY(14px) scale(.96);
+  pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.volume-popup.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+.volume-popup::after {
+  content: "";
+  position: absolute;
+  bottom: -7px; right: 22px;
+  width: 12px; height: 12px;
+  background: var(--bg-3);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  transform: rotate(45deg);
+}
+
+.volume-v-mute {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  color: var(--muted);
+  font-size: 15px;
+  transition: color .15s, background .15s, transform .15s;
+  flex: 0 0 auto;
+}
+.volume-v-mute:hover { color: #fff; background: rgba(255,255,255,.08); }
+.volume-v-mute:active { transform: scale(.92); }
+.volume-v-mute.is-muted { color: var(--red); }
+
+.volume-v-track {
+  position: relative;
+  width: 10px;
+  height: 150px;
+  background: rgba(128,128,128,.38);
+  border-radius: 99px;
+  cursor: pointer;
+  touch-action: none;
+  flex: 0 0 auto;
+}
+.volume-v-fill {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  background: #fff;
+  border-radius: 99px;
+  height: 90%;
+  transition: background .15s;
+  pointer-events: none;
+}
+.volume-v-track:hover .volume-v-fill,
+.volume-v-track.is-dragging .volume-v-fill { background: var(--green); }
+
+.volume-v-knob {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 50%);
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,.55), 0 0 0 1px rgba(0,0,0,.25);
+  pointer-events: none;
+  transition: transform .12s, background .15s;
+}
+.volume-v-track:hover .volume-v-knob,
+.volume-v-track.is-dragging .volume-v-knob {
+  background: var(--green);
+  transform: translate(-50%, 50%) scale(1.12);
+}
+
+.volume-v-val {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .02em;
+  min-width: 26px;
+  text-align: center;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 720px) {
+  .volume-popup {
+    right: 10px;
+    bottom: calc(var(--dock-h) + 10px);
+    width: 66px;
+    padding: 12px 12px 10px;
+  }
+  .volume-v-track { width: 12px; height: 170px; }
+  .volume-v-knob { width: 18px; height: 18px; }
+  .volume-v-mute { width: 40px; height: 40px; font-size: 16px; }
+  .volume-v-val { font-size: 12px; }
+}
+
 @media (max-width: 1180px) { .net-pill { display: none; } }
 @media (max-width: 1000px) {
   .dock { grid-template-columns: minmax(140px,1fr) minmax(260px,2fr) auto; padding: 0 12px; gap: 10px; }
@@ -1823,164 +1940,6 @@ html[data-theme="silk"] {
   --text:#3d2c33; --muted:#7d6a70; --muted-2:#ab9aa0;
   --green:#d98ea8; --green-hi:#e8a4bb; --red:#c05c7a; --amber:#e0b57d; --violet:#b58fd1;
 }
-
-/* ═══════════════════════════════════════════════════════════════════
-   ★★  MOBILE VERTICAL VOLUME UPGRADE  ★★
-   ───────────────────────────────────────────────────────────────────
-   Desktop layout, theme, icons, buttons and the system JavaScript are
-   left completely untouched.  On phones / small tablets (≤ 720px) the
-   volume control is upgraded to a vertical UP / DOWN slider bar that
-   flies out above the dock.  It re-uses the existing CSS variables so
-   every one of the 34 palettes repaints it automatically.
-   ═══════════════════════════════════════════════════════════════════ */
-
-.hexvol { display: none; }
-
-@media (max-width: 720px) {
-
-  .hexvol {
-    position: fixed;
-    right: 12px;
-    bottom: calc(var(--dock-h) + 14px);
-    z-index: 58;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    font-family: inherit;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-user-select: none;
-    user-select: none;
-  }
-
-  /* ── the floating open / close button ── */
-  .hexvol-fab {
-    width: 46px; height: 46px;
-    border-radius: 50%;
-    display: grid; place-items: center;
-    font-size: 16px;
-    background: var(--bg-4);
-    color: var(--text);
-    border: 1px solid var(--border-2);
-    box-shadow: 0 10px 26px rgba(0,0,0,.7);
-    transition: transform .15s, background .15s, color .15s,
-                border-color .15s, box-shadow .2s;
-  }
-  .hexvol-fab:active { transform: scale(.92); }
-  .hexvol.open .hexvol-fab {
-    background: var(--green);
-    color: #000;
-    border-color: var(--green);
-    box-shadow: 0 10px 30px rgba(0,0,0,.75), 0 0 0 4px rgba(128,128,128,.18);
-  }
-
-  /* ── the fly-out vertical panel ── */
-  .hexvol-panel {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 9px;
-    padding: 12px 10px;
-    border-radius: 999px;
-    background: var(--bg-3);
-    border: 1px solid var(--border-2);
-    box-shadow: 0 26px 64px rgba(0,0,0,.9);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
-    backdrop-filter: blur(14px) saturate(140%);
-    transform-origin: bottom center;
-    transform: translateY(14px) scale(.9);
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: opacity .2s ease, transform .2s ease, visibility .2s;
-  }
-  .hexvol.open .hexvol-panel {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transform: translateY(0) scale(1);
-  }
-
-  /* ── percentage read-out ── */
-  .hexvol-pct {
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: .02em;
-    line-height: 1;
-    color: var(--green-hi);
-    font-variant-numeric: tabular-nums;
-    min-width: 40px;
-    text-align: center;
-  }
-  .hexvol.muted .hexvol-pct { color: var(--red); }
-
-  /* ── up / down step buttons ── */
-  .hexvol-step {
-    width: 34px; height: 34px;
-    border-radius: 50%;
-    display: grid; place-items: center;
-    flex: 0 0 auto;
-    font-size: 12px;
-    background: var(--bg-5);
-    color: var(--text);
-    transition: background .15s, color .15s, transform .12s;
-  }
-  .hexvol-step:active {
-    background: var(--green);
-    color: #000;
-    transform: scale(.9);
-  }
-
-  /* ── the vertical slider bar ── */
-  .hexvol-track {
-    position: relative;
-    width: 8px;
-    height: 132px;
-    border-radius: 99px;
-    background: rgba(128,128,128,.42);
-    cursor: pointer;
-    touch-action: none;
-    flex: 0 0 auto;
-  }
-  .hexvol-fill {
-    position: absolute;
-    left: 0; right: 0; bottom: 0;
-    height: 90%;
-    border-radius: 99px;
-    background: var(--green);
-    pointer-events: none;
-    transition: height .08s linear, background .15s;
-  }
-  .hexvol-knob {
-    position: absolute;
-    left: 50%;
-    bottom: 90%;
-    width: 20px; height: 20px;
-    border-radius: 50%;
-    background: #fff;
-    border: 3px solid var(--green);
-    transform: translate(-50%, 50%);
-    box-shadow: 0 4px 12px rgba(0,0,0,.7);
-    pointer-events: none;
-    transition: bottom .08s linear, transform .15s, border-color .15s;
-  }
-  .hexvol-track.armed .hexvol-fill { background: var(--green-hi); }
-  .hexvol-track.armed .hexvol-knob {
-    border-color: var(--green-hi);
-    transform: translate(-50%, 50%) scale(1.14);
-  }
-
-  .hexvol.muted .hexvol-fill { background: var(--red); }
-  .hexvol.muted .hexvol-knob { border-color: var(--red); }
-
-  /* the horizontal dock bar stays exactly where it always was — hidden */
-  .dock-right .volume { display: none; }
-}
-
-@media (max-width: 380px) {
-  .hexvol-track { height: 112px; }
-  .hexvol-fab   { width: 42px; height: 42px; font-size: 15px; }
-}
 </style>
 </head>
 <body>
@@ -2178,12 +2137,25 @@ html[data-theme="silk"] {
       <button class="icon-btn" id="btn-queue" title="Queue" aria-label="Queue">
         <i class="fa-solid fa-list-ul"></i>
       </button>
-      <button class="icon-btn" id="btn-mute" title="Mute" aria-label="Mute">
+      <button class="icon-btn" id="btn-mute" title="Volume" aria-label="Volume">
         <i class="fa-solid fa-volume-high"></i>
       </button>
       <div class="volume" id="volume"><div class="volume-fill" id="volume-fill"></div></div>
     </div>
   </footer>
+</div>
+
+<!-- ══════════ VERTICAL VOLUME POPUP  (NEW — appears on volume icon click) ══════════ -->
+<div class="volume-popup" id="volume-popup" aria-hidden="true" role="dialog" aria-label="Volume control">
+  <button class="volume-v-mute" id="volume-v-mute" type="button" aria-label="Mute">
+    <i class="fa-solid fa-volume-high"></i>
+  </button>
+  <div class="volume-v-track" id="volume-v-track" role="slider" aria-label="Volume"
+       aria-valuemin="0" aria-valuemax="100" aria-valuenow="90" tabindex="0">
+    <div class="volume-v-fill" id="volume-v-fill"></div>
+    <div class="volume-v-knob" id="volume-v-knob"></div>
+  </div>
+  <span class="volume-v-val" id="volume-v-val">90</span>
 </div>
 
 <!-- ══════════ QUEUE PANEL ══════════ -->
@@ -2488,45 +2460,368 @@ html[data-theme="silk"] {
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════════════
-     ★★ MOBILE VERTICAL VOLUME CONTROL ★★
-     Flies out above the dock on phones / small tablets only.
-     Desktop never sees it — the original horizontal bar is untouched.
-     ══════════════════════════════════════════════════════════════════ -->
-<div class="hexvol" id="hexvol" aria-label="Volume control">
-
-  <div class="hexvol-panel" id="hexvol-panel" role="group" aria-label="Vertical volume slider">
-
-    <div class="hexvol-pct" id="hexvol-pct">90%</div>
-
-    <button class="hexvol-step" id="hexvol-up" type="button" aria-label="Volume up" title="Volume up">
-      <i class="fa-solid fa-plus"></i>
-    </button>
-
-    <div class="hexvol-track" id="hexvol-track"
-         role="slider" tabindex="0"
-         aria-label="Volume level"
-         aria-valuemin="0" aria-valuemax="100" aria-valuenow="90"
-         aria-orientation="vertical">
-      <div class="hexvol-fill" id="hexvol-fill"></div>
-      <div class="hexvol-knob" id="hexvol-knob"></div>
-    </div>
-
-    <button class="hexvol-step" id="hexvol-down" type="button" aria-label="Volume down" title="Volume down">
-      <i class="fa-solid fa-minus"></i>
-    </button>
-
-  </div>
-
-  <button class="hexvol-fab" id="hexvol-fab" type="button"
-          aria-label="Volume" aria-expanded="false" title="Volume">
-    <i class="fa-solid fa-volume-high" id="hexvol-fab-ico"></i>
-  </button>
-</div>
-
 <div class="toast" id="toast" hidden></div>
 <audio id="audio" preload="none" playsinline></audio>
 
+<!-- ═══════════════════════════════════════════════════════════════════════
+     ══ AUDIO LIBRARIES  (Howler + Spatial Plugin + Tone.js + Essentia.js) ══
+     Loaded synchronously before the main HEX RADIO engine so they are
+     available when the player initialises.
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<!-- ── Howler.js v2.2.4 ── -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<!-- ── Howler Spatial Plugin v2.2.4 (adds stereo + 3D audio) ── -->
+<script>
+/*!
+ *  Spatial Plugin - Adds support for stereo and 3D audio where Web Audio is supported.
+ *  
+ *  howler.js v2.2.4
+ *  howlerjs.com
+ *
+ *  (c) 2013-2020, James Simpson of GoldFire Studios
+ *  goldfirestudios.com
+ *
+ *  MIT License
+ */
+(function() {
+  'use strict';
+  if (typeof Howler === 'undefined' || typeof Howl === 'undefined' || typeof Sound === 'undefined') {
+    return;
+  }
+
+  HowlerGlobal.prototype._pos = [0, 0, 0];
+  HowlerGlobal.prototype._orientation = [0, 0, -1, 0, 1, 0];
+
+  HowlerGlobal.prototype.stereo = function(pan) {
+    var self = this;
+    if (!self.ctx || !self.ctx.listener) { return self; }
+    for (var i=self._howls.length-1; i>=0; i--) { self._howls[i].stereo(pan); }
+    return self;
+  };
+
+  HowlerGlobal.prototype.pos = function(x, y, z) {
+    var self = this;
+    if (!self.ctx || !self.ctx.listener) { return self; }
+    y = (typeof y !== 'number') ? self._pos[1] : y;
+    z = (typeof z !== 'number') ? self._pos[2] : z;
+    if (typeof x === 'number') {
+      self._pos = [x, y, z];
+      if (typeof self.ctx.listener.positionX !== 'undefined') {
+        self.ctx.listener.positionX.setTargetAtTime(self._pos[0], Howler.ctx.currentTime, 0.1);
+        self.ctx.listener.positionY.setTargetAtTime(self._pos[1], Howler.ctx.currentTime, 0.1);
+        self.ctx.listener.positionZ.setTargetAtTime(self._pos[2], Howler.ctx.currentTime, 0.1);
+      } else {
+        self.ctx.listener.setPosition(self._pos[0], self._pos[1], self._pos[2]);
+      }
+    } else { return self._pos; }
+    return self;
+  };
+
+  HowlerGlobal.prototype.orientation = function(x, y, z, xUp, yUp, zUp) {
+    var self = this;
+    if (!self.ctx || !self.ctx.listener) { return self; }
+    var or = self._orientation;
+    y = (typeof y !== 'number') ? or[1] : y;
+    z = (typeof z !== 'number') ? or[2] : z;
+    xUp = (typeof xUp !== 'number') ? or[3] : xUp;
+    yUp = (typeof yUp !== 'number') ? or[4] : yUp;
+    zUp = (typeof zUp !== 'number') ? or[5] : zUp;
+    if (typeof x === 'number') {
+      self._orientation = [x, y, z, xUp, yUp, zUp];
+      if (typeof self.ctx.listener.forwardX !== 'undefined') {
+        self.ctx.listener.forwardX.setTargetAtTime(x, Howler.ctx.currentTime, 0.1);
+        self.ctx.listener.forwardY.setTargetAtTime(y, Howler.ctx.currentTime, 0.1);
+        self.ctx.listener.forwardZ.setTargetAtTime(z, Howler.ctx.currentTime, 0.1);
+        self.ctx.listener.upX.setTargetAtTime(xUp, Howler.ctx.currentTime, 0.1);
+        self.ctx.listener.upY.setTargetAtTime(yUp, Howler.ctx.currentTime, 0.1);
+        self.ctx.listener.upZ.setTargetAtTime(zUp, Howler.ctx.currentTime, 0.1);
+      } else {
+        self.ctx.listener.setOrientation(x, y, z, xUp, yUp, zUp);
+      }
+    } else { return or; }
+    return self;
+  };
+
+  Howl.prototype.init = (function(_super) {
+    return function(o) {
+      var self = this;
+      self._orientation = o.orientation || [1, 0, 0];
+      self._stereo = o.stereo || null;
+      self._pos = o.pos || null;
+      self._pannerAttr = {
+        coneInnerAngle: typeof o.coneInnerAngle !== 'undefined' ? o.coneInnerAngle : 360,
+        coneOuterAngle: typeof o.coneOuterAngle !== 'undefined' ? o.coneOuterAngle : 360,
+        coneOuterGain: typeof o.coneOuterGain !== 'undefined' ? o.coneOuterGain : 0,
+        distanceModel: typeof o.distanceModel !== 'undefined' ? o.distanceModel : 'inverse',
+        maxDistance: typeof o.maxDistance !== 'undefined' ? o.maxDistance : 10000,
+        panningModel: typeof o.panningModel !== 'undefined' ? o.panningModel : 'HRTF',
+        refDistance: typeof o.refDistance !== 'undefined' ? o.refDistance : 1,
+        rolloffFactor: typeof o.rolloffFactor !== 'undefined' ? o.rolloffFactor : 1
+      };
+      self._onstereo = o.onstereo ? [{fn: o.onstereo}] : [];
+      self._onpos = o.onpos ? [{fn: o.onpos}] : [];
+      self._onorientation = o.onorientation ? [{fn: o.onorientation}] : [];
+      return _super.call(this, o);
+    };
+  })(Howl.prototype.init);
+
+  Howl.prototype.stereo = function(pan, id) {
+    var self = this;
+    if (!self._webAudio) { return self; }
+    if (self._state !== 'loaded') {
+      self._queue.push({ event: 'stereo', action: function() { self.stereo(pan, id); } });
+      return self;
+    }
+    var pannerType = (typeof Howler.ctx.createStereoPanner === 'undefined') ? 'spatial' : 'stereo';
+    if (typeof id === 'undefined') {
+      if (typeof pan === 'number') { self._stereo = pan; self._pos = [pan, 0, 0]; }
+      else { return self._stereo; }
+    }
+    var ids = self._getSoundIds(id);
+    for (var i=0; i<ids.length; i++) {
+      var sound = self._soundById(ids[i]);
+      if (sound) {
+        if (typeof pan === 'number') {
+          sound._stereo = pan;
+          sound._pos = [pan, 0, 0];
+          if (sound._node) {
+            sound._pannerAttr.panningModel = 'equalpower';
+            if (!sound._panner || !sound._panner.pan) { setupPanner(sound, pannerType); }
+            if (pannerType === 'spatial') {
+              if (typeof sound._panner.positionX !== 'undefined') {
+                sound._panner.positionX.setValueAtTime(pan, Howler.ctx.currentTime);
+                sound._panner.positionY.setValueAtTime(0, Howler.ctx.currentTime);
+                sound._panner.positionZ.setValueAtTime(0, Howler.ctx.currentTime);
+              } else { sound._panner.setPosition(pan, 0, 0); }
+            } else { sound._panner.pan.setValueAtTime(pan, Howler.ctx.currentTime); }
+          }
+          self._emit('stereo', sound._id);
+        } else { return sound._stereo; }
+      }
+    }
+    return self;
+  };
+
+  Howl.prototype.pos = function(x, y, z, id) {
+    var self = this;
+    if (!self._webAudio) { return self; }
+    if (self._state !== 'loaded') {
+      self._queue.push({ event: 'pos', action: function() { self.pos(x, y, z, id); } });
+      return self;
+    }
+    y = (typeof y !== 'number') ? 0 : y;
+    z = (typeof z !== 'number') ? -0.5 : z;
+    if (typeof id === 'undefined') {
+      if (typeof x === 'number') { self._pos = [x, y, z]; }
+      else { return self._pos; }
+    }
+    var ids = self._getSoundIds(id);
+    for (var i=0; i<ids.length; i++) {
+      var sound = self._soundById(ids[i]);
+      if (sound) {
+        if (typeof x === 'number') {
+          sound._pos = [x, y, z];
+          if (sound._node) {
+            if (!sound._panner || sound._panner.pan) { setupPanner(sound, 'spatial'); }
+            if (typeof sound._panner.positionX !== 'undefined') {
+              sound._panner.positionX.setValueAtTime(x, Howler.ctx.currentTime);
+              sound._panner.positionY.setValueAtTime(y, Howler.ctx.currentTime);
+              sound._panner.positionZ.setValueAtTime(z, Howler.ctx.currentTime);
+            } else { sound._panner.setPosition(x, y, z); }
+          }
+          self._emit('pos', sound._id);
+        } else { return sound._pos; }
+      }
+    }
+    return self;
+  };
+
+  Howl.prototype.orientation = function(x, y, z, id) {
+    var self = this;
+    if (!self._webAudio) { return self; }
+    if (self._state !== 'loaded') {
+      self._queue.push({ event: 'orientation', action: function() { self.orientation(x, y, z, id); } });
+      return self;
+    }
+    y = (typeof y !== 'number') ? self._orientation[1] : y;
+    z = (typeof z !== 'number') ? self._orientation[2] : z;
+    if (typeof id === 'undefined') {
+      if (typeof x === 'number') { self._orientation = [x, y, z]; }
+      else { return self._orientation; }
+    }
+    var ids = self._getSoundIds(id);
+    for (var i=0; i<ids.length; i++) {
+      var sound = self._soundById(ids[i]);
+      if (sound) {
+        if (typeof x === 'number') {
+          sound._orientation = [x, y, z];
+          if (sound._node) {
+            if (!sound._panner) {
+              if (!sound._pos) { sound._pos = self._pos || [0, 0, -0.5]; }
+              setupPanner(sound, 'spatial');
+            }
+            if (typeof sound._panner.orientationX !== 'undefined') {
+              sound._panner.orientationX.setValueAtTime(x, Howler.ctx.currentTime);
+              sound._panner.orientationY.setValueAtTime(y, Howler.ctx.currentTime);
+              sound._panner.orientationZ.setValueAtTime(z, Howler.ctx.currentTime);
+            } else { sound._panner.setOrientation(x, y, z); }
+          }
+          self._emit('orientation', sound._id);
+        } else { return sound._orientation; }
+      }
+    }
+    return self;
+  };
+
+  Howl.prototype.pannerAttr = function() {
+    var self = this;
+    var args = arguments;
+    var o, id, sound;
+    if (!self._webAudio) { return self; }
+    if (args.length === 0) { return self._pannerAttr; }
+    else if (args.length === 1) {
+      if (typeof args[0] === 'object') {
+        o = args[0];
+        if (typeof id === 'undefined') {
+          if (!o.pannerAttr) {
+            o.pannerAttr = {
+              coneInnerAngle: o.coneInnerAngle, coneOuterAngle: o.coneOuterAngle,
+              coneOuterGain: o.coneOuterGain, distanceModel: o.distanceModel,
+              maxDistance: o.maxDistance, refDistance: o.refDistance,
+              rolloffFactor: o.rolloffFactor, panningModel: o.panningModel
+            };
+          }
+          self._pannerAttr = {
+            coneInnerAngle: typeof o.pannerAttr.coneInnerAngle !== 'undefined' ? o.pannerAttr.coneInnerAngle : self._coneInnerAngle,
+            coneOuterAngle: typeof o.pannerAttr.coneOuterAngle !== 'undefined' ? o.pannerAttr.coneOuterAngle : self._coneOuterAngle,
+            coneOuterGain: typeof o.pannerAttr.coneOuterGain !== 'undefined' ? o.pannerAttr.coneOuterGain : self._coneOuterGain,
+            distanceModel: typeof o.pannerAttr.distanceModel !== 'undefined' ? o.pannerAttr.distanceModel : self._distanceModel,
+            maxDistance: typeof o.pannerAttr.maxDistance !== 'undefined' ? o.pannerAttr.maxDistance : self._maxDistance,
+            refDistance: typeof o.pannerAttr.refDistance !== 'undefined' ? o.pannerAttr.refDistance : self._refDistance,
+            rolloffFactor: typeof o.pannerAttr.rolloffFactor !== 'undefined' ? o.pannerAttr.rolloffFactor : self._rolloffFactor,
+            panningModel: typeof o.pannerAttr.panningModel !== 'undefined' ? o.pannerAttr.panningModel : self._panningModel
+          };
+        }
+      } else {
+        sound = self._soundById(parseInt(args[0], 10));
+        return sound ? sound._pannerAttr : self._pannerAttr;
+      }
+    } else if (args.length === 2) {
+      o = args[0];
+      id = parseInt(args[1], 10);
+    }
+    var ids = self._getSoundIds(id);
+    for (var i=0; i<ids.length; i++) {
+      sound = self._soundById(ids[i]);
+      if (sound) {
+        var pa = sound._pannerAttr;
+        pa = {
+          coneInnerAngle: typeof o.coneInnerAngle !== 'undefined' ? o.coneInnerAngle : pa.coneInnerAngle,
+          coneOuterAngle: typeof o.coneOuterAngle !== 'undefined' ? o.coneOuterAngle : pa.coneOuterAngle,
+          coneOuterGain: typeof o.coneOuterGain !== 'undefined' ? o.coneOuterGain : pa.coneOuterGain,
+          distanceModel: typeof o.distanceModel !== 'undefined' ? o.distanceModel : pa.distanceModel,
+          maxDistance: typeof o.maxDistance !== 'undefined' ? o.maxDistance : pa.maxDistance,
+          refDistance: typeof o.refDistance !== 'undefined' ? o.refDistance : pa.refDistance,
+          rolloffFactor: typeof o.rolloffFactor !== 'undefined' ? o.rolloffFactor : pa.rolloffFactor,
+          panningModel: typeof o.panningModel !== 'undefined' ? o.panningModel : pa.panningModel
+        };
+        var panner = sound._panner;
+        if (!panner) {
+          if (!sound._pos) { sound._pos = self._pos || [0, 0, -0.5]; }
+          setupPanner(sound, 'spatial');
+          panner = sound._panner;
+        }
+        panner.coneInnerAngle = pa.coneInnerAngle;
+        panner.coneOuterAngle = pa.coneOuterAngle;
+        panner.coneOuterGain = pa.coneOuterGain;
+        panner.distanceModel = pa.distanceModel;
+        panner.maxDistance = pa.maxDistance;
+        panner.refDistance = pa.refDistance;
+        panner.rolloffFactor = pa.rolloffFactor;
+        panner.panningModel = pa.panningModel;
+      }
+    }
+    return self;
+  };
+
+  Sound.prototype.init = (function(_super) {
+    return function() {
+      var self = this;
+      var parent = self._parent;
+      self._orientation = parent._orientation;
+      self._stereo = parent._stereo;
+      self._pos = parent._pos;
+      self._pannerAttr = parent._pannerAttr;
+      _super.call(this);
+      if (self._stereo) { parent.stereo(self._stereo); }
+      else if (self._pos) { parent.pos(self._pos[0], self._pos[1], self._pos[2], self._id); }
+    };
+  })(Sound.prototype.init);
+
+  Sound.prototype.reset = (function(_super) {
+    return function() {
+      var self = this;
+      var parent = self._parent;
+      self._orientation = parent._orientation;
+      self._stereo = parent._stereo;
+      self._pos = parent._pos;
+      self._pannerAttr = parent._pannerAttr;
+      if (self._stereo) { parent.stereo(self._stereo); }
+      else if (self._pos) { parent.pos(self._pos[0], self._pos[1], self._pos[2], self._id); }
+      else if (self._panner) {
+        self._panner.disconnect(0);
+        self._panner = undefined;
+        parent._refreshBuffer(self);
+      }
+      return _super.call(this);
+    };
+  })(Sound.prototype.reset);
+
+  var setupPanner = function(sound, type) {
+    type = type || 'spatial';
+    if (type === 'spatial') {
+      sound._panner = Howler.ctx.createPanner();
+      sound._panner.coneInnerAngle = sound._pannerAttr.coneInnerAngle;
+      sound._panner.coneOuterAngle = sound._pannerAttr.coneOuterAngle;
+      sound._panner.coneOuterGain = sound._pannerAttr.coneOuterGain;
+      sound._panner.distanceModel = sound._pannerAttr.distanceModel;
+      sound._panner.maxDistance = sound._pannerAttr.maxDistance;
+      sound._panner.refDistance = sound._pannerAttr.refDistance;
+      sound._panner.rolloffFactor = sound._pannerAttr.rolloffFactor;
+      sound._panner.panningModel = sound._pannerAttr.panningModel;
+      if (typeof sound._panner.positionX !== 'undefined') {
+        sound._panner.positionX.setValueAtTime(sound._pos[0], Howler.ctx.currentTime);
+        sound._panner.positionY.setValueAtTime(sound._pos[1], Howler.ctx.currentTime);
+        sound._panner.positionZ.setValueAtTime(sound._pos[2], Howler.ctx.currentTime);
+      } else { sound._panner.setPosition(sound._pos[0], sound._pos[1], sound._pos[2]); }
+      if (typeof sound._panner.orientationX !== 'undefined') {
+        sound._panner.orientationX.setValueAtTime(sound._orientation[0], Howler.ctx.currentTime);
+        sound._panner.orientationY.setValueAtTime(sound._orientation[1], Howler.ctx.currentTime);
+        sound._panner.orientationZ.setValueAtTime(sound._orientation[2], Howler.ctx.currentTime);
+      } else { sound._panner.setOrientation(sound._orientation[0], sound._orientation[1], sound._orientation[2]); }
+    } else {
+      sound._panner = Howler.ctx.createStereoPanner();
+      sound._panner.pan.setValueAtTime(sound._stereo, Howler.ctx.currentTime);
+    }
+    sound._panner.connect(sound._node);
+    if (!sound._paused) {
+      sound._parent.pause(sound._id, true).play(sound._id, true);
+    }
+  };
+})();
+</script>
+
+<!-- ── Tone.js v14.8.49 ── -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<!-- ── Essentia.js v0.1.3  (music/audio signal analysis — MTG-UPF) ── -->
+<script src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-core.0.1.3.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     ══ HEX RADIO  —  MAIN ENGINE  ══
+     ═══════════════════════════════════════════════════════════════════════ -->
 <script>
 (function () {
   'use strict';
@@ -5222,41 +5517,199 @@ html[data-theme="silk"] {
       toggleLike(st.id);
     });
 
-    /* ---- volume ---- */
-    var vol = $('#volume'), volFill = $('#volume-fill'), dragging = false;
+    /* ══════════════════════════════════════════════════════════
+       VOLUME  —  upgraded
+       • Desktop: horizontal slider (#volume) preserved
+       • Click volume icon (#btn-mute): vertical popup slider
+       • Mobile: horizontal hidden by CSS, popup is primary control
+       • Auto-detects view via responsive layout + touch support
+       ══════════════════════════════════════════════════════════ */
+    var vol         = $('#volume');
+    var volFill     = $('#volume-fill');
+    var vPopup      = $('#volume-popup');
+    var vTrack      = $('#volume-v-track');
+    var vFill       = $('#volume-v-fill');
+    var vKnob       = $('#volume-v-knob');
+    var vVal        = $('#volume-v-val');
+    var vMuteBtn    = $('#volume-v-mute');
+    var mainVolBtn  = $('#btn-mute');
+    var dragging    = false;
+    var draggingV   = false;
 
+    function applyVolumeUI() {
+      var shown = Math.max(0, Math.min(1, state.volume));
+
+      /* horizontal slider */
+      if (volFill) volFill.style.width = (shown * 100) + '%';
+
+      /* vertical popup slider */
+      if (vFill) vFill.style.height = (shown * 100) + '%';
+      if (vKnob) vKnob.style.bottom = (shown * 100) + '%';
+      if (vVal)  vVal.textContent = Math.round(shown * 100);
+      if (vTrack) vTrack.setAttribute('aria-valuenow', String(Math.round(shown * 100)));
+
+      /* main dock icon */
+      var iconCls;
+      if (state.muted || shown === 0) {
+        iconCls = 'fa-volume-xmark';
+      } else if (shown < 0.5) {
+        iconCls = 'fa-volume-low';
+      } else {
+        iconCls = 'fa-volume-high';
+      }
+      if (mainVolBtn) {
+        mainVolBtn.innerHTML = '<i class="fa-solid ' + iconCls + '"></i>';
+        mainVolBtn.style.color = state.muted ? 'var(--red)' : '';
+        mainVolBtn.setAttribute('title', state.muted ? 'Unmute (click for slider)' : 'Volume (click for slider)');
+      }
+
+      /* popup mute button */
+      if (vMuteBtn) {
+        vMuteBtn.innerHTML = state.muted
+          ? '<i class="fa-solid fa-volume-xmark"></i>'
+          : (shown === 0 ? '<i class="fa-solid fa-volume-low"></i>' : '<i class="fa-solid fa-volume-high"></i>');
+        vMuteBtn.classList.toggle('is-muted', state.muted);
+      }
+
+      /* apply to audio element */
+      audio.muted  = state.muted;
+      audio.volume = shown;
+    }
+
+    /* --- desktop horizontal slider --- */
     function setVolumeFromEvent(e) {
+      if (!vol) return;
       var r = vol.getBoundingClientRect();
       var x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
       var pct = Math.max(0, Math.min(1, x / r.width));
       state.volume = pct;
-      state.muted = pct === 0;
-      audio.volume = pct;
-      audio.muted = false;
-      volFill.style.width = (pct * 100) + '%';
-      $('#btn-mute').innerHTML = pct === 0
-        ? '<i class="fa-solid fa-volume-xmark"></i>'
-        : (pct < 0.5 ? '<i class="fa-solid fa-volume-low"></i>' : '<i class="fa-solid fa-volume-high"></i>');
+      if (pct > 0) state.muted = false;
+      applyVolumeUI();
     }
 
-    vol.addEventListener('mousedown', function (e) {
-      dragging = true; setVolumeFromEvent(e); e.preventDefault();
-    });
-    document.addEventListener('mousemove', function (e) { if (dragging) setVolumeFromEvent(e); });
-    document.addEventListener('mouseup', function () { dragging = false; });
+    if (vol) {
+      vol.addEventListener('mousedown', function (e) {
+        dragging = true; setVolumeFromEvent(e); e.preventDefault();
+      });
+      document.addEventListener('mousemove', function (e) { if (dragging) setVolumeFromEvent(e); });
+      document.addEventListener('mouseup', function () { dragging = false; });
 
-    vol.addEventListener('touchstart', function (e) { setVolumeFromEvent(e); }, { passive: true });
-    vol.addEventListener('touchmove', function (e) { setVolumeFromEvent(e); }, { passive: true });
+      vol.addEventListener('touchstart', function (e) { setVolumeFromEvent(e); }, { passive: true });
+      vol.addEventListener('touchmove', function (e) { setVolumeFromEvent(e); }, { passive: true });
+    }
 
-    $('#btn-mute').addEventListener('click', function () {
-      state.muted = !state.muted;
-      audio.muted = state.muted;
-      this.innerHTML = state.muted
-        ? '<i class="fa-solid fa-volume-xmark"></i>'
-        : '<i class="fa-solid fa-volume-high"></i>';
-      this.style.color = state.muted ? 'var(--red)' : '';
-      toast(state.muted ? 'Muted' : 'Unmuted', 1200);
+    /* --- vertical popup slider --- */
+    function setVolumeFromVertical(e) {
+      if (!vTrack) return;
+      var r = vTrack.getBoundingClientRect();
+      var y = (e.touches ? e.touches[0].clientY : e.clientY) - r.top;
+      var pct = 1 - Math.max(0, Math.min(1, y / r.height));
+      state.volume = pct;
+      if (pct > 0) state.muted = false;
+      applyVolumeUI();
+    }
+
+    if (vTrack) {
+      vTrack.addEventListener('mousedown', function (e) {
+        draggingV = true;
+        vTrack.classList.add('is-dragging');
+        setVolumeFromVertical(e);
+        e.preventDefault();
+      });
+      document.addEventListener('mousemove', function (e) {
+        if (draggingV) setVolumeFromVertical(e);
+      });
+      document.addEventListener('mouseup', function () {
+        draggingV = false;
+        if (vTrack) vTrack.classList.remove('is-dragging');
+      });
+
+      vTrack.addEventListener('touchstart', function (e) {
+        vTrack.classList.add('is-dragging');
+        setVolumeFromVertical(e);
+      }, { passive: true });
+      vTrack.addEventListener('touchmove', function (e) {
+        setVolumeFromVertical(e);
+      }, { passive: true });
+      vTrack.addEventListener('touchend', function () {
+        vTrack.classList.remove('is-dragging');
+      }, { passive: true });
+
+      /* keyboard accessible */
+      vTrack.addEventListener('keydown', function (e) {
+        var step = 0.05;
+        if (e.key === 'ArrowUp' || e.key === 'ArrowRight') {
+          state.volume = Math.min(1, state.volume + step);
+          if (state.volume > 0) state.muted = false;
+          applyVolumeUI();
+          e.preventDefault();
+        } else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') {
+          state.volume = Math.max(0, state.volume - step);
+          applyVolumeUI();
+          e.preventDefault();
+        }
+      });
+    }
+
+    /* --- main volume button: show / hide the vertical popup --- */
+    if (mainVolBtn && vPopup) {
+      mainVolBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (vPopup.classList.contains('show')) {
+          vPopup.classList.remove('show');
+          vPopup.setAttribute('aria-hidden', 'true');
+        } else {
+          vPopup.classList.add('show');
+          vPopup.setAttribute('aria-hidden', 'false');
+          applyVolumeUI();
+        }
+      });
+    }
+
+    /* --- mute toggle inside the popup --- */
+    if (vMuteBtn) {
+      vMuteBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        state.muted = !state.muted;
+        applyVolumeUI();
+        toast(state.muted ? 'Muted' : 'Unmuted', 1200);
+      });
+    }
+
+    /* --- close popup on outside click / Escape --- */
+    document.addEventListener('click', function (e) {
+      if (!vPopup || !vPopup.classList.contains('show')) return;
+      if (vPopup.contains(e.target)) return;
+      if (mainVolBtn && (e.target === mainVolBtn || mainVolBtn.contains(e.target))) return;
+      vPopup.classList.remove('show');
+      vPopup.setAttribute('aria-hidden', 'true');
     });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && vPopup && vPopup.classList.contains('show')) {
+        vPopup.classList.remove('show');
+        vPopup.setAttribute('aria-hidden', 'true');
+      }
+    });
+
+    /* --- mobile-aware auto positioning --- */
+    function positionVolumePopup() {
+      if (!vPopup) return;
+      var isMobile = window.matchMedia('(max-width: 720px)').matches;
+      /* On mobile the popup is a bit wider and sits a hair closer to the icon */
+      if (isMobile) {
+        vPopup.style.setProperty('--volume-popup-mobile', '1');
+      } else {
+        vPopup.style.removeProperty('--volume-popup-mobile');
+      }
+    }
+    positionVolumePopup();
+    window.addEventListener('resize', positionVolumePopup);
+    if (screen.orientation && screen.orientation.addEventListener) {
+      screen.orientation.addEventListener('change', positionVolumePopup);
+    }
+
+    /* initial state */
+    applyVolumeUI();
 
     /* ---- progress ---- */
     $('#progress').addEventListener('click', function (e) {
@@ -5274,6 +5727,7 @@ html[data-theme="silk"] {
       p.hidden = !p.hidden;
       $('#proxy-panel').hidden = true;
       $('#sources-panel').hidden = true;
+      if (vPopup) vPopup.classList.remove('show');
     });
 
     $$('[data-close]').forEach(function (b) {
@@ -5588,11 +6042,79 @@ html[data-theme="silk"] {
   }
 
   /* ══════════════════════════════════════════════════════════
+     26b. AUDIO LIBRARIES BOOT  (Howler / Tone / Essentia)
+     ══════════════════════════════════════════════════════════ */
+  var HEXLibs = window.HEXLibs = {
+    howler:   null,
+    tone:     null,
+    essentia: null,
+    ready:    false
+  };
+
+  function bootAudioLibraries() {
+    /* ── Howler ── */
+    if (typeof window.Howler !== 'undefined') {
+      HEXLibs.howler = window.Howler;
+      HEXLibs.howlerVersion = (window.Howl && window.Howl.version) || '2.2.4';
+      try {
+        if (window.Howler && typeof window.Howler.volume === 'function') {
+          window.Howler.volume(1);
+        }
+      } catch (e) { /* silent */ }
+    }
+
+    /* ── Tone.js ── */
+    if (typeof window.Tone !== 'undefined') {
+      HEXLibs.tone = window.Tone;
+      try { HEXLibs.toneVersion = window.Tone.version || '14.x'; } catch (e) {}
+    }
+
+    /* ── Essentia.js ── */
+    try {
+      if (typeof window.Essentia !== 'undefined') {
+        HEXLibs.essentia = window.Essentia;
+      }
+      if (typeof window.EssentiaWASM !== 'undefined') {
+        HEXLibs.essentiaWASM = window.EssentiaWASM;
+      }
+    } catch (e) { /* silent */ }
+
+    HEXLibs.ready = !!(HEXLibs.howler || HEXLibs.tone || HEXLibs.essentia);
+  }
+
+  /* Safe Tone.js initialisation (only on user gesture, per browser autoplay policy) */
+  function ensureToneStarted() {
+    if (!HEXLibs.tone) return;
+    try {
+      if (HEXLibs.tone.context && HEXLibs.tone.context.state !== 'running') {
+        HEXLibs.tone.start().catch(function () {});
+      }
+    } catch (e) { /* silent */ }
+  }
+
+  /* Expose helpers on window for advanced usage */
+  window.HEXAudio = {
+    libs: HEXLibs,
+    ensureToneStarted: ensureToneStarted,
+    get audioEl () { return audio; },
+    get state   () { return state; }
+  };
+
+  /* ══════════════════════════════════════════════════════════
      27. INIT
      ══════════════════════════════════════════════════════════ */
   function init() {
     /* ═══ FORCE DARK MODE — always on, from the very first paint ═══ */
     document.documentElement.classList.add('dark');
+
+    /* ═══ Bring up audio libraries ═══ */
+    bootAudioLibraries();
+
+    /* Resume Tone.js context on first interaction */
+    document.addEventListener('pointerdown', function once() {
+      ensureToneStarted();
+      document.removeEventListener('pointerdown', once);
+    }, { once: true });
 
     $('#brand-logo').src = ART;
     $('#dock-art-img').src = ART;
@@ -5649,7 +6171,9 @@ html[data-theme="silk"] {
 })();
 </script>
 
-
+<!-- ═══════════════════════════════════════════════════════════════════════
+     ══ CLIENT-SIDE PROTECTION LAYER  ══
+     ═══════════════════════════════════════════════════════════════════════ -->
 <script>
 (function () {
   "use strict";
@@ -6270,7 +6794,6 @@ html[data-theme="silk"] {
 })();
 </script>
 
-
 <script>
 // Disable right-click
 document.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -6369,251 +6892,5 @@ if (document.addEventListener) {
     });
 }
 </script>
-
-<!-- ══════════════════════════════════════════════════════════════════
-     ★★ MOBILE VERTICAL VOLUME ENGINE ★★
-     Pure additive module. It never touches the system theme, the system
-     icons, the system buttons or the system player logic — it only
-     mirrors the <audio> element's own `volumechange` events and writes
-     back a level the user picked on the vertical bar.
-     ══════════════════════════════════════════════════════════════════ -->
-<script>
-(function () {
-  'use strict';
-
-  var audio = document.getElementById('audio');
-  var root  = document.getElementById('hexvol');
-  if (!audio || !root) return;
-
-  var fab    = document.getElementById('hexvol-fab');
-  var fabIco = document.getElementById('hexvol-fab-ico');
-  var track  = document.getElementById('hexvol-track');
-  var fill   = document.getElementById('hexvol-fill');
-  var knob   = document.getElementById('hexvol-knob');
-  var pctEl  = document.getElementById('hexvol-pct');
-  var upBtn  = document.getElementById('hexvol-up');
-  var dnBtn  = document.getElementById('hexvol-down');
-
-  var STEP     = 0.05;
-  var dragging = false;
-  var userVol  = null;     /* remembers the level the user chose on mobile */
-
-  /* ── restore the previous mobile volume choice ── */
-  try {
-    var saved = parseFloat(localStorage.getItem('hex.mobile.volume'));
-    if (!isNaN(saved) && saved >= 0 && saved <= 1) userVol = saved;
-  } catch (e) { userVol = null; }
-
-  function clamp(v) { return Math.max(0, Math.min(1, v)); }
-
-  function iconFor(v, muted) {
-    if (muted || v <= 0.001) return 'fa-volume-xmark';
-    if (v < 0.5) return 'fa-volume-low';
-    return 'fa-volume-high';
-  }
-
-  /* ── paint the vertical bar from a volume + muted pair ── */
-  function paint(v, muted) {
-    if (typeof v !== 'number' || isNaN(v)) v = 0.9;
-    v = clamp(v);
-
-    var pct = Math.round(v * 100);
-
-    if (fill)  fill.style.height = pct + '%';
-    if (knob)  knob.style.bottom = pct + '%';
-    if (pctEl) pctEl.textContent = pct + '%';
-    if (track) track.setAttribute('aria-valuenow', String(pct));
-
-    root.classList.toggle('muted', !!muted);
-
-    if (fabIco) {
-      var cls = 'fa-solid ' + iconFor(v, muted);
-      if (fabIco.className !== cls) fabIco.className = cls;
-    }
-  }
-
-  /* ── read the live state straight off the <audio> element ── */
-  function sync() {
-    paint(typeof audio.volume === 'number' ? audio.volume : 0.9, audio.muted);
-  }
-
-  /* ── write a new level back to the element ── */
-  function setVol(v, remember) {
-    v = clamp(v);
-
-    if (remember) {
-      userVol = v;
-      try { localStorage.setItem('hex.mobile.volume', String(v)); } catch (e) {}
-    }
-
-    try { if (audio.muted) audio.muted = false; } catch (e) {}
-    try { audio.volume = v; } catch (e) {}
-
-    paint(v, false);
-  }
-
-  /* ═══ 1. Mirror the system player ═══ */
-  audio.addEventListener('volumechange', sync);
-
-  /* Keep the user's mobile level when a brand-new station loads
-     (the system player re-applies its own default on every load). */
-  audio.addEventListener('playing', function () {
-    if (userVol == null) return;
-    if (audio.muted) return;
-    if (Math.abs(audio.volume - userVol) > 0.005) {
-      try { audio.volume = userVol; } catch (e) {}
-      paint(userVol, false);
-    }
-  });
-
-  /* ═══ 2. Open / close the fly-out panel ═══ */
-  if (fab) {
-    fab.addEventListener('click', function (e) {
-      e.stopPropagation();
-      var open = root.classList.toggle('open');
-      fab.setAttribute('aria-expanded', open ? 'true' : 'false');
-      if (open) sync();
-    });
-  }
-
-  /* close when tapping anywhere outside */
-  document.addEventListener('click', function (e) {
-    if (!root.classList.contains('open')) return;
-    if (root.contains(e.target)) return;
-    root.classList.remove('open');
-    if (fab) fab.setAttribute('aria-expanded', 'false');
-  }, true);
-
-  /* close on Escape */
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && root.classList.contains('open')) {
-      root.classList.remove('open');
-      if (fab) fab.setAttribute('aria-expanded', 'false');
-    }
-  });
-
-  /* ═══ 3. Drag the vertical slider bar ═══ */
-  function pctFromY(clientY) {
-    var r = track.getBoundingClientRect();
-    if (!r.height) return 0.9;
-    return clamp((r.bottom - clientY) / r.height);
-  }
-
-  function onDown(e) {
-    if (!track) return;
-    dragging = true;
-    track.classList.add('armed');
-    setVol(pctFromY(e.touches ? e.touches[0].clientY : e.clientY), true);
-    if (e.cancelable) e.preventDefault();
-  }
-
-  function onMove(e) {
-    if (!dragging) return;
-    setVol(pctFromY(e.touches ? e.touches[0].clientY : e.clientY), true);
-    if (e.cancelable) e.preventDefault();
-  }
-
-  function onUp() {
-    dragging = false;
-    if (track) track.classList.remove('armed');
-  }
-
-  if (track) {
-    track.addEventListener('mousedown', onDown);
-    track.addEventListener('touchstart', onDown, { passive: false });
-
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('touchmove', onMove, { passive: false });
-
-    document.addEventListener('mouseup', onUp);
-    document.addEventListener('touchend', onUp);
-    document.addEventListener('touchcancel', onUp);
-
-    /* keyboard accessibility (arrows work like a native slider) */
-    track.addEventListener('keydown', function (e) {
-      var k = e.key;
-      var cur = typeof audio.volume === 'number' ? audio.volume : 0.9;
-
-      if (k === 'ArrowUp' || k === 'ArrowRight') {
-        setVol(cur + STEP, true); e.preventDefault();
-      } else if (k === 'ArrowDown' || k === 'ArrowLeft') {
-        setVol(cur - STEP, true); e.preventDefault();
-      } else if (k === 'Home') {
-        setVol(0, true); e.preventDefault();
-      } else if (k === 'End') {
-        setVol(1, true); e.preventDefault();
-      }
-    });
-  }
-
-  /* ═══ 4. Up / Down step buttons ═══ */
-  if (upBtn) upBtn.addEventListener('click', function (e) {
-    e.stopPropagation();
-    var cur = typeof audio.volume === 'number' ? audio.volume : 0.9;
-    setVol(cur + STEP, true);
-    if (!root.classList.contains('open')) {
-      root.classList.add('open');
-      if (fab) fab.setAttribute('aria-expanded', 'true');
-    }
-  });
-
-  if (dnBtn) dnBtn.addEventListener('click', function (e) {
-    e.stopPropagation();
-    var cur = typeof audio.volume === 'number' ? audio.volume : 0.9;
-    setVol(cur - STEP, true);
-    if (!root.classList.contains('open')) {
-      root.classList.add('open');
-      if (fab) fab.setAttribute('aria-expanded', 'true');
-    }
-  });
-
-  /* ═══ 5. First paint ═══ */
-  sync();
-
-  /* ═══ 6. Optional audio-lab bridge (Howler · Tone.js · Essentia.js) ═══
-     These libraries are loaded for anyone who wants to hook into them.
-     They are entirely passive here — nothing is started until a page
-     script explicitly asks for it, so the system player is unaffected. */
-  window.HEXLAB = {
-    ready: function () {
-      return {
-        howler:  typeof window.Howl   !== 'undefined',
-        tone:    typeof window.Tone   !== 'undefined',
-        essentia: typeof window.Essentia !== 'undefined'
-      };
-    },
-    startTone: function () {
-      try {
-        if (window.Tone && typeof window.Tone.start === 'function') {
-          return window.Tone.start();
-        }
-      } catch (e) {}
-      return Promise.resolve(false);
-    }
-  };
-
-})();
-</script>
-
-<!-- ═══════════ OPTIONAL AUDIO LAB — Howler · Tone.js · Essentia.js ═══════════ -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js" defer></script>
-<script src="https://unpkg.com/tone@14.8.49/build/Tone.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-core.js" defer></script>
-<script>
-/* Quietly report which of the optional audio-lab libraries loaded.
-   Nothing is played, started or patched — the system player stays in charge. */
-(function () {
-  window.addEventListener('load', function () {
-    setTimeout(function () {
-      try {
-        var lab = window.HEXLAB && window.HEXLAB.ready ? window.HEXLAB.ready() : {};
-        console.log('%cHEX RADIO · audio-lab', 'color:#1DB954;font-weight:700',
-                    'Howler:', !!lab.howler, '· Tone.js:', !!lab.tone, '· Essentia.js:', !!lab.essentia);
-      } catch (e) { /* noop */ }
-    }, 1200);
-  });
-})();
-</script>
-
 </body>
 </html>
