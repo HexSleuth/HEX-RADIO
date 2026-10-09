@@ -1823,6 +1823,164 @@ html[data-theme="silk"] {
   --text:#3d2c33; --muted:#7d6a70; --muted-2:#ab9aa0;
   --green:#d98ea8; --green-hi:#e8a4bb; --red:#c05c7a; --amber:#e0b57d; --violet:#b58fd1;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   ★★  MOBILE VERTICAL VOLUME UPGRADE  ★★
+   ───────────────────────────────────────────────────────────────────
+   Desktop layout, theme, icons, buttons and the system JavaScript are
+   left completely untouched.  On phones / small tablets (≤ 720px) the
+   volume control is upgraded to a vertical UP / DOWN slider bar that
+   flies out above the dock.  It re-uses the existing CSS variables so
+   every one of the 34 palettes repaints it automatically.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.hexvol { display: none; }
+
+@media (max-width: 720px) {
+
+  .hexvol {
+    position: fixed;
+    right: 12px;
+    bottom: calc(var(--dock-h) + 14px);
+    z-index: 58;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* ── the floating open / close button ── */
+  .hexvol-fab {
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 16px;
+    background: var(--bg-4);
+    color: var(--text);
+    border: 1px solid var(--border-2);
+    box-shadow: 0 10px 26px rgba(0,0,0,.7);
+    transition: transform .15s, background .15s, color .15s,
+                border-color .15s, box-shadow .2s;
+  }
+  .hexvol-fab:active { transform: scale(.92); }
+  .hexvol.open .hexvol-fab {
+    background: var(--green);
+    color: #000;
+    border-color: var(--green);
+    box-shadow: 0 10px 30px rgba(0,0,0,.75), 0 0 0 4px rgba(128,128,128,.18);
+  }
+
+  /* ── the fly-out vertical panel ── */
+  .hexvol-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    padding: 12px 10px;
+    border-radius: 999px;
+    background: var(--bg-3);
+    border: 1px solid var(--border-2);
+    box-shadow: 0 26px 64px rgba(0,0,0,.9);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(14px) saturate(140%);
+    transform-origin: bottom center;
+    transform: translateY(14px) scale(.9);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease, visibility .2s;
+  }
+  .hexvol.open .hexvol-panel {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+  }
+
+  /* ── percentage read-out ── */
+  .hexvol-pct {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .02em;
+    line-height: 1;
+    color: var(--green-hi);
+    font-variant-numeric: tabular-nums;
+    min-width: 40px;
+    text-align: center;
+  }
+  .hexvol.muted .hexvol-pct { color: var(--red); }
+
+  /* ── up / down step buttons ── */
+  .hexvol-step {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    flex: 0 0 auto;
+    font-size: 12px;
+    background: var(--bg-5);
+    color: var(--text);
+    transition: background .15s, color .15s, transform .12s;
+  }
+  .hexvol-step:active {
+    background: var(--green);
+    color: #000;
+    transform: scale(.9);
+  }
+
+  /* ── the vertical slider bar ── */
+  .hexvol-track {
+    position: relative;
+    width: 8px;
+    height: 132px;
+    border-radius: 99px;
+    background: rgba(128,128,128,.42);
+    cursor: pointer;
+    touch-action: none;
+    flex: 0 0 auto;
+  }
+  .hexvol-fill {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 90%;
+    border-radius: 99px;
+    background: var(--green);
+    pointer-events: none;
+    transition: height .08s linear, background .15s;
+  }
+  .hexvol-knob {
+    position: absolute;
+    left: 50%;
+    bottom: 90%;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    border: 3px solid var(--green);
+    transform: translate(-50%, 50%);
+    box-shadow: 0 4px 12px rgba(0,0,0,.7);
+    pointer-events: none;
+    transition: bottom .08s linear, transform .15s, border-color .15s;
+  }
+  .hexvol-track.armed .hexvol-fill { background: var(--green-hi); }
+  .hexvol-track.armed .hexvol-knob {
+    border-color: var(--green-hi);
+    transform: translate(-50%, 50%) scale(1.14);
+  }
+
+  .hexvol.muted .hexvol-fill { background: var(--red); }
+  .hexvol.muted .hexvol-knob { border-color: var(--red); }
+
+  /* the horizontal dock bar stays exactly where it always was — hidden */
+  .dock-right .volume { display: none; }
+}
+
+@media (max-width: 380px) {
+  .hexvol-track { height: 112px; }
+  .hexvol-fab   { width: 42px; height: 42px; font-size: 15px; }
+}
 </style>
 </head>
 <body>
@@ -2328,6 +2486,42 @@ html[data-theme="silk"] {
       </button>
     </div>
   </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ★★ MOBILE VERTICAL VOLUME CONTROL ★★
+     Flies out above the dock on phones / small tablets only.
+     Desktop never sees it — the original horizontal bar is untouched.
+     ══════════════════════════════════════════════════════════════════ -->
+<div class="hexvol" id="hexvol" aria-label="Volume control">
+
+  <div class="hexvol-panel" id="hexvol-panel" role="group" aria-label="Vertical volume slider">
+
+    <div class="hexvol-pct" id="hexvol-pct">90%</div>
+
+    <button class="hexvol-step" id="hexvol-up" type="button" aria-label="Volume up" title="Volume up">
+      <i class="fa-solid fa-plus"></i>
+    </button>
+
+    <div class="hexvol-track" id="hexvol-track"
+         role="slider" tabindex="0"
+         aria-label="Volume level"
+         aria-valuemin="0" aria-valuemax="100" aria-valuenow="90"
+         aria-orientation="vertical">
+      <div class="hexvol-fill" id="hexvol-fill"></div>
+      <div class="hexvol-knob" id="hexvol-knob"></div>
+    </div>
+
+    <button class="hexvol-step" id="hexvol-down" type="button" aria-label="Volume down" title="Volume down">
+      <i class="fa-solid fa-minus"></i>
+    </button>
+
+  </div>
+
+  <button class="hexvol-fab" id="hexvol-fab" type="button"
+          aria-label="Volume" aria-expanded="false" title="Volume">
+    <i class="fa-solid fa-volume-high" id="hexvol-fab-ico"></i>
+  </button>
 </div>
 
 <div class="toast" id="toast" hidden></div>
@@ -6077,7 +6271,6 @@ html[data-theme="silk"] {
 </script>
 
 
-  
 <script>
 // Disable right-click
 document.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -6176,5 +6369,251 @@ if (document.addEventListener) {
     });
 }
 </script>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ★★ MOBILE VERTICAL VOLUME ENGINE ★★
+     Pure additive module. It never touches the system theme, the system
+     icons, the system buttons or the system player logic — it only
+     mirrors the <audio> element's own `volumechange` events and writes
+     back a level the user picked on the vertical bar.
+     ══════════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  var audio = document.getElementById('audio');
+  var root  = document.getElementById('hexvol');
+  if (!audio || !root) return;
+
+  var fab    = document.getElementById('hexvol-fab');
+  var fabIco = document.getElementById('hexvol-fab-ico');
+  var track  = document.getElementById('hexvol-track');
+  var fill   = document.getElementById('hexvol-fill');
+  var knob   = document.getElementById('hexvol-knob');
+  var pctEl  = document.getElementById('hexvol-pct');
+  var upBtn  = document.getElementById('hexvol-up');
+  var dnBtn  = document.getElementById('hexvol-down');
+
+  var STEP     = 0.05;
+  var dragging = false;
+  var userVol  = null;     /* remembers the level the user chose on mobile */
+
+  /* ── restore the previous mobile volume choice ── */
+  try {
+    var saved = parseFloat(localStorage.getItem('hex.mobile.volume'));
+    if (!isNaN(saved) && saved >= 0 && saved <= 1) userVol = saved;
+  } catch (e) { userVol = null; }
+
+  function clamp(v) { return Math.max(0, Math.min(1, v)); }
+
+  function iconFor(v, muted) {
+    if (muted || v <= 0.001) return 'fa-volume-xmark';
+    if (v < 0.5) return 'fa-volume-low';
+    return 'fa-volume-high';
+  }
+
+  /* ── paint the vertical bar from a volume + muted pair ── */
+  function paint(v, muted) {
+    if (typeof v !== 'number' || isNaN(v)) v = 0.9;
+    v = clamp(v);
+
+    var pct = Math.round(v * 100);
+
+    if (fill)  fill.style.height = pct + '%';
+    if (knob)  knob.style.bottom = pct + '%';
+    if (pctEl) pctEl.textContent = pct + '%';
+    if (track) track.setAttribute('aria-valuenow', String(pct));
+
+    root.classList.toggle('muted', !!muted);
+
+    if (fabIco) {
+      var cls = 'fa-solid ' + iconFor(v, muted);
+      if (fabIco.className !== cls) fabIco.className = cls;
+    }
+  }
+
+  /* ── read the live state straight off the <audio> element ── */
+  function sync() {
+    paint(typeof audio.volume === 'number' ? audio.volume : 0.9, audio.muted);
+  }
+
+  /* ── write a new level back to the element ── */
+  function setVol(v, remember) {
+    v = clamp(v);
+
+    if (remember) {
+      userVol = v;
+      try { localStorage.setItem('hex.mobile.volume', String(v)); } catch (e) {}
+    }
+
+    try { if (audio.muted) audio.muted = false; } catch (e) {}
+    try { audio.volume = v; } catch (e) {}
+
+    paint(v, false);
+  }
+
+  /* ═══ 1. Mirror the system player ═══ */
+  audio.addEventListener('volumechange', sync);
+
+  /* Keep the user's mobile level when a brand-new station loads
+     (the system player re-applies its own default on every load). */
+  audio.addEventListener('playing', function () {
+    if (userVol == null) return;
+    if (audio.muted) return;
+    if (Math.abs(audio.volume - userVol) > 0.005) {
+      try { audio.volume = userVol; } catch (e) {}
+      paint(userVol, false);
+    }
+  });
+
+  /* ═══ 2. Open / close the fly-out panel ═══ */
+  if (fab) {
+    fab.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = root.classList.toggle('open');
+      fab.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (open) sync();
+    });
+  }
+
+  /* close when tapping anywhere outside */
+  document.addEventListener('click', function (e) {
+    if (!root.classList.contains('open')) return;
+    if (root.contains(e.target)) return;
+    root.classList.remove('open');
+    if (fab) fab.setAttribute('aria-expanded', 'false');
+  }, true);
+
+  /* close on Escape */
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && root.classList.contains('open')) {
+      root.classList.remove('open');
+      if (fab) fab.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  /* ═══ 3. Drag the vertical slider bar ═══ */
+  function pctFromY(clientY) {
+    var r = track.getBoundingClientRect();
+    if (!r.height) return 0.9;
+    return clamp((r.bottom - clientY) / r.height);
+  }
+
+  function onDown(e) {
+    if (!track) return;
+    dragging = true;
+    track.classList.add('armed');
+    setVol(pctFromY(e.touches ? e.touches[0].clientY : e.clientY), true);
+    if (e.cancelable) e.preventDefault();
+  }
+
+  function onMove(e) {
+    if (!dragging) return;
+    setVol(pctFromY(e.touches ? e.touches[0].clientY : e.clientY), true);
+    if (e.cancelable) e.preventDefault();
+  }
+
+  function onUp() {
+    dragging = false;
+    if (track) track.classList.remove('armed');
+  }
+
+  if (track) {
+    track.addEventListener('mousedown', onDown);
+    track.addEventListener('touchstart', onDown, { passive: false });
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('touchmove', onMove, { passive: false });
+
+    document.addEventListener('mouseup', onUp);
+    document.addEventListener('touchend', onUp);
+    document.addEventListener('touchcancel', onUp);
+
+    /* keyboard accessibility (arrows work like a native slider) */
+    track.addEventListener('keydown', function (e) {
+      var k = e.key;
+      var cur = typeof audio.volume === 'number' ? audio.volume : 0.9;
+
+      if (k === 'ArrowUp' || k === 'ArrowRight') {
+        setVol(cur + STEP, true); e.preventDefault();
+      } else if (k === 'ArrowDown' || k === 'ArrowLeft') {
+        setVol(cur - STEP, true); e.preventDefault();
+      } else if (k === 'Home') {
+        setVol(0, true); e.preventDefault();
+      } else if (k === 'End') {
+        setVol(1, true); e.preventDefault();
+      }
+    });
+  }
+
+  /* ═══ 4. Up / Down step buttons ═══ */
+  if (upBtn) upBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    var cur = typeof audio.volume === 'number' ? audio.volume : 0.9;
+    setVol(cur + STEP, true);
+    if (!root.classList.contains('open')) {
+      root.classList.add('open');
+      if (fab) fab.setAttribute('aria-expanded', 'true');
+    }
+  });
+
+  if (dnBtn) dnBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    var cur = typeof audio.volume === 'number' ? audio.volume : 0.9;
+    setVol(cur - STEP, true);
+    if (!root.classList.contains('open')) {
+      root.classList.add('open');
+      if (fab) fab.setAttribute('aria-expanded', 'true');
+    }
+  });
+
+  /* ═══ 5. First paint ═══ */
+  sync();
+
+  /* ═══ 6. Optional audio-lab bridge (Howler · Tone.js · Essentia.js) ═══
+     These libraries are loaded for anyone who wants to hook into them.
+     They are entirely passive here — nothing is started until a page
+     script explicitly asks for it, so the system player is unaffected. */
+  window.HEXLAB = {
+    ready: function () {
+      return {
+        howler:  typeof window.Howl   !== 'undefined',
+        tone:    typeof window.Tone   !== 'undefined',
+        essentia: typeof window.Essentia !== 'undefined'
+      };
+    },
+    startTone: function () {
+      try {
+        if (window.Tone && typeof window.Tone.start === 'function') {
+          return window.Tone.start();
+        }
+      } catch (e) {}
+      return Promise.resolve(false);
+    }
+  };
+
+})();
+</script>
+
+<!-- ═══════════ OPTIONAL AUDIO LAB — Howler · Tone.js · Essentia.js ═══════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js" defer></script>
+<script src="https://unpkg.com/tone@14.8.49/build/Tone.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-core.js" defer></script>
+<script>
+/* Quietly report which of the optional audio-lab libraries loaded.
+   Nothing is played, started or patched — the system player stays in charge. */
+(function () {
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      try {
+        var lab = window.HEXLAB && window.HEXLAB.ready ? window.HEXLAB.ready() : {};
+        console.log('%cHEX RADIO · audio-lab', 'color:#1DB954;font-weight:700',
+                    'Howler:', !!lab.howler, '· Tone.js:', !!lab.tone, '· Essentia.js:', !!lab.essentia);
+      } catch (e) { /* noop */ }
+    }, 1200);
+  });
+})();
+</script>
+
 </body>
 </html>
