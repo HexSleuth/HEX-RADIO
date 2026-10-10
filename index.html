@@ -6794,6 +6794,176 @@ html[data-theme="silk"] {
 })();
 </script>
 
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     HEX RADIO — MINIMIZE / DISCREET SOUND FIX
+     • Audio keeps playing when the tab/window is minimized
+     • Auto-resumes if the browser throttled the stream
+     • Notifications become silent + non-vibrating while hidden
+     • Keeps MediaSession & Web Audio Context alive on minimize
+     ═══════════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  var audio = document.getElementById('audio');
+  if (!audio) return;
+
+  /* ── 1. Make the <audio> element minimize-proof ── */
+  audio.setAttribute('playsinline', '');
+  audio.setAttribute('webkit-playsinline', '');
+  audio.setAttribute('x-webkit-airplay', 'allow');
+  audio.setAttribute('disableRemotePlayback', 'false');
+  audio.preservesPitch = true;
+  audio.autoplay = true;
+
+  /* Remember whether we were playing before the tab hid */
+  window.__hexWasPlaying = false;
+  window.__hexLastSrc     = '';
+
+  /* ── 2. Handle visibility / minimize ── */
+  function onHide() {
+    window.__hexWasPlaying = !audio.paused && !!audio.src;
+    window.__hexLastSrc    = audio.src || '';
+
+    /* Resume Howler AudioContext if it got suspended */
+    try {
+      if (window.Howler && Howler.ctx && Howler.ctx.state === 'suspended') {
+        Howler.ctx.resume();
+      }
+    } catch (e) {}
+
+    /* Resume Tone.js context if it exists */
+    try {
+      if (window.Tone && Tone.context && Tone.context.state !== 'running') {
+        Tone.start().catch(function () {});
+      }
+    } catch (e) {}
+
+    /* Keep MediaSession metadata marked as playing */
+    try {
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = 'playing';
+      }
+    } catch (e) {}
+  }
+
+  function onShow() {
+    /* If the stream got paused by the OS while hidden, resume it */
+    if (window.__hexWasPlaying && audio.src && audio.paused) {
+      var pr = audio.play();
+      if (pr && pr.catch) pr.catch(function () { /* silently ignore */ });
+    }
+    window.__hexWasPlaying = false;
+
+    try {
+      if (window.Howler && Howler.ctx && Howler.ctx.state === 'suspended') {
+        Howler.ctx.resume();
+      }
+    } catch (e) {}
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) onHide(); else onShow();
+  }, true);
+
+  window.addEventListener('pagehide', onHide, true);
+  window.addEventListener('pageshow', onShow, true);
+
+  /* The ACP layer blurs the page on blur — do NOT let it pause audio */
+  window.addEventListener('blur', function () {
+    /* no-op: playback must continue while unfocused */
+  }, true);
+
+  /* ── 3. Auto-recover if the browser kills the stream while minimized ── */
+  var recoverTimer = null;
+  function startRecoveryWatch() {
+    if (recoverTimer) clearInterval(recoverTimer);
+    recoverTimer = setInterval(function () {
+      if (document.hidden && audio.src && audio.paused && window.__hexWasPlaying) {
+        var pr = audio.play();
+        if (pr && pr.catch) pr.catch(function () {});
+      }
+    }, 4000);
+  }
+  startRecoveryWatch();
+
+  audio.addEventListener('playing', function () {
+    window.__hexWasPlaying = true;
+  });
+
+  /* ── 4. Silent AudioContext keep-alive (prevents timer throttling) ── */
+  var keepCtx  = null;
+  var keepGain = null;
+
+  function ensureKeepAlive() {
+    if (keepCtx) return;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    try {
+      keepCtx  = new AC();
+      var osc  = keepCtx.createOscillator();
+      keepGain = keepCtx.createGain();
+      keepGain.gain.value = 0.0001;   /* effectively inaudible */
+      osc.frequency.value = 40;
+      osc.connect(keepGain);
+      keepGain.connect(keepCtx.destination);
+      osc.start();
+    } catch (e) { keepCtx = null; }
+  }
+
+  function resumeKeepAlive() {
+    try {
+      if (keepCtx && keepCtx.state === 'suspended') keepCtx.resume();
+    } catch (e) {}
+  }
+
+  /* Unlock on first user gesture (browser policy requirement) */
+  document.addEventListener('pointerdown', function once() {
+    ensureKeepAlive();
+    document.removeEventListener('pointerdown', once);
+  }, { once: true });
+
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) resumeKeepAlive();
+  }, true);
+
+  /* ── 5. Discreet notifications while page is hidden ── */
+  if (window.Notification) {
+    var Native = window.Notification;
+
+    function DiscreetNotification(title, opts) {
+      opts = opts || {};
+      if (document.hidden) {
+        opts.silent          = true;    /* no sound when minimized */
+        opts.vibrate         = [];      /* no haptics          */
+        opts.renotify        = false;   /* don't re-alert      */
+        opts.requireInteraction = false;
+      }
+      try {
+        return new Native(title, opts);
+      } catch (e) {
+        return { close: function () {} };
+      }
+    }
+    DiscreetNotification.permission        = Native.permission;
+    DiscreetNotification.requestPermission = Native.requestPermission
+      ? Native.requestPermission.bind(Native)
+      : function () { return Promise.resolve('denied'); };
+
+    try { window.Notification = DiscreetNotification; } catch (e) {}
+  }
+
+  /* ── 6. Expose for debugging ── */
+  window.HEXMinimizeFix = {
+    wasPlaying : function () { return !!window.__hexWasPlaying; },
+    wake       : onShow,
+    sleep      : onHide
+  };
+})();
+</script>
+
+  
 <script>
 // Disable right-click
 document.addEventListener('contextmenu', (e) => e.preventDefault());
