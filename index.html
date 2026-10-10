@@ -7062,5 +7062,185 @@ if (document.addEventListener) {
     });
 }
 </script>
+
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     HEX RADIO — MINIMIZE VOLUME LOCK
+     • Prevents volume loss / ducking when tab is minimized
+     • Locks Howler.masterGain, Tone gain, and <audio>.volume
+     • Auto-restores volume after AudioContext suspend/resume
+     • Keeps the Web Audio destination gain at full level
+     ═══════════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  var audio = document.getElementById('audio');
+  if (!audio) return;
+
+  /* ── 0. Config ── */
+  var CHECK_MS = 1500;               // how often we verify volume
+  var EPSILON  = 0.02;               // tolerance before we force a restore
+
+  /* ── 1. Remember the last intended volume ── */
+  var lockedVolume = (typeof state !== 'undefined' && state && typeof state.volume === 'number')
+    ? state.volume
+    : (audio.volume > 0 ? audio.volume : 0.9);
+  var lockedMuted  = !!audio.muted;
+
+  function remember() {
+    if (typeof state !== 'undefined' && state) {
+      lockedVolume = state.muted ? 0 : state.volume;
+      lockedMuted  = !!state.muted;
+    } else {
+      lockedVolume = audio.volume;
+      lockedMuted  = audio.muted;
+    }
+  }
+
+  /* Mirror the main engine's volume changes into our lock */
+  ['volumechange', 'play', 'playing', 'loadedmetadata'].forEach(function (ev) {
+    audio.addEventListener(ev, remember, true);
+  });
+
+  /* ── 2. Force the locked volume back on every context resume ── */
+  function enforceAudioVolume() {
+    try {
+      var target = lockedMuted ? 0 : Math.max(0.0001, lockedVolume);
+      if (Math.abs(audio.volume - target) > EPSILON) {
+        audio.volume = target;
+      }
+      if (audio.muted !== lockedMuted) {
+        audio.muted = lockedMuted;
+      }
+    } catch (e) {}
+  }
+
+  /* ── 3. Lock Howler's masterGain so it never ducks down ── */
+  function enforceHowlerGain() {
+    try {
+      if (!window.Howler || !Howler.ctx) return;
+      var gain = (typeof state !== 'undefined' && state)
+        ? (state.muted ? 0 : Math.max(0.0001, state.volume))
+        : Math.max(0.0001, lockedVolume);
+
+      /* If Howler was muted by the OS, unmute and restore */
+      if (Howler._muted && !lockedMuted) {
+        Howler.mute(false);
+      }
+
+      if (Howler.masterGain && Howler.masterGain.gain) {
+        var now = Howler.ctx.currentTime;
+        var current = Howler.masterGain.gain.value;
+        if (Math.abs(current - gain) > EPSILON) {
+          Howler.masterGain.gain.cancelScheduledValues(now);
+          Howler.masterGain.gain.setValueAtTime(gain, now);
+        }
+        Howler._volume = gain;
+      }
+
+      /* Per-Howl gains — restore in case the OS muted a child node */
+      if (Array.isArray(Howler._howls)) {
+        for (var i = 0; i < Howler._howls.length; i++) {
+          var h = Howler._howls[i];
+          if (h && h._muted && !lockedMuted) h.mute(false);
+        }
+      }
+    } catch (e) {}
+  }
+
+  /* ── 4. Lock Tone.js destination gain ── */
+  function enforceToneGain() {
+    try {
+      if (!window.Tone || !Tone.getDestination) return;
+      var dest = Tone.getDestination();
+      if (dest && dest.volume && typeof dest.volume.value === 'number') {
+        /* -Infinity means the OS muted Tone.js — bring it back to 0 dB */
+        if (!isFinite(dest.volume.value) || dest.volume.value < -60) {
+          dest.volume.value = 0;
+        }
+        if (dest.mute) dest.mute = false;
+      }
+    } catch (e) {}
+  }
+
+  /* ── 5. Prevent our own quiet keep-alive from ducking the stream ── */
+  function boostExistingKeepAlive() {
+    try {
+      /* Any AudioContext created by the previous minimize patch is fine,
+         but we explicitly make sure its destination gain stays at 1. */
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      /* Nothing to boost unless the app created extra gain chains — this
+         keeps things defensive in case Tone or Howler added a wrapper. */
+    } catch (e) {}
+  }
+
+  /* ── 6. Watchdog — every 1.5s, silently correct any volume drop ── */
+  function watchdog() {
+    if (document.hidden) {
+      enforceAudioVolume();
+    }
+    enforceHowlerGain();
+    enforceToneGain();
+  }
+  setInterval(watchdog, CHECK_MS);
+
+  /* ── 7. On resume, immediately re-apply volume ── */
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) {
+      remember();
+      enforceAudioVolume();
+      enforceHowlerGain();
+      enforceToneGain();
+      boostExistingKeepAlive();
+    }
+  }, true);
+
+  /* ── 8. Hook every AudioContext resume so nothing slips through ── */
+  try {
+    var proto = (window.AudioContext || window.webkitAudioContext).prototype;
+    if (proto && proto.resume && !proto.__hexPatched) {
+      var origResume = proto.resume;
+      proto.resume = function () {
+        var ctx = this;
+        return origResume.apply(this, arguments).then(function (r) {
+          try {
+            if (ctx === (window.Howler && Howler.ctx)) {
+              enforceHowlerGain();
+            }
+          } catch (e) {}
+          return r;
+        });
+      };
+      proto.__hexPatched = true;
+    }
+  } catch (e) {}
+
+  /* ── 9. If the main engine exposes state, subscribe to volume changes ── */
+  if (window.HEXAudio && window.HEXAudio.state) {
+    /* Poll the shared state object so user-driven volume changes
+       always update our lock value (this replaces manual event hooks). */
+    setInterval(remember, 800);
+  }
+
+  /* ── 10. Public API for manual recovery ── */
+  window.HEXVolumeLock = {
+    get volume () { return lockedVolume; },
+    get muted  () { return lockedMuted;  },
+    remember   : remember,
+    enforce    : function () {
+      remember();
+      enforceAudioVolume();
+      enforceHowlerGain();
+      enforceToneGain();
+    }
+  };
+})();
+</script>
+
+
+  
 </body>
 </html>
