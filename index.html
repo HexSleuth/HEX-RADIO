@@ -13379,292 +13379,164 @@ if (document.addEventListener) {
 </script>
 
 <!-- ═══════════════════════════════════════════════════════════════════
-     HEX RADIO — AUTO-DETECT & AUTO-ADJUST VOLUME LOCK  v3
-     Learns the user's chosen volume, distinguishes user changes from
-     browser ducking, and enforces the correct level everywhere.
+     HEX RADIO — VOLUME LOCK v4 (simple, correct, no monkey-patching)
+     • Reads the engine's own state.volume / state.muted every tick
+     • Polls fast while hidden, slow while visible
+     • Burst-corrects after visibility / focus / page show
+     • Never fights the user's slider (slider writes state.volume first)
      ═══════════════════════════════════════════════════════════════════ -->
 <script>
 (function () {
   'use strict';
 
-  /* ── 0. Clean up earlier patches so nothing conflicts ── */
-  ['__hexVolWatch','__hexRecoverWatch','__hexKeepWatch','__hexAdaptWatch']
-    .forEach(function (k) { if (window[k]) { clearInterval(window[k]); window[k] = null; } });
+  /* ── 0. Kill any earlier timers from previous patches ── */
+  ['__hexVolWatch','__hexRecoverWatch','__hexKeepWatch','__hexAdaptWatch',
+   '__hexMinimizeWatch','__hexVolumeWatch'].forEach(function (k) {
+    if (window[k]) { clearInterval(window[k]); clearTimeout(window[k]); window[k] = null; }
+  });
 
   var audio = document.getElementById('audio');
   if (!audio) return;
 
-  /* ── 1. Auto-detect the environment ── */
-  var ENV = {
-    isMobile: (navigator.maxTouchPoints || 0) > 0 ||
-              ('ontouchstart' in window) ||
-              (window.matchMedia && matchMedia('(hover: none) and (pointer: coarse)').matches),
-    isSafari: /^((?!chrome|android).)*safari/i.test(navigator.userAgent),
-    isFirefox: /firefox/i.test(navigator.userAgent),
-    isHidden: document.hidden
-  };
+  /* ── 1. Wait for the main engine to expose its state ── */
+  var tries = 0;
+  var wait = setInterval(function () {
+    if (window.HEXAudio && window.HEXAudio.state) {
+      clearInterval(wait);
+      boot(window.HEXAudio.state);
+    } else if (++tries > 200) {
+      clearInterval(wait);
+      /* Fallback: read the element directly, treat its current value as ref */
+      boot({ volume: audio.volume, muted: audio.muted, playing: false });
+    }
+  }, 50);
 
-  /* ── 2. Reference volume — auto-learned from user interaction ── */
-  var REF = {
-    vol: audio.volume > 0 ? audio.volume : 0.9,
-    muted: !!audio.muted,
-    lastUserTouch: 0,
-    selfWrite: false
-  };
+  function boot(state) {
 
-  /* ── 3. Hook HTMLMediaElement volume + muted setters ──
-        Any write that does NOT come from us is treated as a user /
-        engine change and becomes the new reference. Browser ducking
-        never fires these setters, so drift is always detected. */
-  try {
-    var vDesc  = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'volume');
-    var mDesc  = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'muted');
+    var EPS = 0.006;
+    var lastAppliedVol   = -1;
+    var lastAppliedMuted = null;
 
-    Object.defineProperty(HTMLMediaElement.prototype, 'volume', {
-      configurable: true, enumerable: vDesc.enumerable,
-      get: function () { return vDesc.get.call(this); },
-      set: function (v) {
-        v = Math.max(0, Math.min(1, Number(v) || 0));
-        if (this === audio && !REF.selfWrite) {
-          REF.vol = v;
-          REF.lastUserTouch = performance.now();
+    /* ── 2. The single enforcement routine ── */
+    function enforce() {
+      try {
+        var targetVol   = state.muted ? 0 : Math.max(0, Math.min(1, state.volume));
+        var targetMuted = !!state.muted;
+
+        /* Only write when the value actually changed — avoids fighting */
+        if (Math.abs(audio.volume - targetVol) > EPS) {
+          audio.volume = targetVol;
         }
-        return vDesc.set.call(this, v);
-      }
-    });
-
-    Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
-      configurable: true, enumerable: mDesc.enumerable,
-      get: function () { return mDesc.get.call(this); },
-      set: function (v) {
-        v = !!v;
-        if (this === audio && !REF.selfWrite) {
-          REF.muted = v;
-          REF.lastUserTouch = performance.now();
+        if (audio.muted !== targetMuted) {
+          audio.muted = targetMuted;
         }
-        return mDesc.set.call(this, v);
-      }
-    });
 
-    /* Seed from the current values */
-    REF.vol   = audio.volume > 0 ? audio.volume : 0.9;
-    REF.muted = !!audio.muted;
-  } catch (e) { /* setter hooking blocked — fall back to polling */ }
+        lastAppliedVol   = targetVol;
+        lastAppliedMuted = targetMuted;
+      } catch (e) {}
+    }
 
-  /* ── 4. Watch the sliders + mute buttons to auto-learn user intent ── */
-  function snapUserIntent() {
-    REF.selfWrite = true;
-    REF.vol   = audio.volume;
-    REF.muted = !!audio.muted;
-    REF.selfWrite = false;
-    REF.lastUserTouch = performance.now();
-  }
-
-  ['#volume', '#volume-v-track', '#btn-mute', '#volume-v-mute']
-    .forEach(function (sel) {
-      var el = document.querySelector(sel);
-      if (!el) return;
-      ['pointerdown','pointerup','touchstart','touchend','mouseup','click']
-        .forEach(function (ev) {
-          el.addEventListener(ev, function () {
-            /* small delay so the app's own handler runs first */
-            setTimeout(snapUserIntent, 0);
-            setTimeout(snapUserIntent, 40);
-          }, { passive: true });
-        });
-    });
-
-  /* Any external write updates REF via the setter hook above; no extra work. */
-
-  /* ── 5. The auto-adjusting watchdog ── */
-  var EPS = 0.004;               /* how close is "close enough" */
-  var burstUntil = 0;            /* aggressive mode flag */
-
-  function enforce() {
-    /* Skip when nothing is playing — saves CPU */
-    if (audio.paused && audio.readyState < 2) return;
-
-    var intended = REF.muted ? 0 : Math.max(0.0001, REF.vol);
-    var actual   = audio.volume;
-
-    REF.selfWrite = true;
-    try {
-      /* Only fight DOWNWARD drift — never fight a user raise */
-      if (actual < intended - EPS) {
-        audio.volume = intended;
-      }
-      /* Mute state mismatch */
-      if (audio.muted !== REF.muted) {
-        audio.muted = REF.muted;
-      }
-    } catch (e) {}
-    REF.selfWrite = false;
-
-    /* Engine-specific guards */
-    enforceHowler();
-    enforceTone();
-  }
-
-  function enforceHowler() {
-    try {
-      if (!window.Howler || !Howler.ctx) return;
-      var target = REF.muted ? 0 : Math.max(0.0001, REF.vol);
-      var now    = Howler.ctx.currentTime;
-      if (Howler.masterGain && Howler.masterGain.gain) {
-        var g = Howler.masterGain.gain;
-        if (Math.abs(g.value - target) > EPS) {
-          g.cancelScheduledValues(now);
-          g.setValueAtTime(target, now);
-        }
-      }
-      if (Howler._muted && !REF.muted) Howler.mute(false);
-      Howler._volume = target;
-    } catch (e) {}
-  }
-
-  function enforceTone() {
-    try {
-      if (!window.Tone || !Tone.getDestination) return;
-      var dest = Tone.getDestination();
-      if (!dest) return;
-      if (dest.volume && (!isFinite(dest.volume.value) || dest.volume.value < -60)) {
-        dest.volume.value = 0;
-      }
-      if (dest.mute) dest.mute = false;
-    } catch (e) {}
-  }
-
-  /* ── 6. Adaptive scheduler ── */
-  var currentDelay = 250;
-  function schedule() {
-    var hidden = document.hidden;
-    var next;
-    if (hidden)      next = ENV.isMobile ? 40  : 60;
-    else if (ENV.isMobile) next = 150;
-    else             next = 250;
-
-    /* Aggressive burst window after regaining focus */
-    if (performance.now() < burstUntil) next = 30;
-
-    if (next !== currentDelay) currentDelay = next;
-
-    window.__hexAdaptWatch = setTimeout(function () {
+    /* ── 3. Adaptive tick — fast when hidden, slow when visible ── */
+    var running = true;
+    function tick() {
+      if (!running) return;
       enforce();
-      schedule();
-    }, currentDelay);
-  }
-  schedule();
 
-  /* ── 7. Burst correct on every re-entry ── */
-  function burst(ms) {
-    burstUntil = performance.now() + (ms || 2500);
-    enforce();
-    [0, 20, 60, 150, 350, 700, 1200, 2000].forEach(function (t) {
-      setTimeout(enforce, t);
-    });
-  }
+      /* Hidden → 120 ms. Visible → 400 ms. Mobile → slightly faster. */
+      var delay = document.hidden
+        ? (('ontouchstart' in window) ? 100 : 120)
+        : 400;
 
-  document.addEventListener('visibilitychange', function () {
-    ENV.isHidden = document.hidden;
-    if (!document.hidden) burst(2500);
-  }, true);
-  window.addEventListener('focus',      function () { burst(2000); }, true);
-  window.addEventListener('pageshow',   function () { burst(2000); }, true);
-  window.addEventListener('resume',     function () { burst(2000); }, true);
+      window.__hexVolumeWatch = setTimeout(tick, delay);
+    }
+    tick();
 
-  /* ── 8. React instantly to any audio state change ── */
-  ['play','playing','loadedmetadata','canplay','canplaythrough',
-   'volumechange','seeking','waiting','stalled']
-    .forEach(function (ev) {
-      audio.addEventListener(ev, function () {
-        setTimeout(enforce, 0);
-        setTimeout(enforce, 40);
-        setTimeout(enforce, 180);
-      }, true);
-    });
+    /* ── 4. Immediate re-enforce on every relevant event ── */
+    ['play','playing','pause','waiting','stalled','seeking',
+     'loadedmetadata','canplay','canplaythrough']
+      .forEach(function (ev) {
+        audio.addEventListener(ev, enforce, true);
+      });
 
-  /* ── 9. Keep MediaSession marked "playing" while hidden ──
-        This alone stops a lot of OS-level ducking. */
-  function markPlaying() {
-    try {
-      if ('mediaSession' in navigator && !audio.paused) {
-        navigator.mediaSession.playbackState = 'playing';
+    /* ── 5. Burst-correct after returning to the tab ── */
+    function burst() {
+      enforce();
+      setTimeout(enforce, 30);
+      setTimeout(enforce, 100);
+      setTimeout(enforce, 300);
+      setTimeout(enforce, 900);
+      setTimeout(enforce, 2000);
+    }
+
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) burst();
+    }, true);
+
+    window.addEventListener('focus',    burst, true);
+    window.addEventListener('pageshow', burst, true);
+
+    /* ── 6. Keep MediaSession marked "playing" — this alone stops a
+          lot of OS-level ducking on Safari / iOS. ── */
+    function markPlaying() {
+      try {
+        if ('mediaSession' in navigator && !audio.paused) {
+          navigator.mediaSession.playbackState = 'playing';
+        }
+      } catch (e) {}
+    }
+    audio.addEventListener('playing', markPlaying, true);
+    document.addEventListener('visibilitychange', markPlaying, true);
+
+    /* ── 7. If the browser suspended the Web Audio context while hidden,
+          resume it. Do NOT patch resume — just call it. ── */
+    function reviveContexts() {
+      try {
+        if (window.Howler && Howler.ctx && Howler.ctx.state === 'suspended') {
+          Howler.ctx.resume();
+        }
+      } catch (e) {}
+      try {
+        if (window.Tone && Tone.context && Tone.context.state === 'suspended') {
+          Tone.context.resume();
+        }
+      } catch (e) {}
+    }
+    setInterval(reviveContexts, 1500);
+
+    /* ── 8. If the browser killed playback while hidden and we WERE
+          playing, quietly resume. ── */
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) return;
+      if (!state.playing) return;
+      if (!audio.src) return;
+      if (audio.paused) {
+        var p = audio.play();
+        if (p && p.catch) p.catch(function () {});
       }
-    } catch (e) {}
-  }
-  audio.addEventListener('playing', markPlaying, true);
-  document.addEventListener('visibilitychange', markPlaying, true);
+    }, true);
 
-  /* ── 10. Patch AudioContext.resume so no resume can duck us ── */
-  try {
-    var AC = window.AudioContext || window.webkitAudioContext;
-    if (AC && AC.prototype && !AC.prototype.__hexAutoPatch) {
-      var orig = AC.prototype.resume;
-      AC.prototype.resume = function () {
-        var ctx = this;
-        return orig.apply(this, arguments).then(function (r) {
-          setTimeout(enforce, 0);
-          setTimeout(enforce, 50);
-          setTimeout(enforce, 200);
-          return r;
-        });
-      };
-      AC.prototype.__hexAutoPatch = true;
-    }
-  } catch (e) {}
+    /* ── 9. Public API — small and honest ── */
+    window.HEXVolumeLock = {
+      enforce : enforce,
+      state   : state,
+      get ref () { return { vol: state.volume, muted: state.muted }; },
+      get real() { return { vol: audio.volume, muted: audio.muted }; },
+      stop    : function () { running = false; }
+    };
 
-  /* ── 11. Silent heartbeat — keeps the tab "active" so browsers
-        are less likely to throttle or duck the media pipeline. ── */
-  var heartbeatCtx = null;
-  function startHeartbeat() {
-    if (heartbeatCtx) return;
-    var Ctx = window.AudioContext || window.webkitAudioContext;
-    if (!Ctx) return;
+    /* ── 10. Single console marker ── */
     try {
-      heartbeatCtx = new Ctx();
-      var osc  = heartbeatCtx.createOscillator();
-      var gain = heartbeatCtx.createGain();
-      gain.gain.value = 0.00005;       /* inaudible */
-      osc.frequency.value = 25;
-      osc.connect(gain);
-      gain.connect(heartbeatCtx.destination);
-      osc.start();
-    } catch (e) { heartbeatCtx = null; }
+      console.log(
+        '%c[HEX] Volume Lock v4 active — target ' +
+        (state.muted ? 'MUTED' : Math.round(state.volume * 100) + '%'),
+        'color:#1DB954;font-weight:bold;'
+      );
+    } catch (e) {}
+
+    /* Initial sync */
+    enforce();
   }
-  document.addEventListener('pointerdown', function once() {
-    startHeartbeat();
-    document.removeEventListener('pointerdown', once);
-  }, { once: true });
-  document.addEventListener('visibilitychange', function () {
-    if (!document.hidden) {
-      try { if (heartbeatCtx && heartbeatCtx.state === 'suspended') heartbeatCtx.resume(); } catch (e) {}
-    }
-  }, true);
-
-  /* ── 12. Public API ── */
-  window.HEXVolumeLock = {
-    env      : ENV,
-    get ref  () { return { vol: REF.vol, muted: REF.muted, source: 'auto' }; },
-    get real () { return { vol: audio.volume, muted: audio.muted }; },
-    enforce  : enforce,
-    burst    : burst,
-    snapshot : snapUserIntent
-  };
-
-  /* ── 13. Console marker ── */
-  try {
-    console.log(
-      '%c[HEX] Volume Lock v3 — auto-detect ACTIVE ' +
-      '(' + (ENV.isMobile ? 'mobile' : 'desktop') + ', ref ' +
-      Math.round(REF.vol * 100) + '%)',
-      'color:#1DB954;font-weight:bold;'
-    );
-  } catch (e) {}
-
-  /* Initial enforcement */
-  enforce();
 })();
 </script>
-
 </body>
 </html>
