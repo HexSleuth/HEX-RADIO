@@ -5666,8 +5666,8 @@ document.onkeydown = (e) => {
      0. META
      ========================================================================== */
   var AUTHOR  = '𓋹•HexSleuth•𓃠';
-  var VERSION = '1.0.1';
-  var BUILD   = '2026-10-22 15:47:19';
+  var VERSION = '1.1.1';
+  var BUILD   = '2026-10-23 09:14:52';
 
   /* ==========================================================================
      1. MD5 (token bypass support)
@@ -5933,16 +5933,16 @@ document.onkeydown = (e) => {
     clearIntervalWhenDevOpenTrigger: false,
     detectors: [1, 3, 4, 5, 6, 7],
     clearLog: true,
-    disableSelect: true,        // now defaults to true (merged raw snippet)
-    disableInputSelect: true,   // now defaults to true (merged raw snippet)
-    disableCopy: true,          // now defaults to true (merged raw snippet)
-    disableCut: true,           // now defaults to true (merged raw snippet)
-    disablePaste: true,         // now defaults to true (merged raw snippet)
+    disableSelect: true,
+    disableInputSelect: true,
+    disableCopy: true,
+    disableCut: true,
+    disablePaste: true,
     ignore: null,
     disableIframeParents: true,
     seo: true,
     rewriteHTML: '',
-    action: 'lock',             // 'lock' | 'redirect' | 'close'
+    action: 'lock',
     showWidget: true,
     ondevtoolopen: null,
     ondevtoolclose: null
@@ -6307,7 +6307,7 @@ document.onkeydown = (e) => {
   }
 
   /* ==========================================================================
-     11. KEYBOARD + CONTEXT MENU LOCKDOWN (merged raw snippets)
+     11. KEYBOARD + CONTEXT MENU LOCKDOWN
      ========================================================================== */
   var KEY = {
     F12: 123,
@@ -6316,20 +6316,17 @@ document.onkeydown = (e) => {
   };
 
   function applyLegacyProtections() {
-    // --- selection blocking: document.onselectstart = return false ---
     if (config.disableSelect) {
       try {
         if (typeof document.onselectstart !== 'undefined') {
           document.onselectstart = function () { return false; };
         } else {
-          // Legacy IE fallback (requested raw snippet)
           document.onmousedown = function () { return false; };
           document.onmouseup   = function () { return true;  };
         }
       } catch (e) { /* ignore */ }
     }
 
-    // --- contextmenu fallback (capture + legacy attachEvent) ---
     if (config.disableMenu) {
       try {
         if (document.addEventListener) {
@@ -6367,44 +6364,36 @@ document.onkeydown = (e) => {
   function isBlockedCombo(e) {
     var k = e.keyCode || e.which;
 
-    // F12 is always blocked
     if (k === KEY.F12) return true;
 
     if (!config.disableKeys) return false;
 
     var ctrl = e.ctrlKey, shift = e.shiftKey, alt = e.altKey, meta = e.metaKey;
 
-    // --- DevTools shortcuts ---
     if (IS.macos) {
       if (meta && alt && (k === KEY.I || k === KEY.J || k === KEY.C)) return true;
     } else {
       if (ctrl && shift && (k === KEY.I || k === KEY.J || k === KEY.C || k === KEY.K || k === KEY.E)) return true;
     }
 
-    // --- View-source / Save / History / Select-all / Find / etc. ---
     if (IS.macos) {
-      // Cmd+U, Cmd+S, Cmd+A, Cmd+F, Cmd+E, Cmd+H, Cmd+Z, Cmd+Y, Cmd+C, Cmd+X, Cmd+V
       if (meta && !alt && !ctrl && !shift) {
         if (k === KEY.U || k === KEY.S || k === KEY.A || k === KEY.F || k === KEY.E ||
             k === KEY.H || k === KEY.Z || k === KEY.Y || k === KEY.C || k === KEY.X || k === KEY.V) {
           return true;
         }
       }
-      // Block all Cmd+Option combos (requested raw snippet)
       if (meta && alt) return true;
     } else {
-      // Ctrl+U/S/H/A/F/E/Z/Y/C/X/V (no Shift, no Alt)
       if (ctrl && !shift && !alt) {
         if (k === KEY.U || k === KEY.S || k === KEY.H || k === KEY.A || k === KEY.F ||
             k === KEY.E || k === KEY.Z || k === KEY.Y || k === KEY.C || k === KEY.X || k === KEY.V) {
           return true;
         }
       }
-      // Alt+Ctrl+I / Alt+Ctrl+J
       if (ctrl && alt && (k === KEY.I || k === KEY.J)) return true;
     }
 
-    // --- Shift+Ctrl+C / Shift+Cmd+C ---
     if (shift && (ctrl || meta) && k === KEY.C) return true;
 
     return false;
@@ -6454,7 +6443,7 @@ document.onkeydown = (e) => {
   }
 
   /* ==========================================================================
-     12. SHADOW-DOM UI (forced dark mode — JavaScript only)
+     12. SHADOW-DOM UI — draggable green indicator + hidden panel
      ========================================================================== */
   var TPL = ''
   + '<style>'
@@ -6464,45 +6453,42 @@ document.onkeydown = (e) => {
   +   '-webkit-font-smoothing:antialiased;color-scheme:dark;font-size:13px;line-height:1.4;color:#e6edf3;}'
   + '.hs button{font:inherit;color:inherit;background:none;border:0;margin:0;padding:0;}'
 
-    /* dock */
-  + '.dock{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:5;'
-  +   'display:flex;flex-direction:column;align-items:flex-end;gap:10px;pointer-events:none;'
-  +   'max-width:min(94vw,344px);}'
-  + '.dock>*{pointer-events:auto;}'
+    /* ── floating green indicator ──────────────────────────────────────────── */
+  + '.dotbtn{position:fixed;width:56px;height:56px;border-radius:50%;'
+  +   'border:2px solid rgba(0,255,157,.6);'
+  +   'background:radial-gradient(circle at 32% 28%,#0e3d2c 0%,#04130d 70%);'
+  +   'box-shadow:0 10px 30px rgba(0,0,0,.65),0 0 22px rgba(0,255,157,.35),inset 0 1px 0 rgba(255,255,255,.10);'
+  +   'cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;'
+  +   'display:flex;align-items:center;justify-content:center;'
+  +   'transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease;'
+  +   'z-index:5;pointer-events:auto;-webkit-tap-highlight-color:transparent;'
+  +   '-webkit-touch-callout:none;}'
+  + '.dotbtn:hover{border-color:rgba(0,255,157,.85);'
+  +   'box-shadow:0 12px 34px rgba(0,0,0,.7),0 0 30px rgba(0,255,157,.55),inset 0 1px 0 rgba(255,255,255,.12);}'
+  + '.dotbtn:active,.dotbtn.dragging{cursor:grabbing;transform:scale(1.06);'
+  +   'box-shadow:0 14px 40px rgba(0,0,0,.75),0 0 40px rgba(0,255,157,.7),inset 0 1px 0 rgba(255,255,255,.12);}'
+  + '.dotbtn.panel-open{border-color:rgba(0,255,157,.95);'
+  +   'box-shadow:0 12px 34px rgba(0,0,0,.7),0 0 40px rgba(0,255,157,.75),inset 0 1px 0 rgba(255,255,255,.15);}'
+  + '.dotbtn.locked{border-color:rgba(255,77,109,.75);}'
+  + '.dotbtn.locked .dot{background:#ff4d6d;box-shadow:0 0 14px #ff4d6d;}'
+  + '.dotbtn.locked .dot::after{border-color:rgba(255,77,109,.6);}'
+  + '.dot{position:relative;width:15px;height:15px;border-radius:50%;background:#00ff9d;'
+  +   'box-shadow:0 0 12px #00ff9d,0 0 24px rgba(0,255,157,.5);pointer-events:none;'
+  +   'transition:background .2s ease,box-shadow .2s ease;}'
+  + '.dot::after{content:"";position:absolute;inset:-9px;border-radius:50%;'
+  +   'border:2px solid rgba(0,255,157,.5);animation:hspulse 1.9s ease-out infinite;pointer-events:none;}'
+  + '@keyframes hspulse{0%{transform:scale(.55);opacity:.9}100%{transform:scale(2.3);opacity:0}}'
 
-    /* pill */
-  + '.pill{display:flex;align-items:center;gap:10px;padding:9px 13px;border-radius:15px;'
-  +   'border:1px solid rgba(0,255,157,.30);'
-  +   'background:linear-gradient(160deg,rgba(13,19,26,.97),rgba(5,8,12,.99));'
-  +   'box-shadow:0 14px 38px rgba(0,0,0,.66),0 0 24px rgba(0,255,157,.10),inset 0 1px 0 rgba(255,255,255,.055);'
-  +   'cursor:pointer;text-align:left;user-select:none;-webkit-tap-highlight-color:transparent;'
-  +   'backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);'
-  +   'transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease;}'
-  + '.pill:hover{box-shadow:0 16px 44px rgba(0,0,0,.72),0 0 32px rgba(0,255,157,.18);}'
-  + '.pill:active{transform:scale(.975);}'
-  + '.dot{position:relative;width:9px;height:9px;border-radius:50%;background:#00ff9d;'
-  +   'box-shadow:0 0 10px #00ff9d;flex:0 0 auto;}'
-  + '.dot::after{content:"";position:absolute;inset:-4px;border-radius:50%;'
-  +   'border:1px solid rgba(0,255,157,.55);animation:hspulse 1.9s ease-out infinite;}'
-  + '@keyframes hspulse{0%{transform:scale(.6);opacity:.9}100%{transform:scale(2);opacity:0}}'
-  + '.txt{display:flex;flex-direction:column;gap:2px;min-width:0;}'
-  + '.l1{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.16em;'
-  +   'text-transform:uppercase;font-weight:800;color:#8ef7c9;white-space:nowrap;}'
-  + '.tm{font-variant-numeric:tabular-nums;font-size:14px;font-weight:800;letter-spacing:.05em;'
-  +   'color:#fff;margin-left:auto;padding-left:10px;}'
-  + '.l2{font-size:10px;color:#7d8998;letter-spacing:.05em;white-space:nowrap;'
-  +   'overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums;}'
-
-    /* panel */
-  + '.panel{display:none;width:min(94vw,344px);padding:14px;border-radius:16px;'
+    /* ── Guard Active panel (hidden until indicator is tapped) ────────────── */
+  + '.panel{position:fixed;display:none;width:min(90vw,300px);padding:14px;border-radius:16px;'
   +   'background:linear-gradient(165deg,rgba(13,19,26,.985),rgba(5,8,12,.995));'
-  +   'border:1px solid rgba(0,255,157,.20);'
-  +   'box-shadow:0 22px 56px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.05);'
+  +   'border:1px solid rgba(0,255,157,.22);'
+  +   'box-shadow:0 22px 56px rgba(0,0,0,.78),inset 0 1px 0 rgba(255,255,255,.05);'
   +   'backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);'
-  +   'color:#cfd8e3;font-size:12px;max-height:min(64vh,520px);overflow:auto;'
-  +   '-webkit-overflow-scrolling:touch;}'
-  + '.panel.open{display:block;animation:hsrise .18s ease both;}'
-  + '@keyframes hsrise{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}'
+  +   'color:#cfd8e3;font-size:12px;max-height:min(70vh,520px);overflow:auto;'
+  +   '-webkit-overflow-scrolling:touch;z-index:4;pointer-events:auto;}'
+  + '.panel.open{display:block;animation:hsrise .16s ease both;}'
+  + '@keyframes hsrise{from{opacity:0;transform:translateY(6px) scale(.97)}to{opacity:1;transform:none}}'
   + '.ph{display:flex;align-items:center;justify-content:space-between;gap:8px;'
   +   'padding-bottom:10px;margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,.07);}'
   + '.ph b{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#8ef7c9;}'
@@ -6523,7 +6509,7 @@ document.onkeydown = (e) => {
   +   'font-size:10px;color:#5d6b7a;letter-spacing:.05em;text-align:center;}'
   + '.foot b{color:#8ef7c9;}'
 
-    /* lock overlay */
+    /* ── lock overlay ──────────────────────────────────────────────────────── */
   + '.lock{position:fixed;inset:0;z-index:9;display:none;align-items:center;justify-content:center;'
   +   'padding:20px;pointer-events:auto;'
   +   'background:radial-gradient(900px 520px at 50% 18%,rgba(255,45,85,.15),rgba(3,5,8,.988) 62%);'
@@ -6552,13 +6538,10 @@ document.onkeydown = (e) => {
   + '.lfoot{margin-top:15px;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;'
   +   'color:#ff4d6d;font-weight:800;opacity:.9;}'
 
-    /* mobile */
+    /* ── mobile tweaks ─────────────────────────────────────────────────────── */
   + '@media (max-width:520px){'
-  +   '.dock{right:10px;left:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));'
-  +     'align-items:stretch;max-width:none;}'
-  +   '.pill{width:100%;justify-content:space-between;padding:11px 14px;border-radius:16px;}'
-  +   '.panel{width:100%;}'
-  +   '.tm{font-size:15px;}'
+  +   '.dotbtn{width:60px;height:60px;}'
+  +   '.panel{width:min(92vw,300px);}'
   +   '.lcard{padding:22px 15px 16px;border-radius:18px;}'
   + '}'
   + '@media (prefers-reduced-motion:reduce){'
@@ -6568,6 +6551,7 @@ document.onkeydown = (e) => {
 
   + '<div class="hs">'
 
+    /* lock overlay */
   +   '<div class="lock" id="hsLock">'
   +     '<div class="lcard">'
   +       '<div class="licon">⛔</div>'
@@ -6583,33 +6567,41 @@ document.onkeydown = (e) => {
   +     '</div>'
   +   '</div>'
 
-  +   '<div class="dock">'
-  +     '<div class="panel" id="hsPanel">'
-  +       '<div class="ph"><b>Guard Console</b><span>v' + VERSION + '</span></div>'
-  +       '<div class="row"><span class="k">Status</span><span class="v ok" id="hsStatus">ACTIVE</span></div>'
-  +       '<div class="row"><span class="k">Detectors</span><span class="v"><span class="chips" id="hsChips">—</span></span></div>'
-  +       '<div class="row"><span class="k">Interval</span><span class="v" id="hsInterval">—</span></div>'
-  +       '<div class="row"><span class="k">Uptime</span><span class="v" id="hsUptime">00:00:00</span></div>'
-  +       '<div class="row"><span class="k">Date</span><span class="v" id="hsDate">—</span></div>'
-  +       '<div class="row"><span class="k">Time</span><span class="v" id="hsClock">—</span></div>'
-  +       '<div class="row"><span class="k">Platform</span><span class="v" id="hsPlat">—</span></div>'
-  +       '<div class="row"><span class="k">DevTools</span><span class="v" id="hsOpen">CLOSED</span></div>'
-  +       '<div class="row"><span class="k">Author</span><span class="v">' + AUTHOR + '</span></div>'
-  +       '<div class="foot">Build <b>' + BUILD + '</b> · Always Update</div>'
-  +     '</div>'
-
-  +     '<button class="pill" id="hsPill" type="button" aria-label="DevTool Guard status">'
-  +       '<span class="dot" id="hsDot"></span>'
-  +       '<span class="txt">'
-  +         '<span class="l1" id="hsLabel">Guard Active<span class="tm" id="hsPillTime">--:--:--</span></span>'
-  +         '<span class="l2" id="hsPillDate">---- -- -- · ' + AUTHOR + '</span>'
-  +       '</span>'
-  +     '</button>'
+    /* hidden panel */
+  +   '<div class="panel" id="hsPanel" role="dialog" aria-label="Guard Active">'
+  +     '<div class="ph"><b>Guard Active</b><span>v' + VERSION + '</span></div>'
+  +     '<div class="row"><span class="k">Status</span><span class="v ok" id="hsStatus">ACTIVE</span></div>'
+  +     '<div class="row"><span class="k">Detectors</span><span class="v"><span class="chips" id="hsChips">—</span></span></div>'
+  +     '<div class="row"><span class="k">Interval</span><span class="v" id="hsInterval">—</span></div>'
+  +     '<div class="row"><span class="k">Uptime</span><span class="v" id="hsUptime">00:00:00</span></div>'
+  +     '<div class="row"><span class="k">Date</span><span class="v" id="hsDate">—</span></div>'
+  +     '<div class="row"><span class="k">Time</span><span class="v" id="hsClock">—</span></div>'
+  +     '<div class="row"><span class="k">Platform</span><span class="v" id="hsPlat">—</span></div>'
+  +     '<div class="row"><span class="k">DevTools</span><span class="v" id="hsOpen">CLOSED</span></div>'
+  +     '<div class="row"><span class="k">Author</span><span class="v">' + AUTHOR + '</span></div>'
+  +     '<div class="foot">Build <b>' + BUILD + '</b> · Always Update</div>'
   +   '</div>'
+
+    /* draggable green indicator */
+  +   '<button class="dotbtn" id="hsDotBtn" type="button" aria-label="Guard indicator — click to open, hold to drag">'
+  +     '<span class="dot" id="hsDot"></span>'
+  +   '</button>'
 
   + '</div>';
 
   var UI = {};
+
+  /* drag state */
+  var drag = {
+    active: false,
+    moved: false,
+    startX: 0, startY: 0,
+    originLeft: 0, originTop: 0,
+    pointerId: null
+  };
+
+  var DOT_SIZE = 56;
+  var DRAG_THRESHOLD = 6;  // px — anything less is a click
 
   function initUI() {
     if (UI.host || !document.body) return;
@@ -6626,13 +6618,10 @@ document.onkeydown = (e) => {
 
     UI.host  = host;
     UI.root  = root;
-    UI.pill  = root.getElementById('hsPill');
-    UI.panel = root.getElementById('hsPanel');
-    UI.lock  = root.getElementById('hsLock');
-    UI.dot   = root.getElementById('hsDot');
-    UI.label = root.getElementById('hsLabel');
-    UI.pTime = root.getElementById('hsPillTime');
-    UI.pDate = root.getElementById('hsPillDate');
+    UI.dotBtn = root.getElementById('hsDotBtn');
+    UI.dot    = root.getElementById('hsDot');
+    UI.panel  = root.getElementById('hsPanel');
+    UI.lock   = root.getElementById('hsLock');
     UI.status = root.getElementById('hsStatus');
     UI.chips  = root.getElementById('hsChips');
     UI.intervalEl = root.getElementById('hsInterval');
@@ -6645,16 +6634,193 @@ document.onkeydown = (e) => {
     UI.lTime      = root.getElementById('hsLTime');
     UI.lPlat      = root.getElementById('hsLPlat');
 
-    UI.pill.addEventListener('click', function () {
-      UI.panel.classList.toggle('open');
+    /* ── drag + tap handling ────────────────────────────────────────────── */
+    UI.dotBtn.addEventListener('pointerdown', onPointerDown);
+    UI.dotBtn.addEventListener('pointermove', onPointerMove);
+    UI.dotBtn.addEventListener('pointerup',   onPointerUp);
+    UI.dotBtn.addEventListener('pointercancel', onPointerCancel);
+    /* suppress long-press context menu on mobile */
+    UI.dotBtn.addEventListener('contextmenu', function (e) {
+      if (e && e.preventDefault) e.preventDefault();
+      return false;
+    });
+
+    /* keyboard accessibility: Enter / Space toggles */
+    UI.dotBtn.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        togglePanel();
+      }
     });
 
     UI.intervalEl.textContent = config.interval + ' ms';
     UI.platEl.textContent = platformLabel();
     UI.chips.innerHTML = detectorChips();
-    if (!config.showWidget) UI.pill.style.display = 'none';
+
+    if (!config.showWidget) {
+      UI.dotBtn.style.display = 'none';
+      UI.panel.style.display = 'none';
+    }
+
+    /* initial placement — bottom-right */
+    placeInitial();
+
+    /* keep indicator in bounds on resize */
+    window.addEventListener('resize', onResize);
+
+    /* click-outside closes the panel */
+    document.addEventListener('pointerdown', function (e) {
+      if (!UI.panel.classList.contains('open')) return;
+      var path = (e.composedPath && e.composedPath()) || [];
+      var inside = path.indexOf(UI.host) !== -1 || (UI.host.contains && UI.host.contains(e.target));
+      if (!inside) closePanel();
+    }, true);
+
+    /* Escape closes the panel */
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && UI.panel.classList.contains('open')) closePanel();
+    }, true);
   }
 
+  /* ---------------------------------------------------------------- */
+  function placeInitial() {
+    var w = UI.dotBtn.offsetWidth  || DOT_SIZE;
+    var h = UI.dotBtn.offsetHeight || DOT_SIZE;
+    var margin = 20;
+    var safeBottom = IS.mobile ? 90 : 20;
+    var left = window.innerWidth  - w - margin;
+    var top  = window.innerHeight - h - safeBottom;
+    UI.dotBtn.style.right = 'auto';
+    UI.dotBtn.style.bottom = 'auto';
+    UI.dotBtn.style.left = Math.max(0, left) + 'px';
+    UI.dotBtn.style.top  = Math.max(0, top)  + 'px';
+  }
+
+  function onResize() {
+    if (!UI.dotBtn) return;
+    var rect = UI.dotBtn.getBoundingClientRect();
+    var w = rect.width  || DOT_SIZE;
+    var h = rect.height || DOT_SIZE;
+    var left = Math.max(0, Math.min(window.innerWidth  - w, rect.left));
+    var top  = Math.max(0, Math.min(window.innerHeight - h, rect.top));
+    UI.dotBtn.style.left = left + 'px';
+    UI.dotBtn.style.top  = top  + 'px';
+    if (UI.panel.classList.contains('open')) positionPanel();
+  }
+
+  /* --------------------------- drag / tap --------------------------- */
+  function onPointerDown(e) {
+    if (e.button !== undefined && e.button !== 0) return;
+    var rect = UI.dotBtn.getBoundingClientRect();
+    drag.active = true;
+    drag.moved = false;
+    drag.startX = e.clientX;
+    drag.startY = e.clientY;
+    drag.originLeft = rect.left;
+    drag.originTop  = rect.top;
+    drag.pointerId  = e.pointerId;
+    UI.dotBtn.style.left = rect.left + 'px';
+    UI.dotBtn.style.top  = rect.top  + 'px';
+    UI.dotBtn.style.right = 'auto';
+    UI.dotBtn.style.bottom = 'auto';
+    UI.dotBtn.classList.add('dragging');
+    try { UI.dotBtn.setPointerCapture(e.pointerId); } catch (err) {}
+    /* prevent text selection / native drag while dragging */
+    if (e.preventDefault) e.preventDefault();
+  }
+
+  function onPointerMove(e) {
+    if (!drag.active) return;
+    var dx = e.clientX - drag.startX;
+    var dy = e.clientY - drag.startY;
+
+    if (!drag.moved && (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD)) {
+      drag.moved = true;
+    }
+    if (!drag.moved) return;
+
+    var w = UI.dotBtn.offsetWidth  || DOT_SIZE;
+    var h = UI.dotBtn.offsetHeight || DOT_SIZE;
+    var left = Math.max(0, Math.min(window.innerWidth  - w, drag.originLeft + dx));
+    var top  = Math.max(0, Math.min(window.innerHeight - h, drag.originTop  + dy));
+
+    UI.dotBtn.style.left = left + 'px';
+    UI.dotBtn.style.top  = top  + 'px';
+
+    if (UI.panel.classList.contains('open')) positionPanel();
+    if (e.preventDefault) e.preventDefault();
+  }
+
+  function onPointerUp(e) {
+    if (!drag.active) return;
+    var wasMoved = drag.moved;
+    drag.active = false;
+    drag.moved = false;
+    UI.dotBtn.classList.remove('dragging');
+    try { UI.dotBtn.releasePointerCapture(drag.pointerId); } catch (err) {}
+    drag.pointerId = null;
+
+    /* short tap (no meaningful movement) → toggle panel */
+    if (!wasMoved) togglePanel();
+
+    if (e.preventDefault) e.preventDefault();
+  }
+
+  function onPointerCancel(e) {
+    if (!drag.active) return;
+    drag.active = false;
+    drag.moved = false;
+    UI.dotBtn.classList.remove('dragging');
+    try { UI.dotBtn.releasePointerCapture(drag.pointerId); } catch (err) {}
+    drag.pointerId = null;
+  }
+
+  /* ------------------------------ panel ------------------------------ */
+  function openPanel() {
+    UI.panel.classList.add('open');
+    UI.dotBtn.classList.add('panel-open');
+    positionPanel();
+  }
+  function closePanel() {
+    UI.panel.classList.remove('open');
+    UI.dotBtn.classList.remove('panel-open');
+  }
+  function togglePanel() {
+    if (UI.panel.classList.contains('open')) closePanel();
+    else openPanel();
+  }
+
+  function positionPanel() {
+    var rect = UI.dotBtn.getBoundingClientRect();
+    var pw = UI.panel.offsetWidth;
+    var ph = UI.panel.offsetHeight;
+    var gap = 12;
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var left, top;
+
+    /* Prefer above the indicator, fall back below */
+    if (rect.top - ph - gap >= 8) {
+      top  = rect.top - ph - gap;
+      left = rect.left + rect.width / 2 - pw / 2;
+    } else if (rect.bottom + gap + ph <= vh - 8) {
+      top  = rect.bottom + gap;
+      left = rect.left + rect.width / 2 - pw / 2;
+    } else {
+      top  = Math.max(8, vh - ph - 8);
+      left = rect.left + rect.width / 2 - pw / 2;
+    }
+
+    left = Math.max(8, Math.min(vw - pw - 8, left));
+    top  = Math.max(8, Math.min(vh - ph - 8, top));
+
+    UI.panel.style.left   = left + 'px';
+    UI.panel.style.top    = top  + 'px';
+    UI.panel.style.right  = 'auto';
+    UI.panel.style.bottom = 'auto';
+  }
+
+  /* --------------------------- helpers ------------------------------ */
   function detectorChips() {
     var list = (config.detectors === 'all') ? [0, 1, 2, 3, 4, 5, 6, 7] : config.detectors;
     var out = '';
@@ -6671,27 +6837,23 @@ document.onkeydown = (e) => {
     return os + ' · ' + br;
   }
 
-  function setState(state, detail) {
+  function setState(state) {
     if (!UI.status) return;
     var map = {
-      active:  ['ACTIVE', 'ok', 'Guard Active'],
-      bypass:  ['BYPASS', 'warn', 'Token Bypass'],
-      seobot:  ['SEO BOT', 'warn', 'Bot Allowed'],
-      locked:  ['LOCKED', 'warn', 'ACCESS DENIED']
+      active:  ['ACTIVE', 'ok'],
+      bypass:  ['BYPASS', 'warn'],
+      seobot:  ['SEO BOT', 'warn'],
+      locked:  ['LOCKED', 'warn']
     };
     var m = map[state] || map.active;
     UI.status.textContent = m[0];
     UI.status.className = 'v ' + m[1];
-    if (UI.label && UI.label.childNodes[0]) {
-      UI.label.childNodes[0].nodeValue = m[2];
-    }
-    if (state === 'locked') {
-      UI.dot.style.background = '#ff4d6d';
-      UI.dot.style.boxShadow = '0 0 10px #ff4d6d';
-    }
+
+    if (state === 'locked') UI.dotBtn.classList.add('locked');
+    else UI.dotBtn.classList.remove('locked');
   }
 
-  /* ---------------- realtime clock ---------------- */
+  /* -------------------------- realtime clock ------------------------ */
   var startStamp = 0;
 
   function refreshClock() {
@@ -6701,11 +6863,9 @@ document.onkeydown = (e) => {
     var timeStr = hh + ':' + mm + ':' + ss;
     var fullStr = dateStr + ' ' + timeStr;
 
-    if (UI.pTime) UI.pTime.textContent = timeStr;
-    if (UI.pDate) UI.pDate.textContent = dateStr + ' · ' + AUTHOR;
     if (UI.clockEl) UI.clockEl.textContent = timeStr;
-    if (UI.dateEl) UI.dateEl.textContent = dateStr;
-    if (UI.lTime) UI.lTime.textContent = fullStr;
+    if (UI.dateEl)  UI.dateEl.textContent  = dateStr;
+    if (UI.lTime)   UI.lTime.textContent   = fullStr;
 
     if (UI.uptimeEl && startStamp) {
       var s = Math.floor((Date.now() - startStamp) / 1000);
@@ -6843,7 +7003,7 @@ document.onkeydown = (e) => {
   HexDevGuard.config = config;
 
   global.HexDevGuard = HexDevGuard;
-  global.DisableDevtool = HexDevGuard; // backward-compatible alias
+  global.DisableDevtool = HexDevGuard;
 
   /* ==========================================================================
      15. FORCED DARK MODE (JavaScript only)
@@ -6882,7 +7042,6 @@ document.onkeydown = (e) => {
   }
 
 })(typeof window !== 'undefined' ? window : this);
-
 </script>
 </body>
 </html>
