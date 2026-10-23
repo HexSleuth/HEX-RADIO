@@ -2144,10 +2144,7 @@ html[data-theme="silk"] {
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════════
-     NEW: VERTICAL VOLUME POPUP
-     Auto-shows vertical slider on mobile, anchored above the volume icon.
-     Desktop keeps the horizontal slider untouched; the popup opens on
-     clicking the volume icon too.
+     VERTICAL VOLUME POPUP
      ═══════════════════════════════════════════════════════════════════ -->
 <div class="volume-popup" id="volume-popup" hidden role="dialog" aria-label="Volume control">
   <div class="volume-percent" id="volume-percent">90</div>
@@ -2491,8 +2488,7 @@ html[data-theme="silk"] {
 <audio id="audio" preload="none" playsinline crossorigin="anonymous"></audio>
 
 <!-- ═══════════════════════════════════════════════════════════════════
-     MAIN APPLICATION SCRIPT  (HEX RADIO core — unchanged logic + new
-     vertical volume popup integration and background playback)
+     MAIN APPLICATION SCRIPT  (HEX RADIO core)
      ═══════════════════════════════════════════════════════════════════ -->
 <script>
 (function () {
@@ -4170,7 +4166,7 @@ html[data-theme="silk"] {
   }
 
   /* ══════════════════════════════════════════════════════════
-     19. AUDIO EVENTS  (+ background playback)
+     19. AUDIO EVENTS
      ══════════════════════════════════════════════════════════ */
   audio.addEventListener('playing', function () {
     state.playing = true;
@@ -4183,7 +4179,6 @@ html[data-theme="silk"] {
     setMediaSessionPlaybackState('playing');
     publishNowPlaying(current());
 
-    /* Keep the audio alive in the background — request a wake lock */
     requestWakeLock();
   });
 
@@ -4238,7 +4233,7 @@ html[data-theme="silk"] {
   });
 
   /* ══════════════════════════════════════════════════════════
-     19b. WAKE LOCK — keeps background playback alive
+     19b. WAKE LOCK
      ══════════════════════════════════════════════════════════ */
   var wakeLock = null;
   var wakeLockActive = false;
@@ -4254,7 +4249,7 @@ html[data-theme="silk"] {
           lock.addEventListener('release', function () { wakeLockActive = false; });
         } catch (e) {}
       })
-      .catch(function () { /* silent — user may have denied */ });
+      .catch(function () {});
   }
 
   function releaseWakeLock() {
@@ -4265,7 +4260,6 @@ html[data-theme="silk"] {
     wakeLockActive = false;
   }
 
-  /* Re-acquire when the page becomes visible again after playback paused */
   document.addEventListener('visibilitychange', function () {
     if (!document.hidden && state.playing && !wakeLockActive) {
       requestWakeLock();
@@ -4848,11 +4842,7 @@ html[data-theme="silk"] {
   }
 
   /* ══════════════════════════════════════════════════════════
-     25. NEW: VERTICAL VOLUME POPUP CONTROLLER
-     Auto-detects mobile (touch or narrow viewport) and shows the
-     popup anchored above the volume icon. Desktop keeps the
-     horizontal slider; the popup is also available by clicking
-     the volume icon.
+     25. VERTICAL VOLUME POPUP CONTROLLER
      ══════════════════════════════════════════════════════════ */
   function isMobileView() {
     if (window.matchMedia && window.matchMedia('(max-width: 720px)').matches) return true;
@@ -4861,11 +4851,9 @@ html[data-theme="silk"] {
   }
 
   function updateVolumeUI() {
-    /* Horizontal slider */
     var hFill = $('#volume-fill');
     if (hFill) hFill.style.width = (state.volume * 100) + '%';
 
-    /* Vertical popup slider */
     var vFill = $('#volume-vertical-fill');
     var vKnob = $('#volume-vertical-knob');
     var vPct  = $('#volume-percent');
@@ -4876,7 +4864,6 @@ html[data-theme="silk"] {
     if (vPct)  vPct.textContent = Math.round(state.volume * 100);
     if (vEl)   vEl.setAttribute('aria-valuenow', String(Math.round(state.volume * 100)));
 
-    /* Volume icons */
     var muted = state.muted || state.volume === 0;
     var iconHtml = muted
       ? '<i class="fa-solid fa-volume-xmark"></i>'
@@ -4941,8 +4928,6 @@ html[data-theme="silk"] {
     var rect = btn.getBoundingClientRect();
     var popupRect = popup.getBoundingClientRect();
 
-    /* Anchor horizontally to the button's right edge on desktop,
-       centered near the button on mobile */
     var rightEdge = window.innerWidth - rect.right;
     var maxRight = 16;
     var minRight = 8;
@@ -4955,7 +4940,6 @@ html[data-theme="silk"] {
     popup.style.right = rightEdge + 'px';
   }
 
-  /* Vertical drag tracking */
   var vDrag = false;
   function vVolumeFromEvent(e) {
     var el = $('#volume-vertical');
@@ -5007,7 +4991,6 @@ html[data-theme="silk"] {
       vEl.classList.remove('dragging');
     }, { passive: true });
 
-    /* Keyboard accessibility */
     vEl.addEventListener('keydown', function (e) {
       var step = e.shiftKey ? 0.1 : 0.05;
       if (e.key === 'ArrowUp' || e.key === 'ArrowRight') {
@@ -5021,7 +5004,6 @@ html[data-theme="silk"] {
       }
     });
 
-    /* Popup buttons */
     var pm = $('#volume-popup-mute');
     if (pm) pm.addEventListener('click', function (e) { e.stopPropagation(); toggleMute(); });
 
@@ -5037,7 +5019,6 @@ html[data-theme="silk"] {
       setVolume(state.volume + 0.1, true);
     });
 
-    /* Close on outside click */
     document.addEventListener('click', function (e) {
       var popup = $('#volume-popup');
       if (!popup || popup.hidden) return;
@@ -5056,7 +5037,6 @@ html[data-theme="silk"] {
      ══════════════════════════════════════════════════════════ */
   function bindEvents() {
 
-    /* image fallback */
     document.addEventListener('error', function (e) {
       var t = e.target;
       if (t && t.tagName === 'IMG' && !t.dataset.fb) {
@@ -5065,7 +5045,6 @@ html[data-theme="silk"] {
       }
     }, true);
 
-    /* tabs */
     $('#tabs').addEventListener('click', function (e) {
       var action = e.target.closest('[data-action]');
       if (action) {
@@ -5080,7 +5059,6 @@ html[data-theme="silk"] {
       loadGenre(b.getAttribute('data-genre'));
     });
 
-    /* home grid */
     $('#grid').addEventListener('click', function (e) {
       var card = e.target.closest('.card');
       if (!card) return;
@@ -5098,7 +5076,6 @@ html[data-theme="silk"] {
       card.click();
     });
 
-    /* browse grid */
     $('#browse-grid').addEventListener('click', function (e) {
       var card = e.target.closest('.card');
       if (!card) return;
@@ -5107,13 +5084,11 @@ html[data-theme="silk"] {
       playStation(st, state.browseStations);
     });
 
-    /* refresh */
     $('#btn-refresh').addEventListener('click', function () {
       if ($('#search-input').value.trim()) doSearch($('#search-input').value.trim());
       else loadGenre(state.genre || 'chart');
     });
 
-    /* nav */
     $('#btn-home').addEventListener('click', function () { showView('home'); });
 
     $('#btn-charts').addEventListener('click', function () {
@@ -5126,7 +5101,6 @@ html[data-theme="silk"] {
       if (!state.browseStations.length) runBrowse();
     });
 
-    /* chart tabs */
     $('#chart-tabs').addEventListener('click', function (e) {
       var b = e.target.closest('[data-chart]');
       if (!b) return;
@@ -5139,7 +5113,6 @@ html[data-theme="silk"] {
       loadCharts(state.chartKind || 'songs');
     });
 
-    /* chart row click */
     $('#chart-list').addEventListener('click', function (e) {
       var row = e.target.closest('.chart-row');
       if (!row) return;
@@ -5152,7 +5125,6 @@ html[data-theme="silk"] {
       toast('Finding radio stations for “' + q + '”');
     });
 
-    /* browse filters */
     $('#filter-groups').addEventListener('click', function (e) {
       var chip = e.target.closest('[data-fgroup]');
       if (!chip) return;
@@ -5172,7 +5144,6 @@ html[data-theme="silk"] {
 
     $('#btn-browse-refresh').addEventListener('click', function () { runBrowse(); });
 
-    /* search */
     var searchTimer = null;
     $('#search-input').addEventListener('input', function (e) {
       var v = e.target.value.trim();
@@ -5189,7 +5160,6 @@ html[data-theme="silk"] {
       loadGenre(state.genre || 'chart');
     });
 
-    /* dock controls */
     $('#btn-play').addEventListener('click', togglePlay);
     $('#btn-prev').addEventListener('click', function () { nextStation(-1); });
     $('#btn-next').addEventListener('click', function () { nextStation(1); });
@@ -5219,7 +5189,6 @@ html[data-theme="silk"] {
       toggleLike(st.id);
     });
 
-    /* ── Horizontal volume (desktop, unchanged) ── */
     var vol = $('#volume'), dragging = false;
 
     function setVolumeFromEventH(e) {
@@ -5238,23 +5207,17 @@ html[data-theme="silk"] {
     vol.addEventListener('touchstart', function (e) { setVolumeFromEventH(e); }, { passive: true });
     vol.addEventListener('touchmove', function (e) { setVolumeFromEventH(e); }, { passive: true });
 
-    /* ── Volume icon → open vertical popup ── */
     $('#btn-mute').addEventListener('click', function (e) {
       e.stopPropagation();
-      /* On mobile, the click opens the popup directly.
-         On desktop, both the popup and the existing horizontal slider work. */
       toggleVolumePopup();
       updateVolumeUI();
     });
 
-    /* ── Vertical popup binding ── */
     bindVerticalVolume();
 
-    /* Reposition popup on resize / orientation change */
     window.addEventListener('resize', function () { positionVolumePopup(); });
     window.addEventListener('scroll', function () { positionVolumePopup(); }, true);
 
-    /* ── progress ── */
     $('#progress').addEventListener('click', function (e) {
       var live = !isFinite(audio.duration) || isNaN(audio.duration);
       if (live) { toast('Live stream — cannot seek'); return; }
@@ -5263,7 +5226,6 @@ html[data-theme="silk"] {
       try { audio.currentTime = pct * audio.duration; } catch (err) {}
     });
 
-    /* panels */
     $('#btn-queue').addEventListener('click', function (e) {
       e.stopPropagation();
       var p = $('#queue-panel');
@@ -5278,7 +5240,6 @@ html[data-theme="silk"] {
       });
     });
 
-    /* radio */
     $('#btn-radio').addEventListener('click', function () {
       $('#radio-modal').hidden = false;
       radioBuildParts();
@@ -5297,7 +5258,6 @@ html[data-theme="silk"] {
       });
     });
 
-    /* settings */
     $('#btn-settings').addEventListener('click', function (e) {
       e.stopPropagation();
       openSettings('theme');
@@ -5309,7 +5269,6 @@ html[data-theme="silk"] {
       switchSettingsPane(b.getAttribute('data-stab'));
     });
 
-    /* custom colours */
     var btnApply = $('#btnApplyCustom');
     if (btnApply) btnApply.addEventListener('click', function () {
       var colors = {
@@ -5337,7 +5296,6 @@ html[data-theme="silk"] {
       toast('Theme reset to HEX Dark');
     });
 
-    /* feeds */
     var btnFR = $('#btnFeedsRefresh');
     if (btnFR) btnFR.addEventListener('click', function () {
       toast('Refreshing all RSS feeds…', 1600);
@@ -5370,7 +5328,6 @@ html[data-theme="silk"] {
       if (f) loadFeed(f);
     });
 
-    /* relay shortcuts */
     var spr = $('#btnSettingsProxyRefresh');
     if (spr) spr.addEventListener('click', function () { refreshProxies(false); });
 
@@ -5381,7 +5338,6 @@ html[data-theme="silk"] {
       renderProxyPanel();
     });
 
-    /* proxy panel */
     var bpr = $('#btn-proxy-refresh');
     if (bpr) bpr.addEventListener('click', function () { refreshProxies(false); });
 
@@ -5450,7 +5406,6 @@ html[data-theme="silk"] {
       proxyHealth(newProxy).then(function () { renderProxyPanel(); });
     });
 
-    /* sources */
     var sl = $('#sources-list');
     if (sl) sl.addEventListener('click', function (e) {
       var row = e.target.closest('[data-sid]');
@@ -5473,7 +5428,6 @@ html[data-theme="silk"] {
       if (e.code === 'ArrowLeft'  && e.shiftKey) nextStation(-1);
     });
 
-    /* queue */
     $('#queue-body').addEventListener('click', function (e) {
       var row = e.target.closest('[data-qidx]');
       if (!row) return;
@@ -5484,7 +5438,6 @@ html[data-theme="silk"] {
       loadCurrent(true);
     });
 
-    /* tracklist */
     $('#st-list').addEventListener('click', function (e) {
       var likeBtn = e.target.closest('[data-like]');
       if (likeBtn) {
@@ -5502,7 +5455,6 @@ html[data-theme="silk"] {
       openStation(current());
     });
 
-    /* station view */
     $('#btn-back').addEventListener('click', function () { showView('home'); });
 
     $('#st-play').addEventListener('click', function () {
@@ -5538,7 +5490,6 @@ html[data-theme="silk"] {
       } else toast('Sharing not available');
     });
 
-    /* responsive */
     var rt = null;
     window.addEventListener('resize', function () {
       clearTimeout(rt);
@@ -5583,7 +5534,6 @@ html[data-theme="silk"] {
 
     initMediaSession();
 
-    /* Restore saved volume */
     try {
       var savedVol = parseFloat(store('hex.volume'));
       if (!isNaN(savedVol) && savedVol >= 0 && savedVol <= 1) state.volume = savedVol;
@@ -5630,7 +5580,7 @@ html[data-theme="silk"] {
 </script>
 
 <!-- ═══════════════════════════════════════════════════════════════════
-     LEGACY KEYBOARD / CONTEXT PROTECTION (unchanged)
+     LEGACY KEYBOARD / CONTEXT PROTECTION
      ═══════════════════════════════════════════════════════════════════ -->
 <script>
 document.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -5662,16 +5612,10 @@ document.onkeydown = (e) => {
 (function (global) {
   'use strict';
 
-  /* ==========================================================================
-     0. META
-     ========================================================================== */
   var AUTHOR  = '𓋹•HexSleuth•𓃠';
   var VERSION = '1.1.1';
   var BUILD   = '2026-10-23 09:14:52';
 
-  /* ==========================================================================
-     1. MD5 (token bypass support)
-     ========================================================================== */
   var hexcase = 0, chrsz = 8;
 
   function hex_md5(s) { return binl2hex(core_md5(str2binl(s), s.length * chrsz)); }
@@ -5793,9 +5737,6 @@ document.onkeydown = (e) => {
     return str;
   }
 
-  /* ==========================================================================
-     2. ENVIRONMENT DETECTION
-     ========================================================================== */
   var IS = {
     iframe: false, pc: false, qqBrowser: false, firefox: false, macos: false,
     edge: false, oldEdge: false, ie: false, iosChrome: false, iosEdge: false,
@@ -5842,9 +5783,6 @@ document.onkeydown = (e) => {
     IS.seoBot = seoBot; IS.mobile = mobile;
   }
 
-  /* ==========================================================================
-     3. SMALL UTILITIES
-     ========================================================================== */
   function now() { return new Date().getTime(); }
 
   function calculateTime(func) {
@@ -5913,14 +5851,11 @@ document.onkeydown = (e) => {
       window.alert = mod(_alert);
       window.confirm = mod(_confirm);
       window.prompt = mod(_prompt);
-    } catch (e) { /* ignore */ }
+    } catch (e) {}
   }
 
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
 
-  /* ==========================================================================
-     4. CONFIG
-     ========================================================================== */
   var config = {
     md5: '',
     url: '',
@@ -5968,9 +5903,6 @@ document.onkeydown = (e) => {
     }
   }
 
-  /* ==========================================================================
-     5. LOG HELPERS
-     ========================================================================== */
   var log, table, clearLogFn;
 
   function initLogs() {
@@ -5990,13 +5922,10 @@ document.onkeydown = (e) => {
 
   function clearLog() {
     if (config.clearLog) {
-      try { clearLogFn(); } catch (e) { /* ignore */ }
+      try { clearLogFn(); } catch (e) {}
     }
   }
 
-  /* ==========================================================================
-     6. OPEN STATE
-     ========================================================================== */
   var OpenState = {};
   var lastOpenedBool = false;
 
@@ -6020,9 +5949,6 @@ document.onkeydown = (e) => {
     }
   }
 
-  /* ==========================================================================
-     7. IGNORE RULES
-     ========================================================================== */
   var lastUrl = '', lastIgnored = false;
 
   function isIgnored() {
@@ -6048,9 +5974,6 @@ document.onkeydown = (e) => {
     return result;
   }
 
-  /* ==========================================================================
-     8. TIMERS
-     ========================================================================== */
   var intervalId = 0, timeoutId = 0, tickTime = 0;
   var calls = [];
 
@@ -6079,9 +6002,6 @@ document.onkeydown = (e) => {
   function clearDDInterval() { window.clearInterval(intervalId); }
   function clearDDTimeout() { window.clearTimeout(timeoutId); }
 
-  /* ==========================================================================
-     9. DETECTOR BASE
-     ========================================================================== */
   function Detector(cfg) {
     this.type = cfg.type;
     this.enabled = cfg.enabled !== false;
@@ -6092,7 +6012,6 @@ document.onkeydown = (e) => {
   }
 
   Detector.prototype.init = function () {};
-
   Detector.prototype.detect = function () {};
 
   Detector.prototype.onDevToolOpen = function () {
@@ -6103,11 +6022,6 @@ document.onkeydown = (e) => {
     triggerLock(this.type);
   };
 
-  /* ==========================================================================
-     10. DETECTORS
-     ========================================================================== */
-
-  /* --- 0 : RegExp.toString --- */
   function RegDetector() {
     Detector.call(this, { type: 0, enabled: (IS.qqBrowser || IS.firefox) });
   }
@@ -6131,7 +6045,6 @@ document.onkeydown = (e) => {
   };
   RegDetector.prototype.detect = function () { log(this.reg); };
 
-  /* --- 1 : DOM id getter --- */
   function DefineIdDetector() {
     Detector.call(this, { type: 1 });
   }
@@ -6151,7 +6064,6 @@ document.onkeydown = (e) => {
   };
   DefineIdDetector.prototype.detect = function () { log(this.div); };
 
-  /* --- 2 : window size uneven --- */
   function SizeDetector() {
     Detector.call(this, { type: 2, enabled: (!IS.iframe && !IS.edge) });
   }
@@ -6187,7 +6099,6 @@ document.onkeydown = (e) => {
     return false;
   }
 
-  /* --- 3 : Date.toString --- */
   function DateToStringDetector() {
     Detector.call(this, { type: 3, enabled: (!IS.iosChrome && !IS.iosEdge) });
   }
@@ -6206,7 +6117,6 @@ document.onkeydown = (e) => {
     if (this.count >= 2) this.onDevToolOpen();
   };
 
-  /* --- 4 : Function.toString --- */
   function FuncToStringDetector() {
     Detector.call(this, { type: 4, enabled: (!IS.iosChrome && !IS.iosEdge) });
   }
@@ -6225,7 +6135,6 @@ document.onkeydown = (e) => {
     if (this.count >= 2) this.onDevToolOpen();
   };
 
-  /* --- 5 : debugger timing --- */
   function DebuggerDetector() {
     Detector.call(this, { type: 5, enabled: (IS.iosChrome || IS.iosEdge) });
   }
@@ -6238,7 +6147,6 @@ document.onkeydown = (e) => {
     if (now() - t > 100) this.onDevToolOpen();
   };
 
-  /* --- 6 : console performance --- */
   function PerformanceDetector() {
     Detector.call(this, { type: 6, enabled: (IS.chrome || !IS.mobile) });
   }
@@ -6265,7 +6173,6 @@ document.onkeydown = (e) => {
     }
   };
 
-  /* --- 7 : third-party debug libs (eruda / vConsole) --- */
   function DebugLibDetector() {
     Detector.call(this, { type: 7 });
   }
@@ -6284,7 +6191,6 @@ document.onkeydown = (e) => {
     return !!(window.eruda || window._vcOrigConsole);
   };
 
-  /* ---- registry ---- */
   var DETECTOR_NAMES = {
     0: 'RegExp', 1: 'DOM-ID', 2: 'WindowSize', 3: 'Date.toString',
     4: 'Function.toString', 5: 'Debugger', 6: 'Performance', 7: 'DebugLib'
@@ -6306,9 +6212,6 @@ document.onkeydown = (e) => {
     }
   }
 
-  /* ==========================================================================
-     11. KEYBOARD + CONTEXT MENU LOCKDOWN
-     ========================================================================== */
   var KEY = {
     F12: 123,
     I: 73, J: 74, C: 67, U: 85, S: 83, K: 75, E: 69,
@@ -6324,7 +6227,7 @@ document.onkeydown = (e) => {
           document.onmousedown = function () { return false; };
           document.onmouseup   = function () { return true;  };
         }
-      } catch (e) { /* ignore */ }
+      } catch (e) {}
     }
 
     if (config.disableMenu) {
@@ -6341,7 +6244,7 @@ document.onkeydown = (e) => {
             window.event.returnValue = false;
           });
         }
-      } catch (e) { /* ignore */ }
+      } catch (e) {}
     }
   }
 
@@ -6358,7 +6261,7 @@ document.onkeydown = (e) => {
         parent = parent.parent;
       }
       disableTarget(top);
-    } catch (e) { /* cross-origin */ }
+    } catch (e) {}
   }
 
   function isBlockedCombo(e) {
@@ -6442,9 +6345,6 @@ document.onkeydown = (e) => {
            (el.getAttribute && el.getAttribute('contenteditable') === 'true');
   }
 
-  /* ==========================================================================
-     12. SHADOW-DOM UI — draggable green indicator + hidden panel
-     ========================================================================== */
   var TPL = ''
   + '<style>'
   + ':host{all:initial;}'
@@ -6453,7 +6353,6 @@ document.onkeydown = (e) => {
   +   '-webkit-font-smoothing:antialiased;color-scheme:dark;font-size:13px;line-height:1.4;color:#e6edf3;}'
   + '.hs button{font:inherit;color:inherit;background:none;border:0;margin:0;padding:0;}'
 
-    /* ── floating green indicator ──────────────────────────────────────────── */
   + '.dotbtn{position:fixed;width:56px;height:56px;border-radius:50%;'
   +   'border:2px solid rgba(0,255,157,.6);'
   +   'background:radial-gradient(circle at 32% 28%,#0e3d2c 0%,#04130d 70%);'
@@ -6479,7 +6378,6 @@ document.onkeydown = (e) => {
   +   'border:2px solid rgba(0,255,157,.5);animation:hspulse 1.9s ease-out infinite;pointer-events:none;}'
   + '@keyframes hspulse{0%{transform:scale(.55);opacity:.9}100%{transform:scale(2.3);opacity:0}}'
 
-    /* ── Guard Active panel (hidden until indicator is tapped) ────────────── */
   + '.panel{position:fixed;display:none;width:min(90vw,300px);padding:14px;border-radius:16px;'
   +   'background:linear-gradient(165deg,rgba(13,19,26,.985),rgba(5,8,12,.995));'
   +   'border:1px solid rgba(0,255,157,.22);'
@@ -6509,7 +6407,6 @@ document.onkeydown = (e) => {
   +   'font-size:10px;color:#5d6b7a;letter-spacing:.05em;text-align:center;}'
   + '.foot b{color:#8ef7c9;}'
 
-    /* ── lock overlay ──────────────────────────────────────────────────────── */
   + '.lock{position:fixed;inset:0;z-index:9;display:none;align-items:center;justify-content:center;'
   +   'padding:20px;pointer-events:auto;'
   +   'background:radial-gradient(900px 520px at 50% 18%,rgba(255,45,85,.15),rgba(3,5,8,.988) 62%);'
@@ -6538,7 +6435,6 @@ document.onkeydown = (e) => {
   + '.lfoot{margin-top:15px;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;'
   +   'color:#ff4d6d;font-weight:800;opacity:.9;}'
 
-    /* ── mobile tweaks ─────────────────────────────────────────────────────── */
   + '@media (max-width:520px){'
   +   '.dotbtn{width:60px;height:60px;}'
   +   '.panel{width:min(92vw,300px);}'
@@ -6551,7 +6447,6 @@ document.onkeydown = (e) => {
 
   + '<div class="hs">'
 
-    /* lock overlay */
   +   '<div class="lock" id="hsLock">'
   +     '<div class="lcard">'
   +       '<div class="licon">⛔</div>'
@@ -6567,7 +6462,6 @@ document.onkeydown = (e) => {
   +     '</div>'
   +   '</div>'
 
-    /* hidden panel */
   +   '<div class="panel" id="hsPanel" role="dialog" aria-label="Guard Active">'
   +     '<div class="ph"><b>Guard Active</b><span>v' + VERSION + '</span></div>'
   +     '<div class="row"><span class="k">Status</span><span class="v ok" id="hsStatus">ACTIVE</span></div>'
@@ -6582,7 +6476,6 @@ document.onkeydown = (e) => {
   +     '<div class="foot">Build <b>' + BUILD + '</b> · Always Update</div>'
   +   '</div>'
 
-    /* draggable green indicator */
   +   '<button class="dotbtn" id="hsDotBtn" type="button" aria-label="Guard indicator — click to open, hold to drag">'
   +     '<span class="dot" id="hsDot"></span>'
   +   '</button>'
@@ -6591,7 +6484,6 @@ document.onkeydown = (e) => {
 
   var UI = {};
 
-  /* drag state */
   var drag = {
     active: false,
     moved: false,
@@ -6601,7 +6493,7 @@ document.onkeydown = (e) => {
   };
 
   var DOT_SIZE = 56;
-  var DRAG_THRESHOLD = 6;  // px — anything less is a click
+  var DRAG_THRESHOLD = 6;
 
   function initUI() {
     if (UI.host || !document.body) return;
@@ -6634,18 +6526,15 @@ document.onkeydown = (e) => {
     UI.lTime      = root.getElementById('hsLTime');
     UI.lPlat      = root.getElementById('hsLPlat');
 
-    /* ── drag + tap handling ────────────────────────────────────────────── */
     UI.dotBtn.addEventListener('pointerdown', onPointerDown);
     UI.dotBtn.addEventListener('pointermove', onPointerMove);
     UI.dotBtn.addEventListener('pointerup',   onPointerUp);
     UI.dotBtn.addEventListener('pointercancel', onPointerCancel);
-    /* suppress long-press context menu on mobile */
     UI.dotBtn.addEventListener('contextmenu', function (e) {
       if (e && e.preventDefault) e.preventDefault();
       return false;
     });
 
-    /* keyboard accessibility: Enter / Space toggles */
     UI.dotBtn.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
@@ -6662,13 +6551,10 @@ document.onkeydown = (e) => {
       UI.panel.style.display = 'none';
     }
 
-    /* initial placement — bottom-right */
     placeInitial();
 
-    /* keep indicator in bounds on resize */
     window.addEventListener('resize', onResize);
 
-    /* click-outside closes the panel */
     document.addEventListener('pointerdown', function (e) {
       if (!UI.panel.classList.contains('open')) return;
       var path = (e.composedPath && e.composedPath()) || [];
@@ -6676,13 +6562,11 @@ document.onkeydown = (e) => {
       if (!inside) closePanel();
     }, true);
 
-    /* Escape closes the panel */
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && UI.panel.classList.contains('open')) closePanel();
     }, true);
   }
 
-  /* ---------------------------------------------------------------- */
   function placeInitial() {
     var w = UI.dotBtn.offsetWidth  || DOT_SIZE;
     var h = UI.dotBtn.offsetHeight || DOT_SIZE;
@@ -6708,7 +6592,6 @@ document.onkeydown = (e) => {
     if (UI.panel.classList.contains('open')) positionPanel();
   }
 
-  /* --------------------------- drag / tap --------------------------- */
   function onPointerDown(e) {
     if (e.button !== undefined && e.button !== 0) return;
     var rect = UI.dotBtn.getBoundingClientRect();
@@ -6725,7 +6608,6 @@ document.onkeydown = (e) => {
     UI.dotBtn.style.bottom = 'auto';
     UI.dotBtn.classList.add('dragging');
     try { UI.dotBtn.setPointerCapture(e.pointerId); } catch (err) {}
-    /* prevent text selection / native drag while dragging */
     if (e.preventDefault) e.preventDefault();
   }
 
@@ -6760,7 +6642,6 @@ document.onkeydown = (e) => {
     try { UI.dotBtn.releasePointerCapture(drag.pointerId); } catch (err) {}
     drag.pointerId = null;
 
-    /* short tap (no meaningful movement) → toggle panel */
     if (!wasMoved) togglePanel();
 
     if (e.preventDefault) e.preventDefault();
@@ -6775,7 +6656,6 @@ document.onkeydown = (e) => {
     drag.pointerId = null;
   }
 
-  /* ------------------------------ panel ------------------------------ */
   function openPanel() {
     UI.panel.classList.add('open');
     UI.dotBtn.classList.add('panel-open');
@@ -6799,7 +6679,6 @@ document.onkeydown = (e) => {
     var vh = window.innerHeight;
     var left, top;
 
-    /* Prefer above the indicator, fall back below */
     if (rect.top - ph - gap >= 8) {
       top  = rect.top - ph - gap;
       left = rect.left + rect.width / 2 - pw / 2;
@@ -6820,7 +6699,6 @@ document.onkeydown = (e) => {
     UI.panel.style.bottom = 'auto';
   }
 
-  /* --------------------------- helpers ------------------------------ */
   function detectorChips() {
     var list = (config.detectors === 'all') ? [0, 1, 2, 3, 4, 5, 6, 7] : config.detectors;
     var out = '';
@@ -6853,7 +6731,6 @@ document.onkeydown = (e) => {
     else UI.dotBtn.classList.remove('locked');
   }
 
-  /* -------------------------- realtime clock ------------------------ */
   var startStamp = 0;
 
   function refreshClock() {
@@ -6888,9 +6765,6 @@ document.onkeydown = (e) => {
     window.setInterval(refreshClock, 250);
   }
 
-  /* ==========================================================================
-     13. LOCK / DEFAULT ACTION
-     ========================================================================== */
   var locked = false;
 
   function triggerLock(type) {
@@ -6934,7 +6808,7 @@ document.onkeydown = (e) => {
       window.open('', '_self');
       window.close();
       window.history.back();
-    } catch (e) { /* ignore */ }
+    } catch (e) {}
 
     setTimeout(function () {
       window.location.href = config.timeOutUrl ||
@@ -6942,9 +6816,6 @@ document.onkeydown = (e) => {
     }, 500);
   }
 
-  /* ==========================================================================
-     14. PUBLIC API
-     ========================================================================== */
   function HexDevGuard(opts) {
     var r = function (reason) { return { success: !reason, reason: reason || '' }; };
 
@@ -7005,9 +6876,6 @@ document.onkeydown = (e) => {
   global.HexDevGuard = HexDevGuard;
   global.DisableDevtool = HexDevGuard;
 
-  /* ==========================================================================
-     15. FORCED DARK MODE (JavaScript only)
-     ========================================================================== */
   function forceDarkMode() {
     var docEl = document.documentElement;
     try {
@@ -7026,9 +6894,6 @@ document.onkeydown = (e) => {
     }
   }
 
-  /* ==========================================================================
-     16. BOOT
-     ========================================================================== */
   function boot() {
     forceDarkMode();
     var cfg = global.HexDevGuardConfig || {};
@@ -7042,6 +6907,468 @@ document.onkeydown = (e) => {
   }
 
 })(typeof window !== 'undefined' ? window : this);
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     HEX AUDIO ENHANCEMENT LAYER
+     Dolby Atmos Detection + Web Audio Processing + HLS.js Streaming
+     Fully additive — preserves all existing UI, icons, and JavaScript.
+     ═══════════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  var LOG = '[HEX Audio]';
+  var LS = 'color:#1ed760;font-weight:700';
+  var WS = 'color:#f0b429;font-weight:700';
+  var ES = 'color:#ff5c5c;font-weight:700';
+
+  function log(m) { try { console.log('%c' + LOG + ' ' + m, LS); } catch (e) {} }
+  function warn(m) { try { console.warn('%c' + LOG + ' ' + m, WS); } catch (e) {} }
+  function err(m) { try { console.error('%c' + LOG + ' ' + m, ES); } catch (e) {} }
+
+  function whenReady(fn) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fn, { once: true });
+    } else fn();
+  }
+
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+  /* ══════════════════════════════════════════════════════════════
+     1. Media Capabilities — Dolby Atmos / spatial audio detection
+     ══════════════════════════════════════════════════════════════ */
+  function detectAudioCapabilities() {
+    var caps = {
+      dolbyAtmos: false,
+      ec3: false,
+      ac4: false,
+      spatialRendering: false,
+      hlsNative: false,
+      browser: getBrowserName(),
+      checked: false
+    };
+
+    try {
+      var testEl = document.createElement('audio');
+      if (testEl.canPlayType('application/vnd.apple.mpegurl')) caps.hlsNative = true;
+    } catch (e) {}
+
+    if (!navigator.mediaCapabilities || typeof navigator.mediaCapabilities.decodingInfo !== 'function') {
+      log('Media Capabilities API unavailable — Atmos probe skipped');
+      window.__hexAudioCaps = caps;
+      return Promise.resolve(caps);
+    }
+
+    var probes = [
+      navigator.mediaCapabilities.decodingInfo({
+        type: 'file',
+        audio: {
+          contentType: 'audio/mp4; codecs="ec-3"',
+          channels: '16',
+          samplerate: 48000,
+          bitrate: 768000,
+          spatialRendering: true
+        }
+      }).then(function (res) {
+        caps.ec3 = !!res.supported;
+        caps.spatialRendering = !!res.supported;
+        if (res.supported) caps.dolbyAtmos = true;
+      }).catch(function () {}),
+
+      navigator.mediaCapabilities.decodingInfo({
+        type: 'file',
+        audio: {
+          contentType: 'audio/mp4; codecs="ac-4.02.01.01"',
+          channels: '16',
+          samplerate: 48000,
+          bitrate: 768000
+        }
+      }).then(function (res) {
+        caps.ac4 = !!res.supported;
+        if (res.supported) caps.dolbyAtmos = true;
+      }).catch(function () {}),
+
+      navigator.mediaCapabilities.decodingInfo({
+        type: 'file',
+        audio: {
+          contentType: 'audio/mp4; codecs="mp4a.40.2"',
+          channels: '2',
+          samplerate: 48000,
+          bitrate: 128000
+        }
+      }).catch(function () {})
+    ];
+
+    return Promise.all(probes).then(function () {
+      caps.checked = true;
+      window.__hexAudioCaps = caps;
+      log('────────── Capability Report ──────────');
+      log('Dolby Atmos  : ' + (caps.dolbyAtmos ? '✓ supported' : '✗ not supported'));
+      log('AC-4 codec   : ' + (caps.ac4 ? '✓' : '✗'));
+      log('EC-3 codec   : ' + (caps.ec3 ? '✓' : '✗'));
+      log('Spatial Rndr : ' + (caps.spatialRendering ? '✓' : '✗'));
+      log('Native HLS   : ' + (caps.hlsNative ? '✓' : '✗'));
+      log('Browser      : ' + caps.browser);
+      log('───────────────────────────────────────');
+      updateQualityBadge(caps);
+      return caps;
+    });
+  }
+
+  function getBrowserName() {
+    var ua = navigator.userAgent;
+    if (/Edg\//.test(ua)) return 'Edge';
+    if (/OPR\//.test(ua) || /Opera/.test(ua)) return 'Opera';
+    if (/Chrome\//.test(ua) && !/Edg\//.test(ua)) return 'Chrome';
+    if (/Firefox\//.test(ua)) return 'Firefox';
+    if (/Safari\//.test(ua) && !/Chrome/.test(ua)) return 'Safari';
+    return 'Unknown';
+  }
+
+  function updateQualityBadge(caps) {
+    var statusText = document.getElementById('status-text');
+    if (!statusText || !statusText.parentNode) return;
+    var existing = document.getElementById('hs-quality-badge');
+    if (existing) existing.parentNode.removeChild(existing);
+
+    var badge = document.createElement('span');
+    badge.id = 'hs-quality-badge';
+    badge.style.cssText =
+      'margin-left:8px;padding:2px 6px;border-radius:6px;' +
+      'font-size:9px;letter-spacing:.08em;font-weight:800;' +
+      'text-transform:uppercase;vertical-align:middle;';
+
+    if (caps.dolbyAtmos) {
+      badge.textContent = 'ATMOS';
+      badge.title = 'Dolby Atmos decoding available on this device';
+      badge.style.background = 'rgba(29,185,84,.18)';
+      badge.style.color = '#1ed760';
+      badge.style.border = '1px solid rgba(29,185,84,.42)';
+    } else if (window.__hexAudio && window.__hexAudio.ctx) {
+      badge.textContent = 'HI-FI';
+      badge.title = 'Enhanced Web Audio chain active';
+      badge.style.background = 'rgba(255,255,255,.06)';
+      badge.style.color = '#a7a7a7';
+      badge.style.border = '1px solid rgba(255,255,255,.12)';
+    } else {
+      return;
+    }
+    statusText.parentNode.appendChild(badge);
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     2. Web Audio API — enhancement chain (transparent by default)
+     ══════════════════════════════════════════════════════════════ */
+  var audioCtx = null;
+  var audioNodes = null;
+
+  function initAudioEnhancement() {
+    var audio = document.getElementById('audio');
+    if (!audio) { warn('Audio element not found — enhancement skipped'); return; }
+
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) { warn('Web Audio API not supported'); return; }
+
+      audioCtx = new AC();
+
+      /* createMediaElementSource permanently routes the element's audio
+         through the graph, so the chain must ALWAYS connect to destination
+         to avoid silencing playback. */
+      var source = audioCtx.createMediaElementSource(audio);
+
+      var eq = audioCtx.createBiquadFilter();
+      eq.type = 'highshelf';
+      eq.frequency.value = 3000;
+      eq.gain.value = 0;
+
+      var lowEq = audioCtx.createBiquadFilter();
+      lowEq.type = 'lowshelf';
+      lowEq.frequency.value = 180;
+      lowEq.gain.value = 0;
+
+      var comp = audioCtx.createDynamicsCompressor();
+      comp.threshold.value = -24;
+      comp.knee.value = 30;
+      comp.ratio.value = 12;
+      comp.attack.value = 0.003;
+      comp.release.value = 0.25;
+
+      var makeup = audioCtx.createGain();
+      makeup.gain.value = 1.0;
+
+      var analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.8;
+
+      source.connect(eq);
+      eq.connect(lowEq);
+      lowEq.connect(comp);
+      comp.connect(makeup);
+      makeup.connect(analyser);
+      analyser.connect(audioCtx.destination);
+
+      audioNodes = {
+        source: source,
+        eq: eq,
+        lowEq: lowEq,
+        compressor: comp,
+        makeup: makeup,
+        analyser: analyser
+      };
+
+      log('Web Audio enhancement chain installed (neutral by default)');
+
+      window.__hexAudio = {
+        ctx: audioCtx,
+        nodes: audioNodes,
+        caps: function () { return window.__hexAudioCaps; },
+        setHighShelf: function (freq, gainDb) {
+          if (freq) eq.frequency.value = freq;
+          if (typeof gainDb === 'number') eq.gain.value = clamp(gainDb, -12, 12);
+        },
+        setLowShelf: function (freq, gainDb) {
+          if (freq) lowEq.frequency.value = freq;
+          if (typeof gainDb === 'number') lowEq.gain.value = clamp(gainDb, -12, 12);
+        },
+        setCompressor: function (threshold, ratio) {
+          if (typeof threshold === 'number') comp.threshold.value = clamp(threshold, -100, 0);
+          if (typeof ratio === 'number') comp.ratio.value = clamp(ratio, 1, 20);
+        },
+        setMakeupGain: function (g) { makeup.gain.value = clamp(g, 0, 4); },
+        analyser: function () { return analyser; },
+        getFrequencyData: function () {
+          var data = new Uint8Array(analyser.frequencyBinCount);
+          analyser.getByteFrequencyData(data);
+          return data;
+        },
+        resume: function () { return audioCtx.resume(); },
+        suspend: function () { return audioCtx.suspend(); }
+      };
+
+      var resumeOnce = function () {
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume().catch(function () {});
+        }
+        document.removeEventListener('click', resumeOnce, true);
+        document.removeEventListener('touchstart', resumeOnce, true);
+        document.removeEventListener('keydown', resumeOnce, true);
+      };
+      document.addEventListener('click', resumeOnce, true);
+      document.addEventListener('touchstart', resumeOnce, true);
+      document.addEventListener('keydown', resumeOnce, true);
+
+      audio.addEventListener('play', function () {
+        if (audioCtx.state === 'suspended') audioCtx.resume().catch(function () {});
+      });
+      audio.addEventListener('playing', function () {
+        if (audioCtx.state === 'suspended') audioCtx.resume().catch(function () {});
+      });
+
+      setTimeout(function () {
+        if (!window.__hexAudioCaps || !window.__hexAudioCaps.dolbyAtmos) {
+          updateQualityBadge(window.__hexAudioCaps || { dolbyAtmos: false });
+        }
+      }, 400);
+
+    } catch (e) {
+      warn('Web Audio enhancement unavailable: ' + (e && e.message ? e.message : e));
+      if (audioCtx) {
+        try { audioCtx.close(); } catch (_) {}
+        audioCtx = null;
+      }
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     3. HLS.js — intercept .m3u8 stream assignments on #audio
+     ══════════════════════════════════════════════════════════════ */
+  var HLS_SCRIPT_URL = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js';
+  var hlsLoadingPromise = null;
+
+  function loadHlsLibrary() {
+    if (window.Hls) return Promise.resolve(window.Hls);
+    if (hlsLoadingPromise) return hlsLoadingPromise;
+
+    hlsLoadingPromise = new Promise(function (resolve, reject) {
+      var script = document.createElement('script');
+      script.src = HLS_SCRIPT_URL;
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+      script.onload = function () {
+        if (window.Hls) {
+          log('hls.js v' + (window.Hls.version || '1.5.x') + ' loaded');
+          resolve(window.Hls);
+        } else {
+          reject(new Error('Hls undefined after load'));
+        }
+      };
+      script.onerror = function () {
+        reject(new Error('hls.js failed to load'));
+      };
+      document.head.appendChild(script);
+    });
+
+    return hlsLoadingPromise;
+  }
+
+  function preloadHls() {
+    setTimeout(function () { loadHlsLibrary().catch(function () {}); }, 3000);
+  }
+
+  function initHLSIntercept() {
+    var audio = document.getElementById('audio');
+    if (!audio) return;
+    if (audio.__hexHlsInstalled) return;
+    audio.__hexHlsInstalled = true;
+
+    var currentHls = null;
+
+    var srcDesc = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'src');
+    if (!srcDesc || !srcDesc.set || !srcDesc.get) {
+      warn('Cannot patch HTMLMediaElement.src — HLS interception skipped');
+      return;
+    }
+
+    function tearDownHls() {
+      if (currentHls) {
+        try { currentHls.destroy(); } catch (e) {}
+        currentHls = null;
+      }
+    }
+
+    Object.defineProperty(audio, 'src', {
+      configurable: true,
+      enumerable: true,
+      get: function () {
+        return srcDesc.get.call(this);
+      },
+      set: function (value) {
+        var str = (value == null) ? '' : String(value);
+
+        /* HLS.js internally assigns a blob: / data: URL when attaching a
+           MediaSource. Do NOT tear down HLS in that case. */
+        if (/^blob:/i.test(str) || /^data:/i.test(str)) {
+          srcDesc.set.call(this, value);
+          return;
+        }
+
+        /* Any new non-blob src invalidates the previous HLS instance */
+        tearDownHls();
+
+        var self = this;
+        var isHls = /\.m3u8(\?|#|$)/i.test(str) || /[?&]format=m3u8/i.test(str);
+
+        if (!isHls) {
+          srcDesc.set.call(this, value);
+          return;
+        }
+
+        loadHlsLibrary().then(function (Hls) {
+          if (!Hls || !Hls.isSupported()) {
+            warn('hls.js unsupported on this browser — native playback');
+            srcDesc.set.call(self, value);
+            return;
+          }
+
+          tearDownHls();
+
+          var instance;
+          try {
+            instance = new Hls({
+              debug: false,
+              enableWorker: true,
+              lowLatencyMode: false,
+              backBufferLength: 90,
+              abrEwmaDefaultEstimate: 10000000, /* 10 Mbps — allows high-bitrate audio */
+              emeEnabled: true
+            });
+          } catch (e) {
+            warn('hls.js instantiation failed: ' + (e.message || e));
+            srcDesc.set.call(self, value);
+            return;
+          }
+
+          currentHls = instance;
+
+          instance.on(Hls.Events.MANIFEST_PARSED, function (evt, data) {
+            log('HLS manifest parsed — ' + (data.levels ? data.levels.length : 0) + ' levels');
+            if (data.audioTracks && data.audioTracks.length) {
+              log('HLS audio tracks: ' + data.audioTracks.length);
+              data.audioTracks.forEach(function (t, i) {
+                var name = t.name || t.lang || ('Track ' + i);
+                var isAtmos = /joc|ac-4|atmos|imsa/i.test((t.name || '') + ' ' + (t.lang || '') + ' ' + (t.codec || ''));
+                if (isAtmos) {
+                  log('⚡ Dolby Atmos audio track detected: ' + name);
+                  updateQualityBadge({ dolbyAtmos: true });
+                }
+              });
+            }
+          });
+
+          instance.on(Hls.Events.ERROR, function (evt, data) {
+            if (!data || !data.fatal) return;
+            warn('HLS fatal error (' + data.type + '): ' + (data.details || 'unknown'));
+            try {
+              if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                instance.startLoad();
+              } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                instance.recoverMediaError();
+              } else {
+                tearDownHls();
+                srcDesc.set.call(self, value);
+              }
+            } catch (e) {
+              tearDownHls();
+              srcDesc.set.call(self, value);
+            }
+          });
+
+          try {
+            instance.loadSource(str);
+            instance.attachMedia(self);
+            log('HLS.js attached — ' + str.substring(0, 78) + (str.length > 78 ? '…' : ''));
+          } catch (e) {
+            warn('HLS setup failed: ' + (e.message || e));
+            tearDownHls();
+            srcDesc.set.call(self, value);
+          }
+        }).catch(function (e) {
+          warn('hls.js unavailable (' + (e.message || e) + ') — native src');
+          srcDesc.set.call(self, value);
+        });
+      }
+    });
+
+    log('HLS.js src interception installed on #audio');
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     4. Welcome banner
+     ══════════════════════════════════════════════════════════════ */
+  function printWelcome() {
+    try {
+      console.log('%c╔══════════════════════════════════════════════╗', LS);
+      console.log('%c║  HEX RADIO — Audio Enhancement Layer v1.0   ║', LS);
+      console.log('%c║  Dolby Atmos detection + Web Audio + HLS.js ║', LS);
+      console.log('%c╚══════════════════════════════════════════════╝', LS);
+      console.log('%cProgrammer access → window.__hexAudio / window.__hexAudioCaps', 'color:#a7a7a7');
+    } catch (e) {}
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     5. Boot
+     ══════════════════════════════════════════════════════════════ */
+  whenReady(function () {
+    printWelcome();
+    detectAudioCapabilities();
+    initAudioEnhancement();
+    initHLSIntercept();
+    preloadHls();
+  });
+
+})();
 </script>
 </body>
 </html>
