@@ -8,7 +8,6 @@
 <meta name="description" content="HEX RADIO — Discover, share and listen to chart radio stations from all over the world.">
 <title>HEX RADIO</title>
 
-<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FELJHJJ66X"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -17,10 +16,8 @@
   gtag('config', 'G-FELJHJJ66X');
 </script>
 
-<!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 
-<!-- ═══════════ TONE.JS + ESSENTIA.JS (audio analysis) ═══════════ -->
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia-wasm.web.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-core.js"></script>
@@ -76,9 +73,6 @@ img { max-width: 100%; display: block; }
 }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.3); background-clip: padding-box; }
 
-/* ═══════════════════════════════════════════════════════════════════
-   APP LAYOUT
-   ═══════════════════════════════════════════════════════════════════ */
 #app {
   position: fixed; inset: 0;
   display: grid;
@@ -91,7 +85,6 @@ img { max-width: 100%; display: block; }
   background: #000;
 }
 
-/* ═══ TOP BAR ═══ */
 .topbar {
   grid-area: top;
   display: flex; align-items: center; gap: 16px;
@@ -221,7 +214,6 @@ img { max-width: 100%; display: block; }
   .topbar-right { gap: 6px; }
 }
 
-/* ═══ MAIN ═══ */
 #main {
   grid-area: main;
   background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 340px, #0f0f0f 100%);
@@ -479,7 +471,6 @@ img { max-width: 100%; display: block; }
   .tl-album { display: none; }
 }
 
-/* ═══ CHART LIST ═══ */
 .chart-list { display: flex; flex-direction: column; gap: 2px; }
 .chart-row {
   display: grid; grid-template-columns: 54px 46px 1fr auto;
@@ -530,7 +521,6 @@ img { max-width: 100%; display: block; }
   .chart-row.is-artist .chart-art.is-artist { display: grid; }
 }
 
-/* ═══ FILTER CHIPS ═══ */
 .filter-group { margin-bottom: 18px; }
 .filter-group h4 {
   font-size: 10.5px; text-transform: uppercase; letter-spacing: .15em;
@@ -551,9 +541,6 @@ img { max-width: 100%; display: block; }
 .chip-btn.active { background: var(--green); color: #000; }
 .chip-btn:active { transform: scale(.95); }
 
-/* ═══════════════════════════════════════════════════════════════════
-   PLAYER DOCK
-   ═══════════════════════════════════════════════════════════════════ */
 .dock {
   grid-area: dock;
   display: grid;
@@ -711,9 +698,6 @@ img { max-width: 100%; display: block; }
   .dock-artist { display: none; }
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   NEW: VERTICAL VOLUME POPUP (auto-detects mobile / desktop)
-   ═══════════════════════════════════════════════════════════════════ */
 .volume-popup {
   position: fixed;
   right: 16px;
@@ -859,7 +843,6 @@ img { max-width: 100%; display: block; }
 .volume-popup-actions button:active { transform: scale(.9); }
 .volume-popup-actions button.on { color: var(--green); }
 
-/* On mobile make the popup slightly larger and easier to tap */
 @media (max-width: 720px) {
   .volume-popup {
     right: 10px;
@@ -876,7 +859,6 @@ img { max-width: 100%; display: block; }
   .volume-vertical { height: 160px; }
 }
 
-/* ═══ SIDE PANELS ═══ */
 .queue-panel {
   position: fixed; right: 12px; bottom: calc(var(--dock-h) + 12px);
   width: min(360px, calc(100vw - 24px));
@@ -919,7 +901,6 @@ img { max-width: 100%; display: block; }
 .queue-sub { font-size: 11.5px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .side-empty { padding: 34px 20px; text-align: center; color: var(--muted); font-size: 13px; line-height: 1.7; }
 
-/* ═══ PROXY PANEL ═══ */
 .proxy-panel { width: min(430px, calc(100vw - 24px)); max-height: min(660px, 76vh); }
 .proxy-body {
   overflow-y: auto;
@@ -1009,7 +990,6 @@ img { max-width: 100%; display: block; }
   padding: 1px 5px; border-radius: 4px; font-size: 10.5px;
 }
 
-/* ═══ SOURCES PANEL ═══ */
 .sources-panel { width: min(430px, calc(100vw - 24px)); max-height: min(660px, 76vh); }
 .sources-body {
   overflow-y: auto; padding: 14px;
@@ -1036,7 +1016,6 @@ img { max-width: 100%; display: block; }
 }
 .src-row:hover .src-go { color: #fff; transform: translateX(2px); }
 
-/* ═══ ANIMATED RADIO ═══ */
 .radio-card { width: min(560px, calc(100vw - 24px)); }
 .radio-body-wrap {
   padding: 20px 24px 24px !important;
@@ -1338,7 +1317,6 @@ img { max-width: 100%; display: block; }
   .radio-knob.small { width: 22px; height: 22px; }
 }
 
-/* ═══ MODAL ═══ */
 .modal { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; }
 .modal[hidden] { display: none; }
 .modal-backdrop {
@@ -1430,7 +1408,6 @@ img { max-width: 100%; display: block; }
 }
 .about-src-list span:hover { background: rgba(29,185,84,.16); color: #fff; }
 
-/* ═══ BUTTONS ═══ */
 .btn {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 11px 22px; border-radius: 999px;
@@ -1451,7 +1428,6 @@ img { max-width: 100%; display: block; }
 }
 .btn-ghost:hover { background: rgba(255,255,255,.07); }
 
-/* ═══ TOAST ═══ */
 .toast {
   position: fixed;
   bottom: calc(var(--dock-h) + 20px);
@@ -1479,7 +1455,6 @@ img { max-width: 100%; display: block; }
   }
 }
 
-/* ═══ SETTINGS MODAL ═══ */
 .settings-card {
   width: min(820px, calc(100vw - 24px));
   max-height: 90vh;
@@ -1676,9 +1651,6 @@ img { max-width: 100%; display: block; }
 }
 .feed-loading i { color: var(--green); margin-right: 6px; }
 
-/* ═══════════════════════════════════════════════════════════════════
-   THEME SYSTEM — 34 PALETTES
-   ═══════════════════════════════════════════════════════════════════ */
 html.dark {
   --bg:#000; --bg-2:#121212; --bg-3:#181818; --bg-4:#1f1f1f; --bg-5:#242424;
   --hover:#2a2a2a;
@@ -1743,7 +1715,6 @@ html[data-theme] .nav-btn.active { color: var(--text); }
 html[data-theme] .tl-row.playing .tl-title { color: var(--green); }
 html[data-theme] .queue-item.current .queue-title { color: var(--green); }
 
-/* DEFAULT */
 html[data-theme="hexdark"] {
   --bg:#000; --bg-2:#121212; --bg-3:#181818; --bg-4:#1f1f1f; --bg-5:#242424;
   --hover:#2a2a2a;
@@ -1950,7 +1921,6 @@ html[data-theme="silk"] {
 
 <div id="app">
 
-  <!-- ══════════ TOP BAR ══════════ -->
   <header class="topbar">
     <div class="brand">
       <img class="brand-logo" id="brand-logo" src="" alt="HEX RADIO">
@@ -1994,7 +1964,6 @@ html[data-theme="silk"] {
     </div>
   </header>
 
-  <!-- ══════════ MAIN ══════════ -->
   <main id="main">
 
     <section class="view" id="view-home">
@@ -2085,7 +2054,6 @@ html[data-theme="silk"] {
 
   </main>
 
-  <!-- ══════════ DOCK ══════════ -->
   <footer class="dock">
     <div class="dock-left">
       <div class="dock-art" id="dock-art" title="Open station">
@@ -2143,9 +2111,6 @@ html[data-theme="silk"] {
   </footer>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════════
-     VERTICAL VOLUME POPUP
-     ═══════════════════════════════════════════════════════════════════ -->
 <div class="volume-popup" id="volume-popup" hidden role="dialog" aria-label="Volume control">
   <div class="volume-percent" id="volume-percent">90</div>
 
@@ -2186,7 +2151,6 @@ html[data-theme="silk"] {
   </div>
 </div>
 
-<!-- ══════════ QUEUE PANEL ══════════ -->
 <div class="queue-panel" id="queue-panel" hidden>
   <div class="queue-head">
     <h3><i class="fa-solid fa-list-ul"></i> Queue</h3>
@@ -2197,7 +2161,6 @@ html[data-theme="silk"] {
   <div class="queue-body" id="queue-body"></div>
 </div>
 
-<!-- ══════════ SOURCES PANEL ══════════ -->
 <div class="queue-panel sources-panel" id="sources-panel" hidden>
   <div class="queue-head">
     <h3><i class="fa-solid fa-database"></i> Station Directories</h3>
@@ -2208,7 +2171,6 @@ html[data-theme="silk"] {
   <div class="sources-body" id="sources-list"></div>
 </div>
 
-<!-- ══════════ PROXY PANEL ══════════ -->
 <div class="queue-panel proxy-panel" id="proxy-panel" hidden>
   <div class="queue-head">
     <h3><i class="fa-solid fa-globe"></i> Relay Proxies</h3>
@@ -2249,7 +2211,6 @@ html[data-theme="silk"] {
   </div>
 </div>
 
-<!-- ══════════ ANIMATED RADIO MODAL ══════════ -->
 <div class="modal" id="radio-modal" hidden>
   <div class="modal-backdrop" data-close-modal="radio-modal"></div>
   <div class="modal-card radio-card">
@@ -2311,7 +2272,6 @@ html[data-theme="silk"] {
   </div>
 </div>
 
-<!-- ══════════ ABOUT MODAL ══════════ -->
 <div class="modal" id="about-modal" hidden>
   <div class="modal-backdrop" data-close-modal="about-modal"></div>
   <div class="modal-card">
@@ -2354,7 +2314,6 @@ html[data-theme="silk"] {
   </div>
 </div>
 
-<!-- ══════════ SETTINGS MODAL ══════════ -->
 <div class="modal" id="settings-modal" hidden>
   <div class="modal-backdrop" data-close-modal="settings-modal"></div>
   <div class="modal-card settings-card">
@@ -2485,11 +2444,10 @@ html[data-theme="silk"] {
 </div>
 
 <div class="toast" id="toast" hidden></div>
-<audio id="audio" preload="none" playsinline crossorigin="anonymous"></audio>
 
-<!-- ═══════════════════════════════════════════════════════════════════
-     MAIN APPLICATION SCRIPT  (HEX RADIO core)
-     ═══════════════════════════════════════════════════════════════════ -->
+<!-- ▼ FIX 1: removed crossorigin="anonymous" — see notes at top ▼ -->
+<audio id="audio" preload="none" playsinline></audio>
+
 <script>
 (function () {
   'use strict';
@@ -5579,9 +5537,6 @@ html[data-theme="silk"] {
 })();
 </script>
 
-<!-- ═══════════════════════════════════════════════════════════════════
-     LEGACY KEYBOARD / CONTEXT PROTECTION
-     ═══════════════════════════════════════════════════════════════════ -->
 <script>
 document.addEventListener('contextmenu', (e) => e.preventDefault());
 
@@ -5608,6 +5563,7 @@ document.onkeydown = (e) => {
   document.onmouseup=new Function ("return true" );
  }
 </script>
+
 <script>
 (function (global) {
   'use strict';
@@ -6909,11 +6865,6 @@ document.onkeydown = (e) => {
 })(typeof window !== 'undefined' ? window : this);
 </script>
 
-<!-- ═══════════════════════════════════════════════════════════════════
-     HEX AUDIO ENHANCEMENT LAYER
-     Dolby Atmos Detection + Web Audio Processing + HLS.js Streaming
-     Fully additive — preserves all existing UI, icons, and JavaScript.
-     ═══════════════════════════════════════════════════════════════════ -->
 <script>
 (function () {
   'use strict';
@@ -6935,9 +6886,6 @@ document.onkeydown = (e) => {
 
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
-  /* ══════════════════════════════════════════════════════════════
-     1. Media Capabilities — Dolby Atmos / spatial audio detection
-     ══════════════════════════════════════════════════════════════ */
   function detectAudioCapabilities() {
     var caps = {
       dolbyAtmos: false,
@@ -7058,7 +7006,15 @@ document.onkeydown = (e) => {
   }
 
   /* ══════════════════════════════════════════════════════════════
-     2. Web Audio API — enhancement chain (transparent by default)
+     2. Web Audio API — safe compatibility mode
+     ══════════════════════════════════════════════════════════════
+     FIX 2: We deliberately do NOT call createMediaElementSource()
+     because the audio element is loaded without crossorigin="anonymous"
+     (to allow the majority of radio streams to play at all). Calling
+     createMediaElementSource on cross-origin media without CORS headers
+     silences the output entirely — Web Audio API security policy. We
+     keep the AudioContext alive so capabilities detection and hls.js
+     continue to work.
      ══════════════════════════════════════════════════════════════ */
   var audioCtx = null;
   var audioNodes = null;
@@ -7073,76 +7029,22 @@ document.onkeydown = (e) => {
 
       audioCtx = new AC();
 
-      /* createMediaElementSource permanently routes the element's audio
-         through the graph, so the chain must ALWAYS connect to destination
-         to avoid silencing playback. */
-      var source = audioCtx.createMediaElementSource(audio);
+      /* NOTE: createMediaElementSource() is intentionally NOT called.
+         Cross-origin media without CORS headers would be silenced. */
+      log('Web AudioContext ready — direct audio path (stream compatibility mode)');
 
-      var eq = audioCtx.createBiquadFilter();
-      eq.type = 'highshelf';
-      eq.frequency.value = 3000;
-      eq.gain.value = 0;
-
-      var lowEq = audioCtx.createBiquadFilter();
-      lowEq.type = 'lowshelf';
-      lowEq.frequency.value = 180;
-      lowEq.gain.value = 0;
-
-      var comp = audioCtx.createDynamicsCompressor();
-      comp.threshold.value = -24;
-      comp.knee.value = 30;
-      comp.ratio.value = 12;
-      comp.attack.value = 0.003;
-      comp.release.value = 0.25;
-
-      var makeup = audioCtx.createGain();
-      makeup.gain.value = 1.0;
-
-      var analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 256;
-      analyser.smoothingTimeConstant = 0.8;
-
-      source.connect(eq);
-      eq.connect(lowEq);
-      lowEq.connect(comp);
-      comp.connect(makeup);
-      makeup.connect(analyser);
-      analyser.connect(audioCtx.destination);
-
-      audioNodes = {
-        source: source,
-        eq: eq,
-        lowEq: lowEq,
-        compressor: comp,
-        makeup: makeup,
-        analyser: analyser
-      };
-
-      log('Web Audio enhancement chain installed (neutral by default)');
+      audioNodes = null;
 
       window.__hexAudio = {
         ctx: audioCtx,
-        nodes: audioNodes,
+        nodes: null,
         caps: function () { return window.__hexAudioCaps; },
-        setHighShelf: function (freq, gainDb) {
-          if (freq) eq.frequency.value = freq;
-          if (typeof gainDb === 'number') eq.gain.value = clamp(gainDb, -12, 12);
-        },
-        setLowShelf: function (freq, gainDb) {
-          if (freq) lowEq.frequency.value = freq;
-          if (typeof gainDb === 'number') lowEq.gain.value = clamp(gainDb, -12, 12);
-        },
-        setCompressor: function (threshold, ratio) {
-          if (typeof threshold === 'number') comp.threshold.value = clamp(threshold, -100, 0);
-          if (typeof ratio === 'number') comp.ratio.value = clamp(ratio, 1, 20);
-        },
-        setMakeupGain: function (g) { makeup.gain.value = clamp(g, 0, 4); },
-        analyser: function () { return analyser; },
-        getFrequencyData: function () {
-          var data = new Uint8Array(analyser.frequencyBinCount);
-          analyser.getByteFrequencyData(data);
-          return data;
-        },
+        setHighShelf: function () {},
+        setLowShelf: function () {},
+        setCompressor: function () {},
+        setMakeupGain: function () {},
+        analyser: function () { return null; },
+        getFrequencyData: function () { return new Uint8Array(0); },
         resume: function () { return audioCtx.resume(); },
         suspend: function () { return audioCtx.suspend(); }
       };
@@ -7173,7 +7075,7 @@ document.onkeydown = (e) => {
       }, 400);
 
     } catch (e) {
-      warn('Web Audio enhancement unavailable: ' + (e && e.message ? e.message : e));
+      warn('Web Audio setup failed: ' + (e && e.message ? e.message : e));
       if (audioCtx) {
         try { audioCtx.close(); } catch (_) {}
         audioCtx = null;
@@ -7247,14 +7149,11 @@ document.onkeydown = (e) => {
       set: function (value) {
         var str = (value == null) ? '' : String(value);
 
-        /* HLS.js internally assigns a blob: / data: URL when attaching a
-           MediaSource. Do NOT tear down HLS in that case. */
         if (/^blob:/i.test(str) || /^data:/i.test(str)) {
           srcDesc.set.call(this, value);
           return;
         }
 
-        /* Any new non-blob src invalidates the previous HLS instance */
         tearDownHls();
 
         var self = this;
@@ -7281,7 +7180,7 @@ document.onkeydown = (e) => {
               enableWorker: true,
               lowLatencyMode: false,
               backBufferLength: 90,
-              abrEwmaDefaultEstimate: 10000000, /* 10 Mbps — allows high-bitrate audio */
+              abrEwmaDefaultEstimate: 10000000,
               emeEnabled: true
             });
           } catch (e) {
@@ -7294,6 +7193,11 @@ document.onkeydown = (e) => {
 
           instance.on(Hls.Events.MANIFEST_PARSED, function (evt, data) {
             log('HLS manifest parsed — ' + (data.levels ? data.levels.length : 0) + ' levels');
+            /* FIX 3: auto-play once HLS attaches media, because the
+               initial audio.play() fired before hls.js had a source. */
+            if (self.paused) {
+              try { self.play().catch(function () {}); } catch (e) {}
+            }
             if (data.audioTracks && data.audioTracks.length) {
               log('HLS audio tracks: ' + data.audioTracks.length);
               data.audioTracks.forEach(function (t, i) {
@@ -7344,22 +7248,16 @@ document.onkeydown = (e) => {
     log('HLS.js src interception installed on #audio');
   }
 
-  /* ══════════════════════════════════════════════════════════════
-     4. Welcome banner
-     ══════════════════════════════════════════════════════════════ */
   function printWelcome() {
     try {
       console.log('%c╔══════════════════════════════════════════════╗', LS);
       console.log('%c║  HEX RADIO — Audio Enhancement Layer v1.0   ║', LS);
-      console.log('%c║  Dolby Atmos detection + Web Audio + HLS.js ║', LS);
+      console.log('%c║  Dolby Atmos detection + HLS.js stream mode ║', LS);
       console.log('%c╚══════════════════════════════════════════════╝', LS);
       console.log('%cProgrammer access → window.__hexAudio / window.__hexAudioCaps', 'color:#a7a7a7');
     } catch (e) {}
   }
 
-  /* ══════════════════════════════════════════════════════════════
-     5. Boot
-     ══════════════════════════════════════════════════════════════ */
   whenReady(function () {
     printWelcome();
     detectAudioCapabilities();
