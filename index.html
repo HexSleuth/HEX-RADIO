@@ -2445,7 +2445,6 @@ html[data-theme="silk"] {
 
 <div class="toast" id="toast" hidden></div>
 
-<!-- ▼ FIX 1: removed crossorigin="anonymous" — see notes at top ▼ -->
 <audio id="audio" preload="none" playsinline></audio>
 
 <script>
@@ -7007,14 +7006,6 @@ document.onkeydown = (e) => {
 
   /* ══════════════════════════════════════════════════════════════
      2. Web Audio API — safe compatibility mode
-     ══════════════════════════════════════════════════════════════
-     FIX 2: We deliberately do NOT call createMediaElementSource()
-     because the audio element is loaded without crossorigin="anonymous"
-     (to allow the majority of radio streams to play at all). Calling
-     createMediaElementSource on cross-origin media without CORS headers
-     silences the output entirely — Web Audio API security policy. We
-     keep the AudioContext alive so capabilities detection and hls.js
-     continue to work.
      ══════════════════════════════════════════════════════════════ */
   var audioCtx = null;
   var audioNodes = null;
@@ -7029,8 +7020,6 @@ document.onkeydown = (e) => {
 
       audioCtx = new AC();
 
-      /* NOTE: createMediaElementSource() is intentionally NOT called.
-         Cross-origin media without CORS headers would be silenced. */
       log('Web AudioContext ready — direct audio path (stream compatibility mode)');
 
       audioNodes = null;
@@ -7193,8 +7182,6 @@ document.onkeydown = (e) => {
 
           instance.on(Hls.Events.MANIFEST_PARSED, function (evt, data) {
             log('HLS manifest parsed — ' + (data.levels ? data.levels.length : 0) + ' levels');
-            /* FIX 3: auto-play once HLS attaches media, because the
-               initial audio.play() fired before hls.js had a source. */
             if (self.paused) {
               try { self.play().catch(function () {}); } catch (e) {}
             }
@@ -7268,5 +7255,665 @@ document.onkeydown = (e) => {
 
 })();
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     ALL COUNTRIES & RADIO STATIONS  —  pure JavaScript addition
+     Powered by Radio Browser API (radio-browser.info)
+     No API key · No token · Unlimited · Free forever
+     Adds a new button to the topbar, opens a modal, streams via #audio
+     ═══════════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  if (window.__hexAllCountriesInstalled) return;
+  window.__hexAllCountriesInstalled = true;
+
+  /* ───────────────────────── CONFIG ───────────────────────── */
+  var MIRRORS = [
+    'https://de1.api.radio-browser.info',
+    'https://de2.api.radio-browser.info',
+    'https://nl1.api.radio-browser.info',
+    'https://at1.api.radio-browser.info',
+    'https://fi1.api.radio-browser.info',
+    'https://all.api.radio-browser.info'
+  ];
+  var STATION_LIMIT = 1000;
+
+  /* ───────────────────────── STATE ───────────────────────── */
+  var state = {
+    countries: [],
+    stations: [],
+    cache: new Map(),
+    current: null,
+    mirror: 0,
+    sort: 'clickcount',
+    filter: ''
+  };
+
+  var ui = {};
+
+  /* ───────────────────────── HELPERS ───────────────────────── */
+  function el(tag, props) {
+    var children = Array.prototype.slice.call(arguments, 2);
+    var node = document.createElement(tag);
+    if (props) {
+      Object.keys(props).forEach(function (k) {
+        var v = props[k];
+        if (v == null) return;
+        if (k === 'class') node.className = v;
+        else if (k === 'style' && typeof v === 'object') Object.assign(node.style, v);
+        else if (k.slice(0, 2) === 'on' && typeof v === 'function') {
+          node.addEventListener(k.slice(2).toLowerCase(), v);
+        } else node.setAttribute(k, v);
+      });
+    }
+    function append(c) {
+      if (c == null || c === false) return;
+      if (Array.isArray(c)) return c.forEach(append);
+      node.append(c.nodeType ? c : document.createTextNode(String(c)));
+    }
+    children.forEach(append);
+    return node;
+  }
+
+  function flag(cc) {
+    if (!cc || cc.length !== 2) return '🌐';
+    return String.fromCodePoint.apply(null, cc.toUpperCase().split('').map(function (ch) {
+      return 127397 + ch.charCodeAt(0);
+    }));
+  }
+
+  function debounce(fn, ms) {
+    ms = ms || 200;
+    var t;
+    return function () {
+      var ctx = this, args = arguments;
+      clearTimeout(t);
+      t = setTimeout(function () { fn.apply(ctx, args); }, ms);
+    };
+  }
+
+  function api(path, params, timeout) {
+    params = params || {};
+    timeout = timeout || 15000;
+    var idx = 0;
+    var lastErr = null;
+
+    function tryNext() {
+      if (idx >= MIRRORS.length) return Promise.reject(lastErr || new Error('All API mirrors failed'));
+      var mirrorIdx = (state.mirror + idx) % MIRRORS.length;
+      idx++;
+      var base = MIRRORS[mirrorIdx];
+      var qs = new URLSearchParams(params).toString();
+      var url = base + path + (qs ? '?' + qs : '');
+      var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, timeout);
+
+      return fetch(url, {
+        signal: ctrl ? ctrl.signal : undefined,
+        headers: { Accept: 'application/json' }
+      })
+      .then(function (res) {
+        clearTimeout(timer);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        state.mirror = mirrorIdx;
+        return data;
+      })
+      .catch(function (err) {
+        clearTimeout(timer);
+        lastErr = err;
+        return tryNext();
+      });
+    }
+    return tryNext();
+  }
+
+  function setStatus(msg, loading, isError) {
+    if (!ui.status) return;
+    ui.status.textContent = msg;
+    ui.status.style.color = isError ? '#fca5a5' : (loading ? '#7dd3fc' : '#8aa0b6');
+  }
+
+  function ensureSpinKeyframe() {
+    if (document.getElementById('rbspin-kf')) return;
+    var s = document.createElement('style');
+    s.id = 'rbspin-kf';
+    s.textContent = '@keyframes rbspin{to{transform:rotate(360deg)}}';
+    document.head.appendChild(s);
+  }
+
+  /* ───────────────────────── BUILD UI ───────────────────────── */
+  function buildUI() {
+    var topbar = document.querySelector('.topbar-right');
+    if (!topbar) {
+      setTimeout(buildUI, 300);
+      return;
+    }
+    if (document.getElementById('ac-open-btn')) return;
+
+    /* Open button — injected into the existing topbar */
+    var btn = el('button', {
+      class: 'nav-btn',
+      id: 'ac-open-btn',
+      title: 'All Countries & Radio Stations',
+      'aria-label': 'All Countries & Radio Stations',
+      style: {
+        background: 'linear-gradient(145deg, #1a2340, #0f1520)',
+        color: '#7db9ff',
+        border: '1px solid rgba(59,130,246,.35)'
+      },
+      onclick: openModal
+    }, el('i', { class: 'fa-solid fa-earth-americas' }));
+
+    var settingsBtn = topbar.querySelector('#btn-settings');
+    if (settingsBtn) topbar.insertBefore(btn, settingsBtn);
+    else topbar.appendChild(btn);
+
+    /* Build the modal internals */
+    ui.countrySearch = el('input', {
+      type: 'search',
+      placeholder: '🔍 Search countries…',
+      oninput: debounce(fillCountrySelect, 150),
+      style: {
+        background: '#111a23', color: '#e6edf3',
+        border: '1px solid #24313f', borderRadius: '8px',
+        padding: '8px 12px', fontSize: '13px', outline: 'none',
+        minWidth: '160px', maxWidth: '100%'
+      }
+    });
+
+    ui.countrySelect = el('select', {
+      onchange: onCountryChange,
+      style: {
+        background: '#111a23', color: '#e6edf3',
+        border: '1px solid #24313f', borderRadius: '8px',
+        padding: '8px 12px', fontSize: '13px', outline: 'none',
+        minWidth: '170px', maxWidth: '100%'
+      }
+    }, el('option', { value: '' }, '— Loading countries… —'));
+
+    ui.indiaBtn = el('button', {
+      class: 'btn btn-primary btn-sm',
+      onclick: openIndia
+    }, '🇮🇳 All India Stations');
+
+    ui.reloadBtn = el('button', {
+      class: 'btn btn-sm',
+      onclick: reloadAll
+    }, '↻ Reload');
+
+    ui.stationSearch = el('input', {
+      type: 'search',
+      placeholder: '🔍 Filter stations by name / tag / state / language…',
+      oninput: debounce(renderStations, 160),
+      style: {
+        flex: '1', minWidth: '220px',
+        background: '#111a23', color: '#e6edf3',
+        border: '1px solid #24313f', borderRadius: '8px',
+        padding: '8px 12px', fontSize: '13px', outline: 'none'
+      }
+    });
+
+    ui.sortSel = el('select', {
+      onchange: renderStations,
+      style: {
+        background: '#111a23', color: '#e6edf3',
+        border: '1px solid #24313f', borderRadius: '8px',
+        padding: '8px 12px', fontSize: '13px', outline: 'none',
+        minWidth: '150px'
+      }
+    },
+      el('option', { value: 'clickcount' }, 'Sort: Popularity'),
+      el('option', { value: 'votes' }, 'Sort: Votes'),
+      el('option', { value: 'name' }, 'Sort: Name A→Z'),
+      el('option', { value: 'bitrate' }, 'Sort: Bitrate')
+    );
+
+    ui.status = el('div', {
+      style: {
+        padding: '10px 18px', fontSize: '12.5px', color: '#8aa0b6',
+        borderBottom: '1px solid #1f2a37', background: '#0d1319'
+      }
+    }, 'Loading countries…');
+
+    ui.list = el('div', {
+      style: { overflowY: 'auto', padding: '0', background: '#0d1319' }
+    });
+
+    var bar1 = el('div', {
+      style: {
+        padding: '10px 16px',
+        borderBottom: '1px solid #1f2a37',
+        background: '#0f151c',
+        display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center'
+      }
+    }, ui.countrySearch, ui.countrySelect, ui.indiaBtn, ui.reloadBtn);
+
+    var bar2 = el('div', {
+      style: {
+        padding: '10px 16px',
+        borderBottom: '1px solid #1f2a37',
+        background: '#0f151c',
+        display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center'
+      }
+    }, ui.stationSearch, ui.sortSel);
+
+    var modal = el('div', {
+      class: 'modal', id: 'all-countries-modal', hidden: true
+    },
+      el('div', {
+        class: 'modal-backdrop',
+        'data-close-modal': 'all-countries-modal',
+        onclick: closeModal
+      }),
+      el('div', {
+        class: 'modal-card',
+        style: {
+          width: 'min(980px, calc(100vw - 24px))',
+          maxHeight: '90vh',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden'
+        }
+      },
+        el('div', { class: 'modal-head' },
+          el('h3', {},
+            el('i', { class: 'fa-solid fa-earth-americas' }),
+            ' All Countries & Radio Stations'
+          ),
+          el('button', {
+            class: 'icon-btn',
+            'aria-label': 'Close',
+            onclick: closeModal
+          }, el('i', { class: 'fa-solid fa-xmark' }))
+        ),
+        bar1,
+        bar2,
+        ui.status,
+        el('div', {
+          style: { flex: '1 1 auto', minHeight: '200px', overflowY: 'auto', display: 'flex' }
+        }, ui.list)
+      )
+    );
+
+    document.body.appendChild(modal);
+    ui.modal = modal;
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && ui.modal && !ui.modal.hidden) closeModal();
+    });
+
+    if (!state.countries.length) loadCountries();
+  }
+
+  function openModal() {
+    if (!ui.modal) buildUI();
+    if (!ui.modal) return;
+    ui.modal.hidden = false;
+  }
+  function closeModal() {
+    if (ui.modal) ui.modal.hidden = true;
+  }
+
+  /* ───────────────────────── COUNTRIES ───────────────────────── */
+  function loadCountries() {
+    ui.countrySelect.disabled = true;
+    ui.countrySelect.innerHTML = '';
+    ui.countrySelect.appendChild(el('option', { value: '' }, '— Loading countries… —'));
+    setStatus('🌍 Fetching all countries from Radio Browser…', true);
+    api('/json/countries')
+      .then(function (data) {
+        state.countries = (Array.isArray(data) ? data : [])
+          .filter(function (c) { return c && c.name && (c.stationcount || 0) > 0; })
+          .sort(function (a, b) { return a.name.localeCompare(b.name); });
+        fillCountrySelect();
+        ui.countrySelect.disabled = false;
+        setStatus('✅ ' + state.countries.length + ' countries loaded — select one, or hit “All India Stations”.');
+
+        if (!state.stations.length) {
+          var ind = state.countries.find(function (c) { return (c.iso_3166_1 || '').toUpperCase() === 'IN'; });
+          if (ind) {
+            ui.countrySelect.value = 'IN';
+            loadStations('IN', ind.name);
+          }
+        }
+      })
+      .catch(function (err) {
+        setStatus('❌ Could not load countries: ' + err.message + ' — check connection / ad-blocker.', false, true);
+      });
+  }
+
+  function fillCountrySelect() {
+    var q = ui.countrySearch.value.trim().toLowerCase();
+    var matches = state.countries.filter(function (c) {
+      return !q || c.name.toLowerCase().indexOf(q) !== -1
+        || (c.iso_3166_1 || '').toLowerCase() === q;
+    });
+    var previous = ui.countrySelect.value;
+
+    ui.countrySelect.innerHTML = '';
+    ui.countrySelect.appendChild(el('option', { value: '' }, '— Select a country (' + matches.length + ') —'));
+    matches.forEach(function (c) {
+      ui.countrySelect.appendChild(el('option', { value: c.iso_3166_1 || c.name },
+        flag(c.iso_3166_1) + ' ' + c.name + ' — ' + c.stationcount));
+    });
+    if (previous && matches.some(function (c) { return (c.iso_3166_1 || c.name) === previous; })) {
+      ui.countrySelect.value = previous;
+    }
+  }
+
+  function onCountryChange() {
+    var code = ui.countrySelect.value;
+    if (!code) return;
+    var found = state.countries.find(function (c) { return (c.iso_3166_1 || c.name) === code; });
+    ui.stationSearch.value = '';
+    loadStations(code, found ? found.name : code);
+  }
+
+  function openIndia() {
+    var ind = state.countries.find(function (c) { return (c.iso_3166_1 || '').toUpperCase() === 'IN'; });
+    if (ind) ui.countrySelect.value = 'IN';
+    ui.stationSearch.value = '';
+    loadStations('IN', ind ? ind.name : 'India');
+  }
+
+  function reloadAll() {
+    state.cache.clear();
+    state.stations = [];
+    ui.list.innerHTML = '';
+    loadCountries();
+  }
+
+  /* ───────────────────────── STATIONS ───────────────────────── */
+  function loadStations(code, name) {
+    var key = code || name;
+    if (state.cache.has(key)) {
+      state.stations = state.cache.get(key);
+      renderStations();
+      setStatus('✅ ' + state.stations.length + ' stations in ' + name + ' (cached)');
+      return;
+    }
+
+    ensureSpinKeyframe();
+    ui.list.innerHTML = '';
+    ui.list.appendChild(el('div', {
+      style: {
+        width: '26px', height: '26px',
+        border: '3px solid #223040', borderTopColor: '#3b82f6',
+        borderRadius: '50%', margin: '34px auto',
+        animation: 'rbspin .8s linear infinite'
+      }
+    }));
+    setStatus('📡 Fetching stations for ' + flag(code) + ' ' + name + '…', true);
+
+    api('/json/stations/bycountrycodeexact/' + encodeURIComponent(code), {
+      limit: STATION_LIMIT, hidebroken: 'true', order: 'clickcount', reverse: 'true'
+    }).then(function (stations) {
+      stations = (Array.isArray(stations) ? stations : []).filter(function (s) {
+        return s && (s.url_resolved || s.url);
+      });
+
+      if (!stations.length) {
+        return api('/json/stations/bycountry/' + encodeURIComponent(name), {
+          limit: STATION_LIMIT, hidebroken: 'true', order: 'clickcount', reverse: 'true'
+        }).then(function (byName) {
+          return (Array.isArray(byName) ? byName : []).filter(function (s) {
+            return s && (s.url_resolved || s.url);
+          });
+        });
+      }
+      return stations;
+    }).then(function (stations) {
+      state.cache.set(key, stations);
+      state.stations = stations;
+      renderStations();
+      setStatus(stations.length
+        ? '✅ ' + stations.length + ' stations in ' + flag(code) + ' ' + name
+        : '⚠️ No working stations found for ' + name, false, !stations.length);
+    }).catch(function (err) {
+      ui.list.innerHTML = '';
+      ui.list.appendChild(el('div', {
+        style: { padding: '40px 20px', textAlign: 'center', color: '#8aa0b6' }
+      }, 'Could not load stations.'));
+      setStatus('❌ Failed to load stations: ' + err.message, false, true);
+    });
+  }
+
+  /* ───────────────────────── RENDER ───────────────────────── */
+  function renderStations() {
+    var q = ui.stationSearch.value.trim().toLowerCase();
+    var sort = ui.sortSel.value;
+
+    var arr = state.stations.slice();
+    if (q) {
+      arr = arr.filter(function (s) {
+        return (s.name || '').toLowerCase().indexOf(q) !== -1
+          || (s.tags || '').toLowerCase().indexOf(q) !== -1
+          || (s.state || '').toLowerCase().indexOf(q) !== -1
+          || (s.language || '').toLowerCase().indexOf(q) !== -1;
+      });
+    }
+
+    if (sort === 'name') {
+      arr.sort(function (a, b) { return (a.name || '').localeCompare(b.name || ''); });
+    } else {
+      arr.sort(function (a, b) { return (Number(b[sort]) || 0) - (Number(a[sort]) || 0); });
+    }
+
+    ui.list.innerHTML = '';
+    if (!arr.length) {
+      ui.list.appendChild(el('div', {
+        style: { padding: '40px 20px', textAlign: 'center', color: '#8aa0b6' }
+      }, '😕 No stations match your filter.'));
+      return;
+    }
+
+    var frag = document.createDocumentFragment();
+    arr.forEach(function (s) { frag.appendChild(stationRow(s)); });
+    ui.list.appendChild(frag);
+  }
+
+  function stationRow(s) {
+    var active = state.current && state.current.stationuuid === s.stationuuid;
+
+    var favWrap = el('div', {
+      style: {
+        width: '38px', height: '38px',
+        borderRadius: '8px', background: '#1b2733',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: '17px', flex: '0 0 auto', overflow: 'hidden'
+      }
+    }, '📻');
+
+    if (s.favicon) {
+      var img = el('img', {
+        src: s.favicon, alt: '', loading: 'lazy',
+        style: { width: '100%', height: '100%', objectFit: 'cover', display: 'none' }
+      });
+      img.addEventListener('load', function () {
+        favWrap.textContent = '';
+        img.style.display = '';
+        favWrap.appendChild(img);
+      });
+      img.addEventListener('error', function () { try { img.remove(); } catch (e) {} });
+      favWrap.appendChild(img);
+    }
+
+    var metaParts = [
+      s.country || '',
+      s.state || '',
+      s.codec || '',
+      s.bitrate ? s.bitrate + ' kbps' : '',
+      s.tags ? s.tags.split(',').slice(0, 3).join(', ') : ''
+    ].filter(Boolean);
+
+    var row = el('div', {
+      'data-uuid': s.stationuuid || '',
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        padding: '9px 16px',
+        borderBottom: '1px solid #141e28',
+        cursor: 'pointer',
+        background: active ? '#13293d' : 'transparent',
+        boxShadow: active ? 'inset 3px 0 0 #3b82f6' : 'none'
+      }
+    },
+      favWrap,
+      el('div', { style: { flex: '1', minWidth: '0' } },
+        el('div', {
+          style: {
+            fontWeight: '600', fontSize: '14px',
+            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+          }
+        }, s.name || 'Unnamed station'),
+        el('div', {
+          style: {
+            fontSize: '11.5px', color: '#8aa0b6',
+            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+            marginTop: '2px'
+          }
+        }, metaParts.join(' · ') || 'Radio stream')
+      ),
+      el('button', {
+        type: 'button',
+        style: {
+          background: '#1d4ed8', border: '0', color: '#fff',
+          borderRadius: '8px', width: '38px', height: '38px',
+          fontSize: '14px', cursor: 'pointer', flex: '0 0 auto'
+        }
+      }, '▶')
+    );
+
+    row.addEventListener('mouseenter', function () {
+      if (!state.current || state.current.stationuuid !== s.stationuuid) {
+        row.style.background = '#121b24';
+      }
+    });
+    row.addEventListener('mouseleave', function () {
+      if (state.current && state.current.stationuuid === s.stationuuid) {
+        row.style.background = '#13293d';
+      } else {
+        row.style.background = 'transparent';
+      }
+    });
+
+    row.addEventListener('click', function () { playStation(s, row); });
+    return row;
+  }
+
+  /* ───────────────────────── PLAYBACK ───────────────────────── */
+  function playStation(s, rowEl) {
+    var url = s.url_resolved || s.url;
+    if (!url) return;
+
+    var audio = document.getElementById('audio');
+    if (!audio) return;
+
+    /* Toggle: same station and playing -> pause */
+    if (state.current && state.current.stationuuid === s.stationuuid && !audio.paused) {
+      audio.pause();
+      return;
+    }
+
+    state.current = s;
+
+    /* Clear active styling */
+    Array.prototype.slice.call(ui.list.querySelectorAll('[data-uuid]')).forEach(function (r) {
+      r.style.background = 'transparent';
+      r.style.boxShadow = 'none';
+    });
+    if (rowEl) {
+      rowEl.style.background = '#13293d';
+      rowEl.style.boxShadow = 'inset 3px 0 0 #3b82f6';
+    }
+
+    if (location.protocol === 'https:' && url.indexOf('http://') === 0) {
+      setStatus('⚠️ HTTP-only stream — browsers may block it on an HTTPS page.', false, true);
+    } else {
+      setStatus('🎧 Connecting to ' + (s.name || 'station') + '…', true);
+    }
+
+    try {
+      audio.src = url;
+      audio.volume = 0.9;
+      var pr = audio.play();
+      if (pr && pr.catch) {
+        pr.catch(function (err) {
+          setStatus('❌ Playback failed: ' + err.message + ' — try another station.', false, true);
+        });
+      }
+    } catch (e) {
+      setStatus('❌ Playback error: ' + e.message, false, true);
+    }
+
+    try {
+      fetch(MIRRORS[state.mirror] + '/json/url/' + encodeURIComponent(s.stationuuid || '')).catch(function () {});
+    } catch (_) {}
+
+    updateDockVisual(s);
+  }
+
+  /* Keep dock labels in sync — runs after the HEX RADIO player handler
+     so it overrides the (possibly stale) queue-based update */
+  function updateDockVisual(s) {
+    try {
+      var title = document.getElementById('dock-title');
+      var artist = document.getElementById('dock-artist');
+      var img = document.getElementById('dock-art-img');
+      if (title) title.textContent = s.name || 'Unknown station';
+      if (artist) {
+        var bits = [s.country, s.state, s.codec, s.bitrate ? s.bitrate + ' kbps' : ''].filter(Boolean);
+        artist.textContent = bits.join(' · ') || 'Live radio';
+      }
+      if (img && s.favicon) {
+        img.onerror = function () { img.onerror = null; img.src = ''; };
+        img.src = s.favicon;
+      }
+    } catch (e) {}
+  }
+
+  /* Hook into the shared audio element so the dock stays correct */
+  function hookAudioEvents() {
+    var audio = document.getElementById('audio');
+    if (!audio || audio.__acHooked) return;
+    audio.__acHooked = true;
+
+    audio.addEventListener('playing', function () {
+      if (state.current) {
+        setTimeout(function () {
+          if (state.current && !audio.paused) updateDockVisual(state.current);
+        }, 150);
+      }
+    });
+    audio.addEventListener('error', function () {
+      if (state.current) {
+        setStatus('❌ Stream error — station may be offline. Pick another one.', false, true);
+      }
+    });
+  }
+
+  /* ───────────────────────── INIT ───────────────────────── */
+  function init() {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+      return;
+    }
+    /* Wait for the HEX RADIO shell to be present */
+    setTimeout(function () {
+      buildUI();
+      hookAudioEvents();
+    }, 400);
+  }
+
+  init();
+})();
+</script>
+
 </body>
 </html>
